@@ -28,6 +28,7 @@ secret.key
 *.pid
 *.tmp
 study/
+runtime/
 
 # 기타
 .loom

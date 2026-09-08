@@ -64,7 +64,7 @@ install_packages() {
     iproute2 \
     file \
     ca-certificates \
-    tzdata \ 
+    tzdata \
     ufw
 
   ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime

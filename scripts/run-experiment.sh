@@ -31,7 +31,9 @@ fi
 # 환경변수 로드
 if [[ -f /workspace/runtime/agent.env ]]; then
   # shellcheck disable=SC1091
+  set -a
   source /workspace/runtime/agent.env
+  set +a
 else
   echo "[ERROR] /workspace/runtime/agent.env not found. Run provision.sh first." >&2
   exit 1

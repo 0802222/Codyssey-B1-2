@@ -1,0 +1,8 @@
+# Experiment env snapshot
+# Case: oom-before
+# Timestamp: 2026-09-08 18:05:49 KST
+
+APP_NAME=agent-leak-app-x86
+CPU_MAX_OCCUPY=50
+MEMORY_LIMIT=100
+MULTI_THREAD_ENABLE=true

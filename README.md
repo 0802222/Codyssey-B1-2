@@ -224,7 +224,10 @@ mission-b1-2/
 ├── bin/
 │   └── agent-leak-app
 ├── scripts/
-│   └── monitor.sh
+│   ├── provision.sh
+│   ├── configure_firewall.sh
+│   ├── monitor.sh
+│   └── run-expreriment.sh
 ├── reports/
 │   ├── 01-oom-report.md
 │   ├── 02-cpu-report.md
@@ -235,8 +238,18 @@ mission-b1-2/
     └── deadlock/
 ```
 
+### 각 스크립트의 역할
+| 스크립트	| 실행 주체	| 실행 시점	| 역할 |
+| --- | --- | --- | --- |
+| provision.sh | root	| 컨테이너 생성 직후, 최초 1회	패키지 설치, 사용자·경로·환경 준비 |
+| configure_firewall.sh	| root	| provision 이후, 정책 적용 시	UFW 규칙·포트 정책 구성 |
+| monitor.sh	| 보통 root	| 앱 실행 중 프로세스·CPU·메모리·RSS·스레드·포트 상태 기록 | 
+| run-experiment.sh	| agentuser	| 환경 준비 후, 케이스마다	monitor + 앱 + 증적 + CSV + 리포트 스니펫 자동화 |
+
 <br>
 <br>
+
+
 
 # 장애 분석 방법
 

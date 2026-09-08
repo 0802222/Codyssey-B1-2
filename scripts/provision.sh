@@ -65,7 +65,8 @@ install_packages() {
     file \
     ca-certificates \
     tzdata \
-    ufw
+    ufw \
+    gawk
 
   ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
   echo "Asia/Seoul" > /etc/timezone

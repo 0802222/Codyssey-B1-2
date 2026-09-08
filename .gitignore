@@ -29,6 +29,7 @@ secret.key
 *.tmp
 study/
 runtime/
+runtime/logs/agent-leak-app.log
 
 # 기타
 .loom

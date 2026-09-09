@@ -45,17 +45,22 @@ fi
 # -----------------------------
 WORKSPACE="/workspace"
 EVIDENCE_ROOT="$WORKSPACE/evidence"
-CASE_DIR="$EVIDENCE_ROOT/$CASE"
+
+TYPE="${CASE%-*}"      # oom-after → oom
+PHASE="${CASE##*-}"    # oom-after → after
+
+CASE_DIR="$EVIDENCE_ROOT/$TYPE"
+
 APP_PATH="$WORKSPACE/bin/${APP_NAME:-agent-leak-app-x86}"
 MONITOR_SCRIPT="$WORKSPACE/scripts/monitor.sh"
 
 mkdir -p "$CASE_DIR"
 
-APP_LOG="$CASE_DIR/app.log"
-MONITOR_STDOUT="$CASE_DIR/monitor-stdout.log"
-ENV_SNAPSHOT="$CASE_DIR/env-snapshot.txt"
-TIMESERIES_CSV="$CASE_DIR/timeseries.csv"
-REPORT_SNIPPET="$CASE_DIR/report-snippet.md"
+APP_LOG="$CASE_DIR/$PHASE-app.log"
+MONITOR_STDOUT="$CASE_DIR/$PHASE-monitor-stdout.log"
+ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"
+TIMESERIES_CSV="$CASE_DIR/$PHASE-timeseries.csv"
+REPORT_SNIPPET="$CASE_DIR/$PHASE-report-snippet.md"
 
 echo "===== Experiment: $CASE ====="
 echo "Started at   : $(date '+%Y-%m-%d %H:%M:%S %Z')"

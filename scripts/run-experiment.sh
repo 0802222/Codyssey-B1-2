@@ -58,6 +58,7 @@ mkdir -p "$CASE_DIR"
 
 APP_LOG="$CASE_DIR/$PHASE-app.log"
 MONITOR_STDOUT="$CASE_DIR/$PHASE-monitor-stdout.log"
+MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"
 ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"
 TIMESERIES_CSV="$CASE_DIR/$PHASE-timeseries.csv"
 REPORT_SNIPPET="$CASE_DIR/$PHASE-report-snippet.md"
@@ -90,14 +91,23 @@ echo "[INFO] Env snapshot saved: $ENV_SNAPSHOT"
 
 
 # -----------------------------
-# 4. 모니터 백그라운드 실행
+# 4. 앱과 모니터 실행
 # -----------------------------
+echo "[INFO] Starting app: $APP_PATH"
+echo
+
+"$APP_PATH" > "$APP_LOG" 2>&1 &
+APP_PID=$!
+
+echo "[INFO] App started (PID: $APP_PID)"
+
 INTERVAL=1 bash "$MONITOR_SCRIPT" > "$MONITOR_STDOUT" 2>&1 &
 MONITOR_PID=$!
-echo "[INFO] Monitor started (PID: $MONITOR_PID)"
+
+echo "[INFO] Monitor started (PID: $MONITOR_PID, target app PID: $APP_PID)"
 
 
-# 종료 시 정리 (Ctrl+C 등)
+# 종료 시 모니터 정리
 cleanup() {
   if kill -0 "$MONITOR_PID" 2>/dev/null; then
     kill "$MONITOR_PID" 2>/dev/null || true
@@ -107,36 +117,31 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 
-# -----------------------------
-# 5. 앱 실행 (종료까지 대기)
-# -----------------------------
-echo "[INFO] Starting app: $APP_PATH"
-echo
-"$APP_PATH" 2>&1 | tee "$APP_LOG" || true
+# 앱 종료까지 대기
+wait "$APP_PID" || true
 
-# monitor.sh가 앱 종료를 감지하고 자체 종료할 시간 여유
+# 앱 종료를 monitor가 감지하고 마지막 상태를 기록할 시간
 sleep 2
 
-# 모니터가 아직 살아있으면 정리
-if kill -0 "$MONITOR_PID" 2>/dev/null; then
-  kill "$MONITOR_PID" 2>/dev/null || true
-  wait "$MONITOR_PID" 2>/dev/null || true
-fi
+# 모니터가 살아 있으면 종료
+cleanup
 
 
 # -----------------------------
-# 6. 원본 모니터 로그 복사
+# 5. 원본 모니터 로그 복사
 # -----------------------------
 if [[ -f "${AGENT_LOG_DIR}/monitor.log" ]]; then
-  cp "${AGENT_LOG_DIR}/monitor.log" "$CASE_DIR/monitor.log"
-  echo "[INFO] Monitor log copied: $CASE_DIR/monitor.log"
+  cp "${AGENT_LOG_DIR}/monitor.log" "$MONITOR_LOG"
+  echo "[INFO] Monitor log copied: $MONITOR_LOG"
+else
+  echo "[WARN] Monitor log not found: ${AGENT_LOG_DIR}/monitor.log"  
 fi
 
 
 # -----------------------------
-# 7. 시계열 CSV 추출
+# 6. 시계열 CSV 추출
 # -----------------------------
-if [[ -f "$CASE_DIR/monitor.log" ]]; then
+if [[ -f "$MONITOR_LOG" ]]; then
   {
     echo "timestamp,proc_cpu,proc_mem,rss_kb,sys_cpu,sys_mem,threads,state"
     gawk '
@@ -150,7 +155,7 @@ if [[ -f "$CASE_DIR/monitor.log" ]]; then
       match($0, /STATE:([^ ]+)/, st) {
         print ts[1] "," pc[1] "," pm[1] "," rss[1] "," sc[1] "," sm[1] "," th[1] "," st[1]
       }
-    ' "$CASE_DIR/monitor.log"
+    ' "$MONITOR_LOG"
   } > "$TIMESERIES_CSV"
   ROWS=$(($(wc -l < "$TIMESERIES_CSV") - 1))
   echo "[INFO] Timeseries CSV: $TIMESERIES_CSV ($ROWS rows)"
@@ -158,17 +163,17 @@ fi
 
 
 # -----------------------------
-# 8. 리포트 스니펫 생성
+# 7. 리포트 스니펫 생성
 # -----------------------------
 APP_LAST_LINES=$(tail -n 20 "$APP_LOG" 2>/dev/null || echo "(no app log)")
-MON_FIRST=$(head -n 3 "$CASE_DIR/monitor.log" 2>/dev/null || echo "")
-MON_LAST=$(tail -n 3 "$CASE_DIR/monitor.log" 2>/dev/null || echo "")
+MON_FIRST=$(head -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")
+MON_LAST=$(tail -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")
 
 # 생존 시간 (모니터 로그의 첫/끝 타임스탬프 차이)
 SURVIVAL=""
-if [[ -f "$CASE_DIR/monitor.log" ]]; then
-  FIRST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$CASE_DIR/monitor.log" | head -n 1 | tr -d '[]')
-  LAST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$CASE_DIR/monitor.log" | tail -n 1 | tr -d '[]')
+if [[ -f "$MONITOR_LOG" ]]; then
+  FIRST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | head -n 1 | tr -d '[]')
+  LAST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | tail -n 1 | tr -d '[]')
   if [[ -n "$FIRST_TS" && -n "$LAST_TS" ]]; then
     FIRST_EPOCH=$(date -d "$FIRST_TS" +%s 2>/dev/null || echo 0)
     LAST_EPOCH=$(date -d "$LAST_TS" +%s 2>/dev/null || echo 0)
@@ -181,8 +186,7 @@ fi
 cat > "$REPORT_SNIPPET" <<EOF
 # 실험 스니펫: $CASE
 
-_이 파일은 리포트 작성 시 관측 사실 인용에 사용하세요._
-_"3. Root Cause Analysis"와 "4. Workaround & Verification"은 직접 작성이 필요합니다._
+_이 파일은 리포트 작성 시 관측 사실 인용됩니다._
 
 ## 실험 조건
 
@@ -218,7 +222,6 @@ $MON_LAST
 
 CSV 원본: [\`timeseries.csv\`](./timeseries.csv)
 
-CSV를 스프레드시트로 열어 RSS, PROC_CPU 그래프를 리포트에 첨부하세요.
 
 ## 파일 목록
 
@@ -231,7 +234,7 @@ echo "[INFO] Report snippet: $REPORT_SNIPPET"
 
 
 # -----------------------------
-# 9. 완료 요약
+# 8. 완료 요약
 # -----------------------------
 echo
 echo "===== Experiment complete: $CASE ====="

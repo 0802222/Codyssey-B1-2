@@ -22,8 +22,11 @@ MAX_SIZE=$((10 * 1024 * 1024))  # 10MB
 MAX_FILES=10
 
 
-timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
 monitor_once() {
+  local timestamp
+  timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
+  RESOURCE_WARNINGS=""
+
   # 0. 경로 체크 (AGENT_HOME)
   [[ -d "$AGENT_HOME" ]] || {
     echo "오류: AGENT_HOME 디렉터리가 없습니다: $AGENT_HOME" >&2
@@ -46,7 +49,7 @@ monitor_once() {
 
 
   # 1. 헬스 체크 - 프로세스 (APP_NAME, APP_PID)
-  APP_PID="$(pgrep -f "$APP_NAME" | head -n 1 || true)"
+  APP_PID="$(ps aux | grep "$APP_NAME" | grep -v grep | sort -k6 -nr | awk 'NR==1{print $2}')"
 
   if [ -z "${APP_PID:-}" ]; then
     echo "====== SYSTEM MONITOR RESULT ======"
@@ -99,35 +102,19 @@ monitor_once() {
   FIREWALL_WARNING=""
   FIREWALL_STATUS="unknown"
 
-  if command -v ufw >/dev/null 2>&1; then
-    UFW_STATUS="$(sudo /usr/sbin/ufw status 2>&1 || true)"
+  FIREWALL_STATUS_FILE="${AGENT_HOME}/firewall-status.txt"
 
-    if echo "$UFW_STATUS" | grep -q "Status: active"; then
-      FIREWALL_STATUS="active"
-    elif echo "$UFW_STATUS" | grep -qi "sudo"; then
-      FIREWALL_STATUS="permission denied"
-      FIREWALL_WARNING="[INFO] UFW status check failed (sudo permission required)"
-    else
-      FIREWALL_STATUS="inactive"
-      FIREWALL_WARNING="[WARNING] UFW is inactive"
+  if [[ -r "$FIREWALL_STATUS_FILE" ]]; then
+    FIREWALL_STATUS="$(cat "$FIREWALL_STATUS_FILE")"
+
+    if [[ "$FIREWALL_STATUS" == "inactive" ]]; then
+      FIREWALL_WARNING="[WARNING] Firewall is inactive"
+    elif [[ "$FIREWALL_STATUS" == "not found" ]]; then
+      FIREWALL_WARNING="[WARNING] No firewall tool detected"
     fi
-
-  elif command -v firewall-cmd >/dev/null 2>&1; then
-    FWD_STATUS="$(sudo firewall-cmd --state 2>&1 || true)"
-
-    if echo "$FWD_STATUS" | grep -q "running"; then
-      FIREWALL_STATUS="active"
-    elif echo "$FWD_STATUS" | grep -qi "sudo"; then
-      FIREWALL_STATUS="permission denied"
-      FIREWALL_WARNING="[INFO] firewalld status check failed (sudo permission required)"
-    else
-      FIREWALL_STATUS="inactive"
-      FIREWALL_WARNING="[WARNING] firewalld is inactive"
-    fi
-
   else
-    FIREWALL_STATUS="not found"
-    FIREWALL_WARNING="[WARNING] No firewall tool detected"
+    FIREWALL_STATUS="unknown"
+    FIREWALL_WARNING="[INFO] Firewall status file not found (run provision.sh as root first)"
   fi
 
 
@@ -155,8 +142,6 @@ monitor_once() {
 
 
   # 5. 임계값 경고
-  RESOURCE_WARNINGS=""
-
   if awk "BEGIN {exit !(${CPU_USAGE} > ${CPU_THRESHOLD})}"; then
     RESOURCE_WARNINGS="${RESOURCE_WARNINGS}[WARNING] CPU threshold exceeded (${CPU_USAGE}% > ${CPU_THRESHOLD}%)\n"
   fi

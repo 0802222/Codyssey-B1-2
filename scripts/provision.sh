@@ -135,6 +135,29 @@ EOF
   echo "[INFO] Environment file created: $ENV_FILE"
 }
 
+check_firewall_status() {
+  local status="unknown"
+
+  if command -v ufw >/dev/null 2>&1; then
+    if ufw status 2>/dev/null | grep -q "Status: active"; then
+      status="active"
+    else
+      status="inactive"
+    fi
+  elif command -v firewall-cmd >/dev/null 2>&1; then
+    if firewall-cmd --state 2>/dev/null | grep -q "running"; then
+      status="active"
+    else
+      status="inactive"
+    fi
+  else
+    status="not found"
+  fi
+
+  echo "$status" > "$AGENT_HOME/firewall-status.txt"
+  chown "$SERVICE_USER:$SERVICE_USER" "$AGENT_HOME/firewall-status.txt"
+}
+
 print_result() {
   cat <<EOF
 
@@ -172,6 +195,7 @@ main() {
   prepare_directories
   prepare_app
   write_env_file
+  check_firewall_status
   print_result
 }
 

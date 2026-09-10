@@ -9,7 +9,7 @@
 
 ## 최종 결과물
 
-- [ ] OOM Crash 분석 리포트
+- [x] OOM Crash 분석 리포트 ([01-oom-report.md](./reports/01-oom-report.md))
 - [ ] CPU Latency 분석 리포트
 - [ ] Deadlock 분석 리포트
 - [ ] 각 장애의 Before & After 증거
@@ -247,6 +247,34 @@ mission-b1-2/
 | run-experiment.sh	| agentuser	| 환경 준비 후, 케이스마다	monitor + 앱 + 증적 + CSV + 리포트 스니펫 자동화 |
 
 <br>
+
+### monitor.sh 관제 로그 형식 및 지표 설명
+
+`monitor.sh`는 프로세스와 시스템의 핵심 자원을 1초 간격으로 수집하여 `monitor.log`에 한 줄씩 기록한다.
+
+```text
+[2026-09-10 16:19:27] PID:7237 PPID:7223 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.3% PROC_MEM:0.1% RSS:18352KB SYS_CPU:1.6% SYS_MEM:3.6% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+```
+
+| 항목 | 예시 값 | 기술적 의미 | 수집 목적 및 용도 |
+| :--- | :--- | :--- | :--- |
+| **타임스탬프** | `[2026-09-10 16:19:27]` | 스냅샷이 수집된 시각 | **시계열 차트의 X축**, 장애 발생 시각 특정, 프로그램 로그와의 교차 검증용 |
+| **`PID`** | `7237` | Process ID (프로세스 고유 식별자) | 대상 프로세스 정상 구동 여부 확인 및 제어/디버깅 대상 지정 |
+| **`PPID`** | `7223` | Parent Process ID (부모 프로세스 ID) | 프로세스를 실행한 부모 셸 식별 및 프로세스 계층 트리 추적 |
+| **`STATE`** | `SN` | 프로세스 상태 플래그 (`S`: Sleep 대기, `N`: Nice 저우선순위) | 프로세스의 실행/대기/좀비/교착상태 여부 진단 |
+| **`ELAPSED`** | `00:00` | 누적 실행 시간 (`MM:SS`) | 프로세스 시작 후 경과 시간, **프로세스 생존 시간(Survival Time)** 측정용 |
+| **`THREADS`** | `1` | 프로세스 내 활성 스레드 개수 | 멀티스레드 여부, 스레드 누수 감지, **Deadlock 장애 식별용** |
+| **`PROC_CPU`** | `4.3%` | 프로세스 단독 CPU 코어 사용률 | **CPU 과점유 장애(CPU Spike/Loop) 진단**용 |
+| **`PROC_MEM`** | `0.1%` | 시스템 전체 물리 메모리 대비 점유율 (%) | 전체 시스템 관점에서 대상 프로세스의 메모리 점유 비중 확인 |
+| **`RSS`** | `18352KB` | Resident Set Size (실제 물리 메모리 점유 크기, 1MB=1024KB) | **메모리 누수(Memory Leak) 진단의 핵심 지표**, 시간에 따른 증가 추세 추적 |
+| **`SYS_CPU`** | `1.6%` | 시스템 전체 CPU 사용률 | 부하 원인이 대상 프로세스인지, 시스템 전체 문제인지 비교 판별 |
+| **`SYS_MEM`** | `3.6%` | 시스템 전체 물리 메모리 사용률 | OS 레벨의 시스템 OOM 발생 위험 여부 감시 |
+| **`DISK_USED`** | `1%` | 루트 파티션(`/`) 디스크 사용률 | 로그 폭증 등으로 인한 디스크 풀(Disk Full) 장애 방지 |
+| **`PORT`** | `15034` | 바인딩된 서비스 포트 번호 | 서비스 헬스체크 (포트 리슨 정상 여부 확인) |
+| **`FIREWALL`** | `active` | 시스템 방화벽(`ufw`) 상태 | 보안 규칙 준수 여부 및 트래픽 차단 원인 규명 |
+| **`CMD`** | `/workspace/bin/...` | 실제 실행된 바이너리/명령어 경로 | 모니터링 대상 프로그램의 바이너리 경로 검증 |
+
+<br>
 <br>
 
 
@@ -400,9 +428,9 @@ MemoryGuard가 설정된 임계치를 감지하여 프로세스를 종료한 것
 
 ### Before와 After 기록
 
-| 장애 | 변경 환경변수 | Before | After |
+| 장애 | 변경 환경변수 | Before (`100MB`) | After (`256MB`) |
 |---|---|---|---|
-| OOM | `MEMORY_LIMIT` |  |  |
+| OOM | `MEMORY_LIMIT` | 생존 시간: 11초 / 최종 RSS: 95,164KB (100MB 도달 시 자가 종료) | 생존 시간: 31초 / 최종 RSS: 274,268KB (275MB 도달 시 자가 종료) |
 | CPU | `CPU_MAX_OCCUPY` |  |  |
 | Deadlock | `MULTI_THREAD_ENABLE` |  |  |
 

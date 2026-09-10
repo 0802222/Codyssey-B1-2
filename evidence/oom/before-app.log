@@ -8,14 +8,14 @@
 [4/6] Checking Port Availability          [OK]
    ... Port 15034 is available.
 [5/6] Verifying Log Permission            [OK]
-   ... Log directory is writable: /home/agentuser/logs
+   ... Log directory is writable: /workspace/runtime/logs
 [6/6] Verifying Mission Environment       [OK]
    ... MEMORY_LIMIT=100MB, CPU_MAX_OCCUPY=50%, MULTI_THREAD_ENABLE=True
 ------------------------------------------------------------
 All Boot Checks Passed!
 Agent READY
-2026-09-08 18:05:49,611 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-09-08 18:05:49,612 [INFO] Agent listening at port 15034
+2026-09-10 16:43:26,294 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-09-10 16:43:26,294 [INFO] Agent listening at port 15034
 
 ==================================================
  [ Agent Initiate ] Resource Check 
@@ -27,9 +27,9 @@ Agent READY
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-09-08 18:05:51,660 [INFO] [MemoryWorker] Current Heap: 25MB
-2026-09-08 18:05:54,714 [INFO] [MemoryWorker] Current Heap: 50MB
-2026-09-08 18:05:57,768 [INFO] [MemoryWorker] Current Heap: 75MB
-2026-09-08 18:06:00,820 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-09-08 18:06:00,820 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
-2026-09-08 18:06:00,821 [CRITICAL] [MemoryGuard] Self-terminating process 4474 to prevent system instability.
+2026-09-10 16:43:28,344 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-09-10 16:43:31,396 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-09-10 16:43:34,450 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-09-10 16:43:37,491 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-09-10 16:43:37,492 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
+2026-09-10 16:43:37,492 [CRITICAL] [MemoryGuard] Self-terminating process 7677 to prevent system instability.

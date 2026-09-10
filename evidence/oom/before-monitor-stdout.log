@@ -7,210 +7,201 @@
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:01
+Process state : SN
+Elapsed time  : 00:00
 Thread count  : 1
-Process CPU   : 8.7%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
+Process CPU   : 5.3%
+Process MEM   : 0.1%
+Process RSS   : 18248 KB
+
+System CPU    : 0.0%
+System MEM    : 3.7%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:02
+Thread count  : 1
+Process CPU   : 3.6%
+Process MEM   : 0.2%
+Process RSS   : 43852 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:03
+Thread count  : 1
+Process CPU   : 2.3%
+Process MEM   : 0.2%
+Process RSS   : 43852 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:04
+Thread count  : 1
+Process CPU   : 1.6%
+Process MEM   : 0.2%
+Process RSS   : 43852 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:05
+Thread count  : 1
+Process CPU   : 2.1%
+Process MEM   : 0.4%
+Process RSS   : 69456 KB
+
+System CPU    : 1.6%
+System MEM    : 4.1%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:07
+Thread count  : 1
+Process CPU   : 1.7%
+Process MEM   : 0.4%
+Process RSS   : 69456 KB
+
+System CPU    : 0.0%
+System MEM    : 4.1%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:08
+Thread count  : 1
+Process CPU   : 1.8%
+Process MEM   : 0.5%
+Process RSS   : 95060 KB
+
+System CPU    : 0.0%
+System MEM    : 4.3%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:09
+Thread count  : 1
+Process CPU   : 1.6%
+Process MEM   : 0.5%
+Process RSS   : 95060 KB
 
 System CPU    : 0.0%
 System MEM    : 4.0%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
 
-[INFO] Log appended: /home/agentuser/logs/monitor.log
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7677)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:02
-Thread count  : 1
-Process CPU   : 3.9%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
-
-System CPU    : 1.6%
-System MEM    : 4.1%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /home/agentuser/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:03
-Thread count  : 1
-Process CPU   : 2.5%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
-
-System CPU    : 0.0%
-System MEM    : 4.1%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /home/agentuser/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:04
-Thread count  : 1
-Process CPU   : 1.8%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
-
-System CPU    : 1.6%
-System MEM    : 4.2%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /home/agentuser/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:06
+Process state : SN
+Elapsed time  : 00:10
 Thread count  : 1
 Process CPU   : 1.4%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
-
-System CPU    : 1.6%
-System MEM    : 4.3%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /home/agentuser/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:07
-Thread count  : 1
-Process CPU   : 1.2%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
+Process MEM   : 0.5%
+Process RSS   : 95060 KB
 
 System CPU    : 0.0%
-System MEM    : 4.4%
+System MEM    : 4.0%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
 
-[INFO] Log appended: /home/agentuser/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:08
-Thread count  : 1
-Process CPU   : 1.0%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
-
-System CPU    : 0.0%
-System MEM    : 4.5%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /home/agentuser/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:09
-Thread count  : 1
-Process CPU   : 0.9%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
-
-System CPU    : 1.6%
-System MEM    : 4.5%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /home/agentuser/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 4463)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:11
-Thread count  : 1
-Process CPU   : 0.8%
-Process MEM   : 0.0%
-Process RSS   : 2176 KB
-
-System CPU    : 0.0%
-System MEM    : 4.5%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /home/agentuser/logs/monitor.log
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]

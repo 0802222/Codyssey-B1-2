@@ -1,13 +1,12 @@
 # 실험 스니펫: oom-after
 
-_이 파일은 리포트 작성 시 관측 사실 인용에 사용하세요._
-_"3. Root Cause Analysis"와 "4. Workaround & Verification"은 직접 작성이 필요합니다._
+_이 파일은 리포트 작성 시 관측 사실 인용됩니다._
 
 ## 실험 조건
 
-- 실험 시각: 2026-09-09 14:24:39 KST
+- 실험 시각: 2026-09-10 16:44:26 KST
 - 케이스: `oom-after`
-- 생존 시간: 측정 불가
+- 생존 시간: 31 seconds (2026-09-10 16:43:52 ~ 2026-09-10 16:44:23)
 
 ### 환경변수
 
@@ -29,52 +28,57 @@ MULTI_THREAD_ENABLE=true
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-09-09 14:24:06,556 [INFO] [MemoryWorker] Current Heap: 25MB
-2026-09-09 14:24:09,577 [INFO] [MemoryWorker] Current Heap: 50MB
-2026-09-09 14:24:12,609 [INFO] [MemoryWorker] Current Heap: 75MB
-2026-09-09 14:24:15,659 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-09-09 14:24:18,710 [INFO] [MemoryWorker] Current Heap: 125MB
-2026-09-09 14:24:21,764 [INFO] [MemoryWorker] Current Heap: 150MB
-2026-09-09 14:24:24,811 [INFO] [MemoryWorker] Current Heap: 175MB
-2026-09-09 14:24:27,863 [INFO] [MemoryWorker] Current Heap: 200MB
-2026-09-09 14:24:30,916 [INFO] [MemoryWorker] Current Heap: 225MB
-2026-09-09 14:24:33,966 [INFO] [MemoryWorker] Current Heap: 250MB
-2026-09-09 14:24:37,018 [INFO] [MemoryWorker] Current Heap: 275MB
-2026-09-09 14:24:37,019 [CRITICAL] [MemoryGuard] Memory limit exceeded (275MB >= 256MB) / (Recommend Over 256MB)
-2026-09-09 14:24:37,019 [CRITICAL] [MemoryGuard] Self-terminating process 1621 to prevent system instability.
+2026-09-10 16:43:53,300 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-09-10 16:43:56,353 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-09-10 16:43:59,404 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-09-10 16:44:02,450 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-09-10 16:44:05,504 [INFO] [MemoryWorker] Current Heap: 125MB
+2026-09-10 16:44:08,555 [INFO] [MemoryWorker] Current Heap: 150MB
+2026-09-10 16:44:11,605 [INFO] [MemoryWorker] Current Heap: 175MB
+2026-09-10 16:44:14,662 [INFO] [MemoryWorker] Current Heap: 200MB
+2026-09-10 16:44:17,715 [INFO] [MemoryWorker] Current Heap: 225MB
+2026-09-10 16:44:20,769 [INFO] [MemoryWorker] Current Heap: 250MB
+2026-09-10 16:44:23,823 [INFO] [MemoryWorker] Current Heap: 275MB
+2026-09-10 16:44:23,823 [CRITICAL] [MemoryGuard] Memory limit exceeded (275MB >= 256MB) / (Recommend Over 256MB)
+2026-09-10 16:44:23,823 [CRITICAL] [MemoryGuard] Self-terminating process 8117 to prevent system instability.
 ```
 
 ## 모니터 로그 발췌
 
 **시작 부근:**
 ```
-[2026-09-09 14:24:04] PID:1610 PPID:1601 STATE:S+ ELAPSED:00:01 THREADS:1 PROC_CPU:5.8% PROC_MEM:0.0% RSS:2184KB SYS_CPU:0.0% SYS_MEM:3.5% DISK_USED:1% PORT:15034 FIREWALL:permission denied CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-09 14:24:04] PID:1610 PPID:1601 STATE:S+ ELAPSED:00:02 THREADS:1 PROC_CPU:2.6% PROC_MEM:0.0% RSS:2184KB SYS_CPU:1.6% SYS_MEM:3.7% DISK_USED:1% PORT:15034 FIREWALL:permission denied CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-09 14:24:04] PID:1610 PPID:1601 STATE:S+ ELAPSED:00:03 THREADS:1 PROC_CPU:1.6% PROC_MEM:0.0% RSS:2184KB SYS_CPU:0.0% SYS_MEM:3.7% DISK_USED:1% PORT:15034 FIREWALL:permission denied CMD:/workspace/bin/agent-leak-app-x86
+[2026-09-10 16:43:52] PID:8117 PPID:8103 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.2% PROC_MEM:0.1% RSS:18228KB SYS_CPU:0.0% SYS_MEM:3.7% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+[2026-09-10 16:43:53] PID:8117 PPID:8103 STATE:SN ELAPSED:00:02 THREADS:1 PROC_CPU:3.1% PROC_MEM:0.2% RSS:43832KB SYS_CPU:0.0% SYS_MEM:3.9% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+[2026-09-10 16:43:54] PID:8117 PPID:8103 STATE:SN ELAPSED:00:03 THREADS:1 PROC_CPU:2.0% PROC_MEM:0.2% RSS:43832KB SYS_CPU:0.0% SYS_MEM:3.9% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
 ```
 
 **종료 부근:**
 ```
-[2026-09-09 14:24:04] PID:1610 PPID:1601 STATE:S+ ELAPSED:00:29 THREADS:1 PROC_CPU:0.2% PROC_MEM:0.0% RSS:2184KB SYS_CPU:0.0% SYS_MEM:5.2% DISK_USED:1% PORT:15034 FIREWALL:permission denied CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-09 14:24:04] PID:1610 PPID:1601 STATE:S+ ELAPSED:00:31 THREADS:1 PROC_CPU:0.1% PROC_MEM:0.0% RSS:2184KB SYS_CPU:1.6% SYS_MEM:5.1% DISK_USED:1% PORT:15034 FIREWALL:permission denied CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-09 14:24:04] PID:1610 PPID:1601 STATE:S+ ELAPSED:00:32 THREADS:1 PROC_CPU:0.1% PROC_MEM:0.0% RSS:2184KB SYS_CPU:0.0% SYS_MEM:5.1% DISK_USED:1% PORT:15034 FIREWALL:permission denied CMD:/workspace/bin/agent-leak-app-x86
+[2026-09-10 16:44:21] PID:8117 PPID:8103 STATE:SN ELAPSED:00:29 THREADS:1 PROC_CPU:1.3% PROC_MEM:1.6% RSS:274268KB SYS_CPU:0.0% SYS_MEM:5.4% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+[2026-09-10 16:44:22] PID:8117 PPID:8103 STATE:SN ELAPSED:00:31 THREADS:1 PROC_CPU:1.2% PROC_MEM:1.6% RSS:274268KB SYS_CPU:0.0% SYS_MEM:5.2% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+[2026-09-10 16:44:23] PID:8117 PPID:8103 STATE:SN ELAPSED:00:32 THREADS:1 PROC_CPU:1.2% PROC_MEM:1.6% RSS:274268KB SYS_CPU:0.0% SYS_MEM:5.2% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
 ```
 
 ## 시계열 데이터
 
 CSV 원본: [`timeseries.csv`](./timeseries.csv)
 
-CSV를 스프레드시트로 열어 RSS, PROC_CPU 그래프를 리포트에 첨부하세요.
 
 ## 파일 목록
 
 ```
-drwxr-xr-x 1 agentuser agentuser   256 Sep  9 14:24 .
-drwxrwxr-x 1 agentuser agentuser   128 Sep  9 14:24 ..
--rw-r--r-- 1 agentuser agentuser  2246 Sep  9 14:24 app.log
--rw-r--r-- 1 agentuser agentuser   170 Sep  9 14:24 env-snapshot.txt
--rw-r--r-- 1 agentuser agentuser 13285 Sep  9 14:24 monitor-stdout.log
--rw-r--r-- 1 agentuser agentuser  5928 Sep  9 14:24 monitor.log
--rw-r--r-- 1 agentuser agentuser     0 Sep  9 14:24 report-snippet.md
--rw-r--r-- 1 agentuser agentuser  1261 Sep  9 14:24 timeseries.csv
+drwxrwxr-x 1 agentuser agentuser   448 Sep 10 16:44 .
+drwxrwxr-x 1 agentuser agentuser    96 Sep  9 17:37 ..
+-rw-r--r-- 1 agentuser agentuser  2246 Sep 10 16:44 after-app.log
+-rw-r--r-- 1 agentuser agentuser   170 Sep 10 16:43 after-env-snapshot.txt
+-rw-r--r-- 1 agentuser agentuser 12706 Sep 10 16:44 after-monitor-stdout.log
+-rw-r--r-- 1 agentuser agentuser  5685 Sep 10 16:44 after-monitor.log
+-rw-r--r-- 1 agentuser agentuser     0 Sep 10 16:44 after-report-snippet.md
+-rw-r--r-- 1 agentuser agentuser  1304 Sep 10 16:44 after-timeseries.csv
+-rw-rw-r-- 1 agentuser agentuser  1784 Sep 10 16:43 before-app.log
+-rw-rw-r-- 1 agentuser agentuser   171 Sep 10 16:43 before-env-snapshot.txt
+-rw-rw-r-- 1 agentuser agentuser  4274 Sep 10 16:43 before-monitor-stdout.log
+-rw-rw-r-- 1 agentuser agentuser  1962 Sep 10 16:43 before-monitor.log
+-rw-rw-r-- 1 agentuser agentuser  3532 Sep 10 16:43 before-report-snippet.md
+-rw-rw-r-- 1 agentuser agentuser   488 Sep 10 16:43 before-timeseries.csv
 ```

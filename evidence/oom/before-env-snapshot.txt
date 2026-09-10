@@ -1,6 +1,6 @@
 # Experiment env snapshot
 # Case: oom-before
-# Timestamp: 2026-09-08 18:05:49 KST
+# Timestamp: 2026-09-10 16:43:26 KST
 
 APP_NAME=agent-leak-app-x86
 CPU_MAX_OCCUPY=50

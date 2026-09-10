@@ -7,601 +7,596 @@
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:01
+Process state : SN
+Elapsed time  : 00:00
 Thread count  : 1
-Process CPU   : 5.8%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 4.2%
+Process MEM   : 0.1%
+Process RSS   : 18228 KB
 
 System CPU    : 0.0%
-System MEM    : 3.5%
+System MEM    : 3.7%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:02
 Thread count  : 1
-Process CPU   : 2.6%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 3.1%
+Process MEM   : 0.2%
+Process RSS   : 43832 KB
 
-System CPU    : 1.6%
-System MEM    : 3.7%
+System CPU    : 0.0%
+System MEM    : 3.9%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:03
 Thread count  : 1
-Process CPU   : 1.6%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 2.0%
+Process MEM   : 0.2%
+Process RSS   : 43832 KB
 
 System CPU    : 0.0%
-System MEM    : 3.7%
+System MEM    : 3.9%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:04
 Thread count  : 1
-Process CPU   : 1.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 3.7%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:06
-Thread count  : 1
-Process CPU   : 0.9%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 3.9%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:07
-Thread count  : 1
-Process CPU   : 0.8%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 3.9%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:08
-Thread count  : 1
-Process CPU   : 0.7%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 4.1%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:09
-Thread count  : 1
-Process CPU   : 0.6%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 3.9%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:11
-Thread count  : 1
-Process CPU   : 0.5%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 4.2%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:12
-Thread count  : 1
-Process CPU   : 0.4%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 4.1%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:13
-Thread count  : 1
-Process CPU   : 0.4%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 4.2%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:14
-Thread count  : 1
-Process CPU   : 0.4%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 4.4%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:16
-Thread count  : 1
-Process CPU   : 0.3%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.4%
+Process MEM   : 0.2%
+Process RSS   : 43832 KB
 
 System CPU    : 1.6%
-System MEM    : 4.4%
+System MEM    : 3.9%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:17
+Process state : SN
+Elapsed time  : 00:05
 Thread count  : 1
-Process CPU   : 0.3%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 2.0%
+Process MEM   : 0.4%
+Process RSS   : 69436 KB
 
-System CPU    : 3.2%
+System CPU    : 0.0%
+System MEM    : 4.1%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:07
+Thread count  : 1
+Process CPU   : 1.6%
+Process MEM   : 0.4%
+Process RSS   : 69436 KB
+
+System CPU    : 0.0%
+System MEM    : 4.1%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:08
+Thread count  : 1
+Process CPU   : 1.7%
+Process MEM   : 0.5%
+Process RSS   : 95040 KB
+
+System CPU    : 0.0%
+System MEM    : 4.3%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:09
+Thread count  : 1
+Process CPU   : 1.5%
+Process MEM   : 0.5%
+Process RSS   : 95040 KB
+
+System CPU    : 0.0%
+System MEM    : 4.1%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:11
+Thread count  : 1
+Process CPU   : 1.3%
+Process MEM   : 0.5%
+Process RSS   : 95040 KB
+
+System CPU    : 0.0%
+System MEM    : 4.1%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:12
+Thread count  : 1
+Process CPU   : 1.4%
+Process MEM   : 0.7%
+Process RSS   : 120644 KB
+
+System CPU    : 0.0%
+System MEM    : 4.3%
+DISK Used     : 1%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (120644KB > 102400KB)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:13
+Thread count  : 1
+Process CPU   : 1.3%
+Process MEM   : 0.7%
+Process RSS   : 120644 KB
+
+System CPU    : 1.6%
+System MEM    : 4.3%
+DISK Used     : 1%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (120644KB > 102400KB)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:14
+Thread count  : 1
+Process CPU   : 1.4%
+Process MEM   : 0.8%
+Process RSS   : 146248 KB
+
+System CPU    : 0.0%
 System MEM    : 4.5%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (146248KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
+Elapsed time  : 00:16
+Thread count  : 1
+Process CPU   : 1.3%
+Process MEM   : 0.8%
+Process RSS   : 146248 KB
+
+System CPU    : 0.0%
+System MEM    : 4.5%
+DISK Used     : 1%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (146248KB > 102400KB)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:17
+Thread count  : 1
+Process CPU   : 1.2%
+Process MEM   : 0.8%
+Process RSS   : 146248 KB
+
+System CPU    : 4.8%
+System MEM    : 4.7%
+DISK Used     : 1%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (146248KB > 102400KB)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
 Elapsed time  : 00:18
 Thread count  : 1
-Process CPU   : 0.3%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.3%
+Process MEM   : 1.0%
+Process RSS   : 171852 KB
 
 System CPU    : 0.0%
-System MEM    : 4.6%
+System MEM    : 4.7%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (171852KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:19
 Thread count  : 1
-Process CPU   : 0.3%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.2%
+Process MEM   : 1.0%
+Process RSS   : 171852 KB
 
 System CPU    : 0.0%
-System MEM    : 4.6%
+System MEM    : 4.7%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (171852KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:21
 Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.3%
+Process MEM   : 1.2%
+Process RSS   : 197456 KB
 
 System CPU    : 0.0%
-System MEM    : 4.6%
+System MEM    : 4.7%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (197456KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:22
 Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.2%
+Process MEM   : 1.2%
+Process RSS   : 197456 KB
 
-System CPU    : 0.0%
-System MEM    : 4.6%
+System CPU    : 1.6%
+System MEM    : 4.8%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (197456KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:23
 Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.3%
+Process MEM   : 1.3%
+Process RSS   : 223060 KB
 
-System CPU    : 0.0%
-System MEM    : 4.8%
+System CPU    : 1.6%
+System MEM    : 5.0%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (223060KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:24
 Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.2%
+Process MEM   : 1.3%
+Process RSS   : 223060 KB
 
 System CPU    : 0.0%
-System MEM    : 4.8%
+System MEM    : 5.0%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (223060KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:26
 Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.2%
+Process MEM   : 1.3%
+Process RSS   : 223060 KB
 
 System CPU    : 0.0%
-System MEM    : 4.9%
+System MEM    : 5.0%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (223060KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:27
 Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.3%
+Process MEM   : 1.5%
+Process RSS   : 248664 KB
 
 System CPU    : 0.0%
-System MEM    : 5.0%
+System MEM    : 5.1%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (248664KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
+Process state : SN
 Elapsed time  : 00:28
 Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 0.0%
-System MEM    : 5.0%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:29
-Thread count  : 1
-Process CPU   : 0.2%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.2%
+Process MEM   : 1.5%
+Process RSS   : 248664 KB
 
 System CPU    : 0.0%
 System MEM    : 5.2%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:31
-Thread count  : 1
-Process CPU   : 0.1%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
-
-System CPU    : 1.6%
-System MEM    : 5.1%
-DISK Used     : 1%
-
-Firewall      : permission denied
-
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (248664KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 1610)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : S+
-Elapsed time  : 00:32
+Process state : SN
+Elapsed time  : 00:29
 Thread count  : 1
-Process CPU   : 0.1%
-Process MEM   : 0.0%
-Process RSS   : 2184 KB
+Process CPU   : 1.3%
+Process MEM   : 1.6%
+Process RSS   : 274268 KB
 
 System CPU    : 0.0%
-System MEM    : 5.1%
+System MEM    : 5.4%
 DISK Used     : 1%
 
-Firewall      : permission denied
+Firewall      : active
 
-[INFO] UFW status check failed (sudo permission required)
+[WARNING] Process RSS threshold exceeded (274268KB > 102400KB)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:31
+Thread count  : 1
+Process CPU   : 1.2%
+Process MEM   : 1.6%
+Process RSS   : 274268 KB
+
+System CPU    : 0.0%
+System MEM    : 5.2%
+DISK Used     : 1%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (274268KB > 102400KB)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 8117)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:32
+Thread count  : 1
+Process CPU   : 1.2%
+Process MEM   : 1.6%
+Process RSS   : 274268 KB
+
+System CPU    : 0.0%
+System MEM    : 5.2%
+DISK Used     : 1%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (274268KB > 102400KB)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+[ERROR] Process 'agent-leak-app-x86' not running
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]

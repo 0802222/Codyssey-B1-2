@@ -96,7 +96,7 @@ echo "[INFO] Env snapshot saved: $ENV_SNAPSHOT"
 echo "[INFO] Starting app: $APP_PATH"
 echo
 
-"$APP_PATH" > "$APP_LOG" 2>&1 &
+PYTHONUNBUFFERED=1 "$APP_PATH" > "$APP_LOG" 2>&1 &
 APP_PID=$!
 
 echo "[INFO] App started (PID: $APP_PID)"

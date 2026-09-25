@@ -1,0 +1,588 @@
+[INFO] Monitoring started: interval=1s
+[INFO] Press Ctrl+C to stop.
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+[ERROR] Port 15034 is not listening
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:00
+Thread count  : 1
+Process CPU   : 6.5%
+Process MEM   : 0.1%
+Process RSS   : 18396 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:02
+Thread count  : 1
+Process CPU   : 2.7%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:03
+Thread count  : 1
+Process CPU   : 1.7%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:04
+Thread count  : 1
+Process CPU   : 1.2%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:05
+Thread count  : 1
+Process CPU   : 1.1%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 1.6%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:07
+Thread count  : 1
+Process CPU   : 0.9%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 1.6%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:08
+Thread count  : 1
+Process CPU   : 1.0%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:09
+Thread count  : 1
+Process CPU   : 0.9%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:10
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:12
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 1.6%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:13
+Thread count  : 1
+Process CPU   : 0.7%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:14
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:15
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:17
+Thread count  : 1
+Process CPU   : 0.7%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:18
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:19
+Thread count  : 1
+Process CPU   : 0.7%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:21
+Thread count  : 1
+Process CPU   : 0.9%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 1.6%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:22
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.8%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:23
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:24
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 1.6%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:26
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:27
+Thread count  : 1
+Process CPU   : 0.9%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:28
+Thread count  : 1
+Process CPU   : 0.9%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:29
+Thread count  : 1
+Process CPU   : 0.8%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 4.0%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:31
+Thread count  : 1
+Process CPU   : 0.9%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 1.7%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 7522)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN
+Elapsed time  : 00:32
+Thread count  : 1
+Process CPU   : 0.9%
+Process MEM   : 0.1%
+Process RSS   : 18460 KB
+
+System CPU    : 0.0%
+System MEM    : 3.9%
+DISK Used     : 1%
+
+Firewall      : active
+
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+[ERROR] Process 'agent-leak-app-x86' not running
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+[ERROR] Process 'agent-leak-app-x86' not running
+
+[INFO] Monitoring stopped.

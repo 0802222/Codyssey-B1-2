@@ -107,11 +107,15 @@ MONITOR_PID=$!
 echo "[INFO] Monitor started (PID: $MONITOR_PID, target app PID: $APP_PID)"
 
 
-# 종료 시 모니터 정리
+# 종료 시 모니터 & 앱 정리
 cleanup() {
   if kill -0 "$MONITOR_PID" 2>/dev/null; then
     kill "$MONITOR_PID" 2>/dev/null || true
-    wait "$MONITOR_PID" 2>/dev/null || true
+  fi
+
+  if kill -0 "$APP_PID" 2>/dev/null; then
+    kill "$APP_PID" 2>/dev/null || true
+    wait "$APP_PID" 2>/dev/null || true
   fi
 }
 trap cleanup EXIT INT TERM

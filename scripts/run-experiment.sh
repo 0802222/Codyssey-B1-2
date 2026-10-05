@@ -62,6 +62,7 @@ MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"
 ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"
 TIMESERIES_CSV="$CASE_DIR/$PHASE-timeseries.csv"
 REPORT_SNIPPET="$CASE_DIR/$PHASE-report-snippet.md"
+CMD_SNAPSHOT="$CASE_DIR/$PHASE-cmd-snapshot.txt"
 
 echo "===== Experiment: $CASE ====="
 echo "Started at   : $(date '+%Y-%m-%d %H:%M:%S %Z')"
@@ -97,14 +98,57 @@ echo "[INFO] Starting app: $APP_PATH"
 echo
 
 "$APP_PATH" > "$APP_LOG" 2>&1 &
-APP_PID=$!
+LAUNCHER_PID=$!
 
-echo "[INFO] App started (PID: $APP_PID)"
+echo "[INFO] App launcher started (PID: $LAUNCHER_PID)"
+
+# 앱은 실제 에이전트를 자식 프로세스로 띄운다.
+# $! 는 런처 PID이므로, monitor.sh와 동일한 기준(RSS 최대)으로 관측 대상 PID를 찾는다.
+APP_PID=""
+for _ in $(seq 1 10); do
+  APP_PID="$(ps aux | grep "${APP_NAME:-agent-leak-app-x86}" | grep -v grep | sort -k6 -nr | awk 'NR==1{print $2}')"
+  [[ -n "$APP_PID" && "$APP_PID" != "$LAUNCHER_PID" ]] && break
+  sleep 1
+done
+APP_PID="${APP_PID:-$LAUNCHER_PID}"
+
+echo "[INFO] Target agent process resolved (PID: $APP_PID)"
 
 INTERVAL=1 bash "$MONITOR_SCRIPT" > "$MONITOR_STDOUT" 2>&1 &
 MONITOR_PID=$!
 
 echo "[INFO] Monitor started (PID: $MONITOR_PID, target app PID: $APP_PID)"
+
+
+# -----------------------------
+# 4-1. Linux 명령어 출력 증적 수집 (리포트 템플릿의 "Linux 명령어 출력" 항목)
+# -----------------------------
+{
+  echo "# Linux command evidence"
+  echo "# Case: $CASE / App PID: $APP_PID"
+  echo
+} > "$CMD_SNAPSHOT"
+
+(
+  while kill -0 "$APP_PID" 2>/dev/null; do
+    {
+      echo "===== [$(date '+%Y-%m-%d %H:%M:%S')] ====="
+      echo "--- ps -ef | grep agent-leak-app ---"
+      ps -ef | grep "[a]gent-leak-app" || true
+      echo "--- ps -p $APP_PID -o pid,ppid,stat,etime,%cpu,%mem,rss,cmd ---"
+      ps -p "$APP_PID" -o pid,ppid,stat,etime,%cpu,%mem,rss,cmd 2>/dev/null || true
+      echo "--- top -bn1 -p $APP_PID ---"
+      top -bn1 -p "$APP_PID" 2>/dev/null | tail -n 5 || true
+      echo "--- ps -L -p $APP_PID -o pid,tid,stat,%cpu,%mem,etime,comm ---"
+      ps -L -p "$APP_PID" -o pid,tid,stat,%cpu,%mem,etime,comm 2>/dev/null || true
+      echo
+    } >> "$CMD_SNAPSHOT"
+    sleep 3
+  done
+) &
+SNAPSHOT_PID=$!
+
+echo "[INFO] Command snapshot collector started (PID: $SNAPSHOT_PID)"
 
 
 # 종료 시 모니터 정리
@@ -113,12 +157,16 @@ cleanup() {
     kill "$MONITOR_PID" 2>/dev/null || true
     wait "$MONITOR_PID" 2>/dev/null || true
   fi
+  if kill -0 "$SNAPSHOT_PID" 2>/dev/null; then
+    kill "$SNAPSHOT_PID" 2>/dev/null || true
+    wait "$SNAPSHOT_PID" 2>/dev/null || true
+  fi
 }
 trap cleanup EXIT INT TERM
 
 
-# 앱 종료까지 대기
-wait "$APP_PID" || true
+# 앱 종료까지 대기 (런처가 끝나면 에이전트도 종료된 것)
+wait "$LAUNCHER_PID" || true
 
 # 앱 종료를 monitor가 감지하고 마지막 상태를 기록할 시간
 sleep 2
@@ -143,7 +191,7 @@ fi
 # -----------------------------
 if [[ -f "$MONITOR_LOG" ]]; then
   {
-    echo "timestamp,proc_cpu,proc_mem,rss_kb,sys_cpu,sys_mem,threads,state"
+    echo "timestamp,proc_cpu,proc_cpu_avg,proc_mem,rss_kb,sys_cpu,sys_mem,threads,state"
     gawk '
       match($0, /\[([^]]+)\]/, ts) &&
       match($0, /PROC_CPU:([0-9.]+)%/, pc) &&
@@ -153,7 +201,9 @@ if [[ -f "$MONITOR_LOG" ]]; then
       match($0, /SYS_MEM:([0-9.]+)%/, sm) &&
       match($0, /THREADS:([0-9]+)/, th) &&
       match($0, /STATE:([^ ]+)/, st) {
-        print ts[1] "," pc[1] "," pm[1] "," rss[1] "," sc[1] "," sm[1] "," th[1] "," st[1]
+        avg = ""
+        if (match($0, /PROC_CPU_AVG:([0-9.]+)%/, pa)) { avg = pa[1] }
+        print ts[1] "," pc[1] "," avg "," pm[1] "," rss[1] "," sc[1] "," sm[1] "," th[1] "," st[1]
       }
     ' "$MONITOR_LOG"
   } > "$TIMESERIES_CSV"
@@ -183,6 +233,26 @@ if [[ -f "$MONITOR_LOG" ]]; then
   fi
 fi
 
+# 관측 피크값 (리포트의 "관측된 최대 CPU 사용률" 등에 인용)
+PEAK_SUMMARY="(측정 불가)"
+if [[ -s "$TIMESERIES_CSV" ]]; then
+  PEAK_SUMMARY="$(
+    awk -F',' 'NR > 1 {
+      if ($2 + 0 > maxcpu) { maxcpu = $2 + 0; maxcpu_ts = $1 }
+      if ($5 + 0 > maxrss) { maxrss = $5 + 0; maxrss_ts = $1 }
+      if ($8 + 0 > maxth)  { maxth  = $8 + 0 }
+      rows++
+    }
+    END {
+      if (rows == 0) { print "(측정 불가)"; exit }
+      printf "- 최대 프로세스 CPU: **%.1f%%** (%s)\n", maxcpu, maxcpu_ts
+      printf "- 최대 RSS: **%d KB** (~%.1f MB, %s)\n", maxrss, maxrss / 1024, maxrss_ts
+      printf "- 최대 스레드 수: **%d**\n", maxth
+      printf "- 수집 행수: %d\n", rows
+    }' "$TIMESERIES_CSV"
+  )"
+fi
+
 cat > "$REPORT_SNIPPET" <<EOF
 # 실험 스니펫: $CASE
 
@@ -193,6 +263,10 @@ _이 파일은 리포트 작성 시 관측 사실 인용됩니다._
 - 실험 시각: $(date '+%Y-%m-%d %H:%M:%S %Z')
 - 케이스: \`$CASE\`
 - 생존 시간: ${SURVIVAL:-측정 불가}
+
+## 관측 피크값
+
+$PEAK_SUMMARY
 
 ### 환경변수
 
@@ -218,9 +292,17 @@ $MON_FIRST
 $MON_LAST
 \`\`\`
 
+## Linux 명령어 출력 (마지막 스냅샷)
+
+\`\`\`
+$(tail -n 20 "$CMD_SNAPSHOT" 2>/dev/null || echo "(no command snapshot)")
+\`\`\`
+
+전체 스냅샷: [\`$PHASE-cmd-snapshot.txt\`](./$PHASE-cmd-snapshot.txt)
+
 ## 시계열 데이터
 
-CSV 원본: [\`timeseries.csv\`](./timeseries.csv)
+CSV 원본: [\`$PHASE-timeseries.csv\`](./$PHASE-timeseries.csv)
 
 
 ## 파일 목록

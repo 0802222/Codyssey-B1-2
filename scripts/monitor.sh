@@ -15,11 +15,56 @@ CPU_THRESHOLD=20
 MEM_THRESHOLD=10
 DISK_THRESHOLD=80
 
-PROC_CPU_THRESHOLD=80
+# 프로세스 CPU 경고 임계치는 미션 환경변수(CPU_MAX_OCCUPY)와 일치시킨다.
+PROC_CPU_THRESHOLD="${CPU_MAX_OCCUPY:-80}"
 PROC_RSS_THRESHOLD_KB=$((100 * 1024))
 
 MAX_SIZE=$((10 * 1024 * 1024))  # 10MB
 MAX_FILES=10
+
+# 순간 CPU 사용률 계산용 상태 (샘플 간 델타를 누적 보관)
+CLK_TCK="$(getconf CLK_TCK 2>/dev/null || echo 100)"
+CPU_SAMPLE_PID=""
+CPU_SAMPLE_JIFFIES=""
+CPU_SAMPLE_UPTIME=""
+PROC_CPU_INST=""
+
+
+# ps의 %cpu는 "프로세스 시작 이후 누적 평균"이므로 CPU 과점유 구간을 식별할 수 없다.
+# /proc/<pid>/stat의 utime+stime을 직전 샘플과 비교하여 순간 사용률(코어 1개 기준 %)을 구한다.
+sample_proc_cpu() {
+  local pid="$1"
+  local stat_rest now_jiffies now_uptime delta_jiffies
+
+  PROC_CPU_INST=""
+  [[ -r "/proc/$pid/stat" ]] || return 1
+
+  # comm 필드에 공백·괄호가 들어갈 수 있으므로 마지막 ')' 뒤부터 파싱한다. (이후 12=utime, 13=stime)
+  stat_rest="$(</proc/"$pid"/stat)"
+  stat_rest="${stat_rest##*') '}"
+  # shellcheck disable=SC2086
+  set -- $stat_rest
+  [[ $# -ge 13 ]] || return 1
+
+  now_jiffies=$(( ${12} + ${13} ))
+  now_uptime="$(awk '{print $1}' /proc/uptime)"
+
+  if [[ "$CPU_SAMPLE_PID" == "$pid" && -n "$CPU_SAMPLE_JIFFIES" ]]; then
+    delta_jiffies=$(( now_jiffies - CPU_SAMPLE_JIFFIES ))
+    PROC_CPU_INST="$(
+      awk -v dj="$delta_jiffies" -v t0="$CPU_SAMPLE_UPTIME" -v t1="$now_uptime" -v hz="$CLK_TCK" '
+        BEGIN {
+          dt = t1 - t0
+          if (dt <= 0 || dj < 0) { print "0.0" }
+          else { printf "%.1f", (dj / hz) / dt * 100 }
+        }'
+    )"
+  fi
+
+  CPU_SAMPLE_PID="$pid"
+  CPU_SAMPLE_JIFFIES="$now_jiffies"
+  CPU_SAMPLE_UPTIME="$now_uptime"
+}
 
 
 monitor_once() {
@@ -96,6 +141,13 @@ monitor_once() {
 
   THREAD_COUNT="$(ps -L -p "$APP_PID" --no-headers | wc -l)"
 
+  # ps의 %cpu는 누적 평균이므로 보조 지표로만 남기고, 로그에는 순간 사용률을 기록한다.
+  APP_CPU_AVG="$APP_CPU"
+  sample_proc_cpu "$APP_PID" || true
+  if [[ -n "$PROC_CPU_INST" ]]; then
+    APP_CPU="$PROC_CPU_INST"
+  fi
+
 
 
   # 3. 경고 체크 - 방화벽 활성화 여부
@@ -119,7 +171,7 @@ monitor_once() {
 
 
   if awk "BEGIN {exit !(${APP_CPU} > ${PROC_CPU_THRESHOLD})}"; then
-    RESOURCE_WARNINGS="${RESOURCE_WARNINGS}[WARNING] Process CPU threshold exceeded (${APP_CPU}% > ${PROC_CPU_THRESHOLD}%)\n"
+    RESOURCE_WARNINGS="${RESOURCE_WARNINGS}[WARNING] Process CPU threshold exceeded (${APP_CPU}% > CPU_MAX_OCCUPY ${PROC_CPU_THRESHOLD}%)\n"
   fi
 
   if (( APP_RSS > PROC_RSS_THRESHOLD_KB )); then
@@ -172,8 +224,8 @@ monitor_once() {
   printf '[%s] PID:%s PPID:%s STATE:%s ELAPSED:%s THREADS:%s ' \
     "$timestamp" "$APP_PID" "$APP_PPID" "$APP_STATE" "$APP_ELAPSED" "$THREAD_COUNT" >> "$LOG_FILE"
 
-  printf 'PROC_CPU:%s%% PROC_MEM:%s%% RSS:%sKB ' \
-    "$APP_CPU" "$APP_MEM" "$APP_RSS" >> "$LOG_FILE"
+  printf 'PROC_CPU:%s%% PROC_CPU_AVG:%s%% PROC_MEM:%s%% RSS:%sKB ' \
+    "$APP_CPU" "$APP_CPU_AVG" "$APP_MEM" "$APP_RSS" >> "$LOG_FILE"
 
   printf 'SYS_CPU:%s%% SYS_MEM:%s%% DISK_USED:%s%% PORT:%s FIREWALL:%s CMD:%s\n' \
     "$CPU_USAGE" "$MEM_USAGE" "$DISK_USAGE" "$APP_PORT" "$FIREWALL_STATUS" "$APP_COMMAND" >> "$LOG_FILE"
@@ -200,7 +252,8 @@ monitor_once() {
   echo "Process state : ${APP_STATE}"
   echo "Elapsed time  : ${APP_ELAPSED}"
   echo "Thread count  : ${THREAD_COUNT}"
-  echo "Process CPU   : ${APP_CPU}%"
+  echo "Process CPU   : ${APP_CPU}% (instant, 1 core=100%)"
+  echo "Process CPU평균: ${APP_CPU_AVG}% (since start)"
   echo "Process MEM   : ${APP_MEM}%"
   echo "Process RSS   : ${APP_RSS} KB"
   echo

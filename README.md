@@ -10,10 +10,10 @@
 ## 최종 결과물
 
 - [x] OOM Crash 분석 리포트 ([01-oom-report.md](./reports/01-oom-report.md))
-- [ ] CPU Latency 분석 리포트
-- [ ] Deadlock 분석 리포트
-- [ ] 각 장애의 Before & After 증거
-- [ ] 실행 방법과 실험 결과가 정리된 README
+- [ ] CPU Latency 분석 리포트 ([02-cpu-report.md](./reports/02-cpu-report.md) — 실험 수행 후 관측값 기입 필요)
+- [ ] Deadlock 분석 리포트 ([03-deadlock-report.md](./reports/03-deadlock-report.md) — 실험 수행 후 관측값 기입 필요)
+- [ ] 각 장애의 Before & After 증거 (OOM 완료 / CPU·Deadlock 미수집)
+- [x] 실행 방법과 실험 결과가 정리된 README ([실행 방법](#실행-방법))
 
 <br>
 <br>
@@ -128,7 +128,10 @@ INITIATING EMERGENCY ABORT
 SIGTERM
 ```
 
-`CPU_MAX_OCCUPY`를 높이는 것은 Watchdog의 종료 기준을 변경하는 조치이다. 프로그램이 사용하는 CPU 자체를 줄이는 근본 해결책은 아니다.
+> 실제 실험에서 이 애플리케이션이 기록한 종료 로그는 `[CRITICAL] [CpuWorker] CPU Threshold Violated! (51.6%).` 형태였다.
+> `WATCHDOG`/`SIGTERM` 문자열은 관측되지 않았으므로, 리포트에는 **실제로 수집된 로그 문구**를 근거로 인용한다.
+
+`CPU_MAX_OCCUPY`는 `CpuWorker`가 끌어올릴 수 있는 부하의 상한이다. 이 값을 조정하는 것은 장애 발생 시점을 바꾸는 조치일 뿐이며, 프로그램이 부하를 계속 증가시키는 로직 자체를 줄이는 근본 해결책은 아니다.
 
 <br>
 
@@ -214,6 +217,96 @@ printf '%s' 'agent_api_key_test' > "$AGENT_KEY_PATH/secret.key"
 <br>
 <br>
 
+## 실행 방법
+
+### 1. 컨테이너 생성 (호스트에서 1회)
+
+프로젝트 폴더를 `/workspace`로 마운트하여 컨테이너를 생성한다.
+
+```bash
+docker run -dit \
+  --name codyssey-b1-2 \
+  --hostname codyssey-b1-2-lab \
+  --cap-add NET_ADMIN \
+  -v "$(pwd)":/workspace \
+  -p 15034:15034 \
+  ubuntu:24.04 bash
+```
+
+### 2. 실행 환경 구축 (컨테이너 내부, root, 1회)
+
+`provision.sh`가 패키지 설치, 서비스 계정(`agentuser`) 생성, 디렉터리와 `secret.key` 준비, `/workspace/runtime/agent.env` 생성까지 수행한다.
+
+```bash
+docker exec -it codyssey-b1-2 bash
+cd /workspace
+bash scripts/provision.sh
+bash scripts/configure_firewall.sh
+```
+
+환경변수 기본값을 바꿔서 구축하려면 `provision.sh` 실행 시 함께 지정한다.
+
+```bash
+MEMORY_LIMIT=512 CPU_MAX_OCCUPY=50 MULTI_THREAD_ENABLE=false bash scripts/provision.sh
+```
+
+### 3. 실험 실행 (컨테이너 내부, agentuser)
+
+```bash
+docker exec -it -u agentuser codyssey-b1-2 bash
+cd /workspace
+bash scripts/run-experiment.sh <case-name>
+```
+
+`<case-name>`은 `<장애유형>-<before|after>` 형식이며, 증적은 `evidence/<장애유형>/<phase>-*`로 자동 저장된다.
+
+| 실험 | 케이스 이름 | `agent.env` 설정 |
+| :--- | :--- | :--- |
+| OOM Before | `oom-before` | `MEMORY_LIMIT=100` |
+| OOM After | `oom-after` | `MEMORY_LIMIT=256` |
+| CPU Before | `cpu-before` | `MEMORY_LIMIT=512`, `CPU_MAX_OCCUPY=100`, `MULTI_THREAD_ENABLE=false` |
+| CPU After | `cpu-after` | `CPU_MAX_OCCUPY=50` (나머지 동일) |
+| Deadlock Before | `deadlock-before` | `MEMORY_LIMIT=512`, `CPU_MAX_OCCUPY=50`, `MULTI_THREAD_ENABLE=true` |
+| Deadlock After | `deadlock-after` | `MULTI_THREAD_ENABLE=false` (나머지 동일) |
+
+> 애플리케이션은 환경변수 조합을 보고 **실행할 장애 시나리오를 선택**한다.
+> 따라서 특정 장애를 재현하려면 **대상 장애의 조건만 경고 상태로 두고, 나머지 두 항목은 정상값으로 고정**해야 한다.
+> 세 항목이 모두 정상이면 `[Healthy System Monitoring]` 시나리오가 선택되어 장애가 발생하지 않는다.
+
+### 4. 환경변수 변경 (Before ➔ After)
+
+`run-experiment.sh`는 `/workspace/runtime/agent.env`를 읽어 실행한다. 한 실험에서 변경하는 변수는 하나로 제한한다.
+
+```bash
+nano /workspace/runtime/agent.env   # 해당 변수 1개만 수정
+bash scripts/run-experiment.sh cpu-after
+```
+
+### 5. 증적 확인
+
+```text
+evidence/<장애유형>/
+├── <phase>-app.log              # 애플리케이션 실행 로그
+├── <phase>-monitor.log          # monitor.sh 관제 로그 (1초 간격)
+├── <phase>-monitor-stdout.log   # monitor.sh 콘솔 출력
+├── <phase>-cmd-snapshot.txt     # ps / top / ps -L 출력 (3초 간격)
+├── <phase>-timeseries.csv       # 시계열 데이터 (그래프용)
+├── <phase>-env-snapshot.txt     # 실험 시점 환경변수
+└── <phase>-report-snippet.md    # 생존 시간·피크값 요약 (리포트 인용용)
+```
+
+### 6. 관제만 단독 실행
+
+```bash
+docker exec -it -u agentuser codyssey-b1-2 bash
+source /workspace/runtime/agent.env
+INTERVAL=1 bash /workspace/scripts/monitor.sh      # 1초 간격 반복
+LOOP=false bash /workspace/scripts/monitor.sh      # 1회만 수집
+```
+
+<br>
+<br>
+
 ## Repository 구성
 
 ### 구조
@@ -230,7 +323,7 @@ mission-b1-2/
 │   ├── provision.sh
 │   ├── configure_firewall.sh
 │   ├── monitor.sh
-│   └── run-expreriment.sh
+│   └── run-experiment.sh
 ├── reports/
 │   ├── 01-oom-report.md
 │   ├── 02-cpu-report.md
@@ -256,7 +349,7 @@ mission-b1-2/
 `monitor.sh`는 프로세스와 시스템의 핵심 자원을 1초 간격으로 수집하여 `monitor.log`에 한 줄씩 기록한다.
 
 ```text
-[2026-09-10 16:19:27] PID:7237 PPID:7223 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.3% PROC_MEM:0.1% RSS:18352KB SYS_CPU:1.6% SYS_MEM:3.6% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+[2026-09-10 16:19:27] PID:7237 PPID:7223 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.3% PROC_CPU_AVG:4.3% PROC_MEM:0.1% RSS:18352KB SYS_CPU:1.6% SYS_MEM:3.6% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
 ```
 
 | 항목 | 예시 값 | 기술적 의미 | 수집 목적 및 용도 |
@@ -267,7 +360,8 @@ mission-b1-2/
 | **`STATE`** | `SN` | 프로세스 상태 플래그 (`S`: Sleep 대기, `N`: Nice 저우선순위) | 프로세스의 실행/대기/좀비/교착상태 여부 진단 |
 | **`ELAPSED`** | `00:00` | 누적 실행 시간 (`MM:SS`) | 프로세스 시작 후 경과 시간, **프로세스 생존 시간(Survival Time)** 측정용 |
 | **`THREADS`** | `1` | 프로세스 내 활성 스레드 개수 | 멀티스레드 여부, 스레드 누수 감지, **Deadlock 장애 식별용** |
-| **`PROC_CPU`** | `4.3%` | 프로세스 단독 CPU 코어 사용률 | **CPU 과점유 장애(CPU Spike/Loop) 진단**용 |
+| **`PROC_CPU`** | `4.3%` | 프로세스의 **순간** CPU 점유율 (코어 1개 = 100% 기준). `/proc/<pid>/stat`의 `utime+stime`을 직전 샘플과 비교해 계산 | **CPU 과점유 장애(CPU Spike/Loop) 진단**용 |
+| **`PROC_CPU_AVG`** | `4.3%` | `ps`의 `%cpu` 값으로, **프로세스 시작 이후 누적 평균** | 순간값과의 비교용. 누적 평균은 후반에 발생한 급상승이 희석되어 과점유 구간을 식별할 수 없음을 보여주는 대조 지표 |
 | **`PROC_MEM`** | `0.1%` | 시스템 전체 물리 메모리 대비 점유율 (%) | 전체 시스템 관점에서 대상 프로세스의 메모리 점유 비중 확인 |
 | **`RSS`** | `18352KB` | Resident Set Size (실제 물리 메모리 점유 크기, 1MB=1024KB) | **메모리 누수(Memory Leak) 진단의 핵심 지표**, 시간에 따른 증가 추세 추적 |
 | **`SYS_CPU`** | `1.6%` | 시스템 전체 CPU 사용률 | 부하 원인이 대상 프로세스인지, 시스템 전체 문제인지 비교 판별 |
@@ -304,17 +398,28 @@ mission-b1-2/
 
 `monitor.sh`, `top`, `ps`를 사용하여 CPU 사용률이 급격히 상승하는 구간을 찾는다. 시스템 전체가 아닌 `agent-leak-app` 프로세스의 CPU 사용률이 높아졌는지 확인한다.
 
-종료 전후의 프로그램 로그에서 `WATCHDOG`, `SIGTERM`과 같은 메시지를 찾는다. 이를 근거로 CPU 임계치 초과와 Watchdog의 보호 동작을 연결한다.
+종료 전후의 프로그램 로그에서 임계치 초과 메시지를 찾는다. 이 애플리케이션에서는 다음 형태로 기록된다.
+
+```text
+[ CPU    ] Limit: 100%  		[ WARNING: Recommend Under 50% ]
+[INFO] [CpuWorker] Started. Maximum CPU Limit: 100%
+[INFO] [CpuWorker] Current Load: 5.00%
+...
+[INFO] [CpuWorker] Current Load: 51.60%
+[CRITICAL] [CpuWorker] CPU Threshold Violated! (51.6%).
+```
 
 `CPU_MAX_OCCUPY`를 변경하기 전과 변경한 후에 각각 실행한다. 다음 항목을 비교한다.
 
 - CPU 사용률 상승 구간
-- 관측된 최대 CPU 사용률
+- 관측된 최대 CPU 사용률 (앱이 보고한 Load와 `monitor.sh`의 `PROC_CPU`를 구분하여 기록)
 - 프로세스 생존 시간
 - 프로세스 종료 여부
-- Watchdog 관련 로그
+- 임계치 위반 로그 발생 여부
 
-설정값을 높인 뒤 프로세스가 더 오래 실행되어도 CPU 사용률 자체가 계속 높다면 근본 원인은 해결되지 않은 것이다.
+**실험 방향에 주의한다.** 이 애플리케이션은 `CPU_MAX_OCCUPY`를 **권고치(50%)보다 높게** 설정했을 때 `CpuWorker`가 안전 한계를 넘는 구간까지 부하를 올려 장애가 발생한다. 즉 `100`이 장애 재현(Before), `50`이 조치 적용(After)이다. 값을 올려서 생존 시간을 늘리는 OOM 실험과 방향이 반대이다.
+
+설정값을 낮춰 임계치 위반이 사라져도, 작업 부하가 시간에 따라 계속 증가하는 로직이 남아 있다면 근본 원인은 해결되지 않은 것이다.
 
 ### 3. Deadlock 분석
 
@@ -431,11 +536,13 @@ MemoryGuard가 설정된 임계치를 감지하여 프로세스를 종료한 것
 
 ### Before와 After 기록
 
-| 장애 | 변경 환경변수 | Before (`100MB`) | After (`256MB`) |
+| 장애 | 변경 환경변수 | Before (장애 재현) | After (조치 적용) |
 |---|---|---|---|
-| OOM | `MEMORY_LIMIT` | 생존 시간: 11초 / 최종 RSS: 95,164KB (100MB 도달 시 자가 종료) | 생존 시간: 31초 / 최종 RSS: 274,268KB (275MB 도달 시 자가 종료) |
-| CPU | `CPU_MAX_OCCUPY` |  |  |
-| Deadlock | `MULTI_THREAD_ENABLE` |  |  |
+| OOM | `MEMORY_LIMIT`<br>`100` ➔ `256` (MB) | 생존 시간: 11초 / 최종 RSS: 95,164KB (100MB 도달 시 자가 종료) | 생존 시간: 31초 / 최종 RSS: 274,268KB (275MB 도달 시 자가 종료) |
+| CPU | `CPU_MAX_OCCUPY`<br>`100` ➔ `50` (%) | 생존 시간: _TODO_ / 앱 보고 최대 Load: _TODO_% (50% 초과 시 `CPU Threshold Violated!`로 종료) | 생존 시간: _TODO_ / 앱 보고 최대 Load: _TODO_% (임계치 위반 없이 생존) |
+| Deadlock | `MULTI_THREAD_ENABLE`<br>`true` ➔ `false` | PID 유지 / PROC_CPU 0.0% 고정 / `BLOCKED` 이후 로그 정지 (무응답 _TODO_초) | PID 유지 / 자원 사용량 변동 / 로그 정상 진행 (무응답 미발생) |
+
+> CPU 실험은 `CPU_MAX_OCCUPY`를 **낮추는** 방향이 조치이다. OOM 실험(값을 높여 생존 시간 연장)과 방향이 반대인 점에 주의한다.
 
 
 <br>

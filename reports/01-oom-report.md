@@ -19,7 +19,7 @@
 
 ### 2. Evidence & Logs
 
-#### (1) monitor.sh 관제 데이터 ([before-monitor.log](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-monitor.log))
+#### (1) monitor.sh 관제 데이터 ([before-monitor.log](../evidence/oom/before-monitor.log))
 
 ```text
 [2026-09-10 16:19:27] PID:7237 PPID:7223 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.3% PROC_MEM:0.1% RSS:18352KB SYS_CPU:1.6% SYS_MEM:3.6% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
@@ -33,7 +33,7 @@
 [2026-09-10 16:19:38] PID:7237 PPID:7223 STATE:SN ELAPSED:00:10 THREADS:1 PROC_CPU:1.2% PROC_MEM:0.5% RSS:95164KB SYS_CPU:0.0% SYS_MEM:4.1% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
 ```
 
-#### (2) 프로그램 실행 로그 ([before-app.log](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-app.log))
+#### (2) 프로그램 실행 로그 ([before-app.log](../evidence/oom/before-app.log))
 
 ```text
 >>> Starting Agent Boot Sequence...
@@ -73,7 +73,7 @@ Agent READY
 2026-09-10 16:19:38,288 [CRITICAL] [MemoryGuard] Self-terminating process 7237 to prevent system instability.
 ```
 
-#### (3) 시계열 데이터 요약 ([before-timeseries.csv](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-timeseries.csv))
+#### (3) 시계열 데이터 요약 ([before-timeseries.csv](../evidence/oom/before-timeseries.csv))
 
 | 시각 (Timestamp) | 프로세스 CPU (%) | 시스템 CPU (%) | RSS (KB) | RSS 환산 (MB) | 프로세스 상태 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -87,12 +87,27 @@ Agent READY
 | 16:19:36 | 1.4 | 0.0 | 95,164 | ~92.9 MB | `SN` |
 | 16:19:38 | 1.2 | 0.0 | 95,164 | ~92.9 MB | `SN` |
 
-#### (4) 관련 증적 파일 목록
-- [before-app.log](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-app.log)
-- [before-monitor.log](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-monitor.log)
-- [before-timeseries.csv](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-timeseries.csv)
-- [before-report-snippet.md](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-report-snippet.md)
-- [before-env-snapshot.txt](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/before-env-snapshot.txt)
+#### (4) Linux 명령어 출력
+
+> 본 실험은 `run-experiment.sh`에 명령어 증적 수집 기능이 추가되기 **이전**에 수행되어 `ps`/`top` 원본 출력이 남아 있지 않다.
+> 동일 조건으로 재실행하면 `evidence/oom/<phase>-cmd-snapshot.txt`에 3초 간격의 아래 명령어 출력이 자동 수집된다.
+
+```bash
+ps -ef | grep agent-leak-app
+ps -p <PID> -o pid,ppid,stat,etime,%cpu,%mem,rss,cmd
+top -bn1 -p <PID>
+ps -L -p <PID> -o pid,tid,stat,%cpu,%mem,etime,comm
+```
+
+#### (5) 관련 증적 파일 목록
+
+| 구분 | Before (`MEMORY_LIMIT=100`) | After (`MEMORY_LIMIT=256`) |
+| :--- | :--- | :--- |
+| 앱 로그 | [before-app.log](../evidence/oom/before-app.log) | [after-app.log](../evidence/oom/after-app.log) |
+| 관제 로그 | [before-monitor.log](../evidence/oom/before-monitor.log) | [after-monitor.log](../evidence/oom/after-monitor.log) |
+| 시계열 CSV | [before-timeseries.csv](../evidence/oom/before-timeseries.csv) | [after-timeseries.csv](../evidence/oom/after-timeseries.csv) |
+| 실험 스니펫 | [before-report-snippet.md](../evidence/oom/before-report-snippet.md) | [after-report-snippet.md](../evidence/oom/after-report-snippet.md) |
+| 환경변수 스냅샷 | [before-env-snapshot.txt](../evidence/oom/before-env-snapshot.txt) | [after-env-snapshot.txt](../evidence/oom/after-env-snapshot.txt) |
 
 ---
 
@@ -134,7 +149,7 @@ Agent READY
 - **최종 RSS**: **274,268 KB** (~267.8 MB)
 - **종료 시점 힙 사용량**: **275MB** (`275MB >= 256MB`)
 - **수집 로그 행수**: 26개 행
-- **관찰 로그 ([after-app.log](file:///Users/08022220523/Documents/Codyssey-B1-2/evidence/oom/after-app.log))**:
+- **관찰 로그 ([after-app.log](../evidence/oom/after-app.log))**:
   ```text
   2026-09-10 16:44:20,769 [INFO] [MemoryWorker] Current Heap: 250MB
   2026-09-10 16:44:23,823 [INFO] [MemoryWorker] Current Heap: 275MB

@@ -14,11 +14,11 @@ fi
 }
 
 command -v ufw >/dev/null 2>&1 || {
-  echo "[ERROR] ufw is not installed. Run provision.sh first." >&2
+  echo "[ERROR] ufw is not installed. Run 02-provision-runtime.sh first." >&2
   exit 1
 }
 
 ufw allow "${AGENT_PORT}/tcp"
-ufw enable
+ufw --force enable
 ufw status numbered
 ufw status verbose

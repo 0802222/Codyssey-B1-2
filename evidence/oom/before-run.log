@@ -1,0 +1,38 @@
+===== Experiment: oom-before =====
+Started at   : 2026-10-13 20:57:08 KST
+Evidence dir : /workspace/evidence/oom
+
+[INFO] Env snapshot saved: /workspace/evidence/oom/before-env-snapshot.txt
+[INFO] Starting app: /workspace/bin/agent-leak-app-x86
+
+[INFO] App started (PID: 23023)
+[INFO] Monitor started (PID: 23024, target app PID: 23023)
+./scripts/run-experiment.sh: line 144: 23023 Killed                  "$APP_PATH" > "$APP_LOG" 2>&1
+[INFO] Exit mode: 앱 자체 종료
+[INFO] Monitor log copied: /workspace/evidence/oom/before-monitor.log
+[INFO] Timeseries CSV: /workspace/evidence/oom/before-timeseries.csv (6 rows)
+[INFO] Report snippet: /workspace/evidence/oom/before-report-snippet.md
+
+===== Experiment complete: oom-before =====
+Files saved to /workspace/evidence/oom:
+total 72
+drwxr-xr-x 1 agentuser agentuser   480 Oct 13 20:57 .
+drwxr-xr-x 1 agentuser agentuser   192 Oct 13 20:43 ..
+-rw-r--r-- 1 agentuser agentuser  2246 Oct 13 20:34 after-app.log
+-rw-r--r-- 1 agentuser agentuser   170 Oct 13 20:34 after-env-snapshot.txt
+-rw-r--r-- 1 agentuser agentuser 10948 Oct 13 20:34 after-monitor-stdout.log
+-rw-r--r-- 1 agentuser agentuser  4879 Oct 13 20:34 after-monitor.log
+-rw-r--r-- 1 agentuser agentuser  4376 Oct 13 20:34 after-report-snippet.md
+-rw-r--r-- 1 agentuser agentuser   992 Oct 13 20:34 after-timeseries.csv
+-rw-r--r-- 1 agentuser agentuser  1785 Oct 13 20:57 before-app.log
+-rw-r--r-- 1 agentuser agentuser   171 Oct 13 20:57 before-env-snapshot.txt
+-rw-r--r-- 1 agentuser agentuser  3343 Oct 13 20:57 before-monitor-stdout.log
+-rw-r--r-- 1 agentuser agentuser  1538 Oct 13 20:57 before-monitor.log
+-rw-r--r-- 1 agentuser agentuser  4433 Oct 13 20:57 before-report-snippet.md
+-rw-r--r-- 1 agentuser agentuser   776 Oct 13 20:57 before-run.log
+-rw-r--r-- 1 agentuser agentuser   355 Oct 13 20:57 before-timeseries.csv
+
+Next steps:
+  1) /workspace/evidence/oom/before-report-snippet.md 을 열어 리포트에 인용
+  2) /workspace/evidence/oom/before-timeseries.csv 를 그래프로 시각화
+  3) reports/*.md 의 원인 분석/조치 섹션 작성

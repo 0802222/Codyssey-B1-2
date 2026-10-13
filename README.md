@@ -1,6 +1,6 @@
 # B1-2 시스템 장애 분석 및 트러블슈팅
 
-이 미션에서는 Linux 환경에서 실행되는 `agent-leak-app`에서 `메모리 부족`, `CPU 과점유`, `교착상태`가 발생했을 때 원인을 찾는 방법을 학습한다. 프로그램이 종료되거나 멈췄다는 결과만 보는 것이 아니라, `monitor.sh`, 프로그램 로그, Linux 명령어의 출력 결과를 증거로 사용한다.
+이 미션에서는 Linux 환경에서 실행되는 `agent-leak-app`에서 `메모리 부족`, `CPU 과점유`, `교착상태`가 발생했을 때 원인을 찾는 방법을 학습한다. 프로그램이 종료되거나 멈췄다는 결과만 보는 것이 아니라, `05-monitor-app-resources.sh`, 프로그램 로그, Linux 명령어의 출력 결과를 증거로 사용한다.
 
 각 장애를 재현한 뒤 관련 환경변수를 변경하여 다시 실행한다. 변경 전과 변경 후의 결과를 비교하고, 분석 내용을 `GitHub Issue` 형식의 기술 리포트 3건으로 작성한다.
 
@@ -10,10 +10,10 @@
 ## 최종 결과물
 
 - [x] OOM Crash 분석 리포트 ([01-oom-report.md](./reports/01-oom-report.md))
-- [ ] CPU Latency 분석 리포트
-- [ ] Deadlock 분석 리포트
-- [ ] 각 장애의 Before & After 증거
-- [ ] 실행 방법과 실험 결과가 정리된 README
+- [x] CPU Latency 분석 리포트 ([02-cpu-report.md](./reports/02-cpu-report.md))
+- [x] Deadlock 분석 리포트 ([03-deadlock-report.md](./reports/03-deadlock-report.md))
+- [x] 각 장애의 Before & After 증거 ([evidence/](./evidence/))
+- [x] 실행 방법과 실험 결과가 정리된 README ([실행 방법](#실행-방법), [결과 비교](#결과-비교))
 
 <br>
 <br>
@@ -30,7 +30,7 @@
 ### 장애 분석 흐름
 
 1. 실행 환경과 환경변수를 확인한다.
-2. `agent-leak-app`과 `monitor.sh`를 실행한다.
+2. `agent-leak-app`과 `05-monitor-app-resources.sh`를 실행한다.
 3. 프로세스의 CPU 사용률과 메모리 사용량을 관찰한다.
 4. 장애가 발생한 시점의 로그와 명령어 출력을 수집한다.
 5. 수집한 증거를 바탕으로 장애 원인을 추론한다.
@@ -76,7 +76,7 @@ OOM은 `Out Of Memory`의 약자로, 프로그램이나 시스템에서 사용�
 
 메모리 누수는 프로그램이 더 이상 필요하지 않은 데이터를 계속 참조하여 메모리에서 정리되지 않는 현상이다. 물을 계속 받으면서 비우지 않는 물통처럼, 시간이 지날수록 사용 중인 메모리가 증가한다.
 
-이번 미션에서는 `monitor.sh`, `ps`, `top`을 사용하여 `agent-leak-app`의 메모리 사용량이 시간에 따라 계속 증가하는지 확인한다. 메모리 사용량이 반복해서 증가하고 감소하지 않는다면 메모리 누수를 의심할 수 있다.
+이번 미션에서는 `05-monitor-app-resources.sh`, `ps`, `top`을 사용하여 `agent-leak-app`의 메모리 사용량이 시간에 따라 계속 증가하는지 확인한다. 메모리 사용량이 반복해서 증가하고 감소하지 않는다면 메모리 누수를 의심할 수 있다.
 
 ### 5. RSS
 
@@ -221,16 +221,20 @@ printf '%s' 'agent_api_key_test' > "$AGENT_KEY_PATH/secret.key"
 미션에서 필수로 요구하는 파일만 중심으로 구성한다. 보너스 과제는 실제로 수행할 때 별도의 리포트를 추가한다.
 
 ```text
-mission-b1-2/
+Codyssey-B1-2/
 ├── README.md
 ├── .gitignore
 ├── bin/
-│   └── agent-leak-app
+│   └── agent-leak-app-x86
 ├── scripts/
-│   ├── provision.sh
-│   ├── configure_firewall.sh
-│   ├── monitor.sh
-│   └── run-expreriment.sh
+│   ├── 00-run-all-experiments.sh    # 전체 실행 진입점 (호스트)
+│   ├── 01-setup-container.sh        # 컨테이너 생성·시작 + 프로비전 + 방화벽 (호스트)
+│   ├── experiment-cases.conf     # 실험 케이스별 환경변수
+│   ├── 02-provision-runtime.sh      # 패키지·사용자·디렉터리·agent.env 준비 (root)
+│   ├── 03-configure-firewall.sh     # UFW 포트 정책 적용 (root)
+│   ├── 04-run-experiment-case.sh    # 케이스 1개 실행 + 원본 로그 저장 (agentuser)
+│   ├── 05-monitor-app-resources.sh  # 앱 프로세스·시스템 자원 주기 기록
+│   └── 06-summarize-evidence.sh     # 원본 로그 → CSV·리포트 스니펫
 ├── reports/
 │   ├── 01-oom-report.md
 │   ├── 02-cpu-report.md
@@ -242,18 +246,77 @@ mission-b1-2/
 ```
 
 ### 각 스크립트의 역할
-| 스크립트	| 실행 주체	| 실행 시점	| 역할 |
+
+`00-run-all-experiments.sh`는 순서만 조율하고, 각 단계는 한 가지 책임을 가진 스크립트가 담당한다.
+
+```text
+00-run-all-experiments.sh (호스트)
+├── 01-setup-container.sh                (호스트)
+│   ├── 02-provision-runtime.sh                  (컨테이너, root)
+│   └── 03-configure-firewall.sh         (컨테이너, root)
+└── experiment-cases.conf 의 케이스마다
+    └── 04-run-experiment-case.sh             (컨테이너, agentuser)
+        ├── 05-monitor-app-resources.sh                (백그라운드)
+        └── 06-summarize-evidence.sh
+```
+
+| 스크립트 | 실행 주체 | 실행 시점 | 역할 |
 | --- | --- | --- | --- |
-| provision.sh | root	| 컨테이너 생성 직후, 최초 1회	패키지 설치, 사용자·경로·환경 준비 |
-| configure_firewall.sh	| root	| provision 이후, 정책 적용 시	UFW 규칙·포트 정책 구성 |
-| monitor.sh	| 보통 root	| 앱 실행 중 프로세스·CPU·메모리·RSS·스레드·포트 상태 기록 | 
-| run-experiment.sh	| agentuser	| 환경 준비 후, 케이스마다	monitor + 앱 + 증적 + CSV + 리포트 스니펫 자동화 |
+| 00-run-all-experiments.sh | 호스트 사용자 | 실험 전체를 돌릴 때 | 셋업 후 `experiment-cases.conf`의 케이스를 순서대로 실행 |
+| 01-setup-container.sh | 호스트 사용자 | 실험 전 (00-run-all-experiments.sh가 호출) | 컨테이너 생성·시작, provision·방화벽 실행 |
+| experiment-cases.conf | - | - | 케이스 이름과 케이스별 환경변수 정의 (데이터) |
+| 02-provision-runtime.sh | root | 컨테이너 생성 직후 | 패키지 설치, 사용자·경로·`agent.env` 준비 |
+| 03-configure-firewall.sh | root | provision 이후 | UFW 규칙·포트 정책 구성 |
+| 04-run-experiment-case.sh | agentuser | 케이스마다 | 앱·monitor 실행, `RUN_TIMEOUT` 처리, 원본 로그(app·monitor·run·env) 저장 |
+| 05-monitor-app-resources.sh | agentuser | 앱 실행 중 | 프로세스·CPU·메모리·RSS·스레드·포트 상태 기록 |
+| 06-summarize-evidence.sh | agentuser | run-experiment 마지막, 또는 단독 | 원본 로그로 시계열 CSV·리포트 스니펫 생성 (실험 없이 재생성 가능) |
+
+### 실행 방법
+
+파일 이름 앞 번호는 실행 순서이다. `00`이 전체를 순서대로 실행하고, 각 단계는 아래처럼 따로 실행할 수도 있다.
+
+```bash
+# 전체: 셋업 + 6개 실험 (약 8분, 레포 루트에서)
+bash scripts/00-run-all-experiments.sh
+
+# 특정 케이스만: 셋업 + 지정 케이스
+bash scripts/00-run-all-experiments.sh cpu-before cpu-after
+
+# 셋업 없이 특정 케이스만 (컨테이너가 이미 준비된 경우)
+SKIP_SETUP=1 bash scripts/00-run-all-experiments.sh deadlock-before
+```
+
+| 단계 | 개별 실행 명령 | 실행 위치 |
+| --- | --- | --- |
+| 01 셋업 전체 | `bash scripts/01-setup-container.sh` | 호스트 |
+| 02 프로비전 | `docker exec codyssey-b1-2-lab ./scripts/02-provision-runtime.sh` | 컨테이너 (root) |
+| 03 방화벽 | `docker exec codyssey-b1-2-lab ./scripts/03-configure-firewall.sh` | 컨테이너 (root) |
+| 04 케이스 1개 (값 직접 지정) | `docker exec -u agentuser -e MEMORY_LIMIT=100 codyssey-b1-2-lab ./scripts/04-run-experiment-case.sh oom-before` | 컨테이너 (agentuser) |
+| 05 모니터만 | `docker exec -u agentuser codyssey-b1-2-lab ./scripts/05-monitor-app-resources.sh` | 컨테이너 (agentuser) |
+| 06 CSV·스니펫 재생성 | `docker exec -u agentuser codyssey-b1-2-lab ./scripts/06-summarize-evidence.sh oom-before` | 컨테이너 (agentuser) |
+
+- `04`를 직접 실행할 때 `-e`로 넘기지 않은 변수는 `agent.env` 기본값(100 / 50 / true)이 쓰인다. `experiment-cases.conf`의 값으로 돌리려면 `00`에 케이스 이름을 넘기는 방식을 쓴다.
+
+케이스별 설정값은 [`scripts/experiment-cases.conf`](./scripts/experiment-cases.conf)에서 관리한다.
+
+| 케이스 | MEMORY_LIMIT | CPU_MAX_OCCUPY | MULTI_THREAD_ENABLE | RUN_TIMEOUT |
+| --- | --- | --- | --- | --- |
+| oom-before | **100** | 50 | true | - |
+| oom-after | **256** | 50 | true | - |
+| cpu-before | 512 | **90** | false | 120s |
+| cpu-after | 512 | **50** | false | 120s |
+| deadlock-before | 512 | 50 | **true** | 120s |
+| deadlock-after | 512 | 50 | **false** | 120s |
+
+- 각 실험은 굵게 표시한 변수만 바꾸고, 나머지는 다른 장애가 먼저 일어나지 않도록 고정한다.
+- 세 값이 모두 권장 범위면 앱이 `Healthy System Monitoring` 시나리오로 종료 없이 계속 동작한다. 그래서 CPU·Deadlock 실험에는 `RUN_TIMEOUT`(초)을 걸어 시간이 지나면 앱을 종료하고 증적을 수집한다. 종료 방식은 각 `*-report-snippet.md`와 `*-run.log`에 기록된다.
+- 기존 컨테이너가 `--platform linux/amd64` 없이 만들어졌다면 `docker rm -f codyssey-b1-2-lab` 후 다시 실행한다.
 
 <br>
 
-### monitor.sh 관제 로그 형식 및 지표 설명
+### 05-monitor-app-resources.sh 관제 로그 형식 및 지표 설명
 
-`monitor.sh`는 프로세스와 시스템의 핵심 자원을 1초 간격으로 수집하여 `monitor.log`에 한 줄씩 기록한다.
+`05-monitor-app-resources.sh`는 프로세스와 시스템의 핵심 자원을 1초 간격으로 수집하여 `monitor.log`에 한 줄씩 기록한다.
 
 ```text
 [2026-09-10 16:19:27] PID:7237 PPID:7223 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.3% PROC_MEM:0.1% RSS:18352KB SYS_CPU:1.6% SYS_MEM:3.6% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
@@ -286,7 +349,7 @@ mission-b1-2/
 
 ### 1. OOM 분석
 
-`monitor.sh`를 사용하여 시간에 따른 메모리 사용량을 확인한다. 한 번의 측정값만 보는 것이 아니라, 시작부터 종료까지 여러 시점의 값을 기록하여 메모리가 계속 증가하는지 확인한다.
+`05-monitor-app-resources.sh`를 사용하여 시간에 따른 메모리 사용량을 확인한다. 한 번의 측정값만 보는 것이 아니라, 시작부터 종료까지 여러 시점의 값을 기록하여 메모리가 계속 증가하는지 확인한다.
 
 종료 직전과 직후의 프로그램 로그에서 `Memory limit exceeded`, `SELF-TERMINATED`와 같은 메시지를 찾는다. 이를 근거로 메모리 임계치 초과와 `MemoryGuard`의 종료 동작을 연결한다.
 
@@ -302,7 +365,7 @@ mission-b1-2/
 
 ### 2. CPU 과점유 분석
 
-`monitor.sh`, `top`, `ps`를 사용하여 CPU 사용률이 급격히 상승하는 구간을 찾는다. 시스템 전체가 아닌 `agent-leak-app` 프로세스의 CPU 사용률이 높아졌는지 확인한다.
+`05-monitor-app-resources.sh`, `top`, `ps`를 사용하여 CPU 사용률이 급격히 상승하는 구간을 찾는다. 시스템 전체가 아닌 `agent-leak-app` 프로세스의 CPU 사용률이 높아졌는지 확인한다.
 
 종료 전후의 프로그램 로그에서 `WATCHDOG`, `SIGTERM`과 같은 메시지를 찾는다. 이를 근거로 CPU 임계치 초과와 Watchdog의 보호 동작을 연결한다.
 
@@ -390,7 +453,7 @@ env | grep -E \
 
 ### 2. Evidence & Logs
 
-- monitor.sh 관제 데이터:
+- 05-monitor-app-resources.sh 관제 데이터:
 - 프로그램 실행 로그:
 - Linux 명령어 출력:
 - 스크린샷:
@@ -416,7 +479,7 @@ env | grep -E \
 
 ```text
 관측 사실:
-monitor.sh에서 프로세스의 메모리 사용량이 시간에 따라 증가했다.
+05-monitor-app-resources.sh에서 프로세스의 메모리 사용량이 시간에 따라 증가했다.
 MEMORY_LIMIT에 도달한 직후 SELF-TERMINATED 로그와 함께 프로세스가 종료되었다.
 
 원인 추론:
@@ -431,12 +494,15 @@ MemoryGuard가 설정된 임계치를 감지하여 프로세스를 종료한 것
 
 ### Before와 After 기록
 
-| 장애 | 변경 환경변수 | Before (`100MB`) | After (`256MB`) |
-|---|---|---|---|
-| OOM | `MEMORY_LIMIT` | 생존 시간: 11초 / 최종 RSS: 95,164KB (100MB 도달 시 자가 종료) | 생존 시간: 31초 / 최종 RSS: 274,268KB (275MB 도달 시 자가 종료) |
-| CPU | `CPU_MAX_OCCUPY` |  |  |
-| Deadlock | `MULTI_THREAD_ENABLE` |  |  |
+2026-10-13 `bash scripts/00-run-all-experiments.sh` 실행 결과이다. 자세한 분석은 각 리포트를 참고한다.
 
+| 장애 | 변경 환경변수 | Before | After | 리포트 |
+|---|---|---|---|---|
+| OOM | `MEMORY_LIMIT` 100 → 256 | 약 11초 생존, RSS 102,432KB에서 `Memory limit exceeded (100MB >= 100MB)`로 자가 종료 | 약 32초 생존, RSS 281,660KB에서 `Memory limit exceeded (275MB >= 256MB)`로 자가 종료. 증가 속도(25MB/3초)는 동일 | [01](./reports/01-oom-report.md) |
+| CPU | `CPU_MAX_OCCUPY` 90 → 50 | 앱 보고 부하 5% → 51.29% 상승 후 `CPU Threshold Violated!`로 약 30초 만에 종료 | 50%에서 cooldown 반복, 120초 관찰 동안 종료 없음 (타임아웃으로 중단) | [02](./reports/02-cpu-report.md) |
+| Deadlock | `MULTI_THREAD_ENABLE` true → false | 9초 후 두 스레드 `WAITING ... BLOCKED`, 이후 로그 정지·CPU 0.1%·PID 유지 (120초 무응답) | Lock 경합 없이 로그 계속 진행, 120초 관찰 동안 정상 동작 (타임아웃으로 중단) | [03](./reports/03-deadlock-report.md) |
+
+- CPU 실험에서 OS 지표(`ps`/`top`)의 실제 CPU 사용률은 0~12%로 낮았다. 앱 로그의 `Current Load`는 앱 내부 계산값으로 보이며, CPU 장애 판단은 앱 로그를 근거로 했다.
 
 <br>
 <br>

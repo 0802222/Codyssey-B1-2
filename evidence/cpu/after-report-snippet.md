@@ -4,9 +4,10 @@ _이 파일은 리포트 작성 시 관측 사실 인용됩니다._
 
 ## 실험 조건
 
-- 실험 시각: 2026-09-25 14:21:32 KST
+- 실험 시각: 2026-10-13 20:58:33 KST
 - 케이스: `cpu-after`
-- 생존 시간: 772 seconds (2026-09-25 14:08:37 ~ 2026-09-25 14:21:29)
+- 생존 시간: 117 seconds (2026-10-13 20:58:34 ~ 2026-10-13 21:00:31)
+- 종료 방식: RUN_TIMEOUT(120s) 강제 종료
 
 ### 환경변수
 
@@ -18,67 +19,78 @@ MEMORY_LIMIT=512
 MULTI_THREAD_ENABLE=false
 ```
 
+## 실행 스크립트 출력
+
+```sh
+[INFO] App started (PID: 24975)
+[INFO] Run timeout: 120s
+[WARN] App still running after 120s. Killing (PID: 24975)
+[INFO] Exit mode: RUN_TIMEOUT(120s) 강제 종료
+```
+
 ## 앱 로그 (마지막 20줄)
 
 ```
-2026-09-25 14:21:00,061 [INFO] [MemoryWorker] Current Heap: 150MB
-2026-09-25 14:21:02,507 [INFO] [CpuWorker] Current Load: 34.91%
-2026-09-25 14:21:03,103 [INFO] [MemoryWorker] Current Heap: 175MB
-2026-09-25 14:21:05,628 [INFO] [CpuWorker] Current Load: 43.35%
-2026-09-25 14:21:06,145 [INFO] [MemoryWorker] Current Heap: 200MB
-2026-09-25 14:21:08,747 [INFO] [CpuWorker] Current Load: 44.51%
-2026-09-25 14:21:09,196 [INFO] [MemoryWorker] Current Heap: 225MB
-2026-09-25 14:21:11,866 [INFO] [CpuWorker] Current Load: 46.96%
-2026-09-25 14:21:12,249 [INFO] [MemoryWorker] Current Heap: 250MB
-2026-09-25 14:21:13,980 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
-2026-09-25 14:21:14,986 [INFO] [CpuWorker] Current Load: 50.00%
-2026-09-25 14:21:15,299 [INFO] [MemoryWorker] Current Heap: 275MB
-2026-09-25 14:21:18,107 [INFO] [CpuWorker] Current Load: 46.45%
-2026-09-25 14:21:18,353 [INFO] [MemoryWorker] Current Heap: 300MB
-2026-09-25 14:21:21,227 [INFO] [CpuWorker] Current Load: 44.95%
-2026-09-25 14:21:21,402 [INFO] [MemoryWorker] Current Heap: 325MB
-2026-09-25 14:21:24,348 [INFO] [CpuWorker] Current Load: 38.55%
-2026-09-25 14:21:24,455 [INFO] [MemoryWorker] Current Heap: 350MB
-2026-09-25 14:21:27,504 [INFO] [CpuWorker] Current Load: 29.72%
-2026-09-25 14:21:27,504 [INFO] [MemoryWorker] Current Heap: 375MB
+2026-10-13 21:00:03,584 [INFO] [CpuWorker] Current Load: 46.83%
+2026-10-13 21:00:06,058 [INFO] [MemoryWorker] Current Heap: 225MB
+2026-10-13 21:00:06,711 [INFO] [CpuWorker] Current Load: 47.80%
+2026-10-13 21:00:08,823 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
+2026-10-13 21:00:09,086 [INFO] [MemoryWorker] Current Heap: 250MB
+2026-10-13 21:00:09,826 [INFO] [CpuWorker] Current Load: 50.00%
+2026-10-13 21:00:12,111 [INFO] [MemoryWorker] Current Heap: 275MB
+2026-10-13 21:00:12,952 [INFO] [CpuWorker] Current Load: 46.86%
+2026-10-13 21:00:15,137 [INFO] [MemoryWorker] Current Heap: 300MB
+2026-10-13 21:00:16,078 [INFO] [CpuWorker] Current Load: 39.09%
+2026-10-13 21:00:18,167 [INFO] [MemoryWorker] Current Heap: 325MB
+2026-10-13 21:00:19,207 [INFO] [CpuWorker] Current Load: 34.18%
+2026-10-13 21:00:21,188 [INFO] [MemoryWorker] Current Heap: 350MB
+2026-10-13 21:00:22,324 [INFO] [CpuWorker] Current Load: 33.57%
+2026-10-13 21:00:24,199 [INFO] [MemoryWorker] Current Heap: 375MB
+2026-10-13 21:00:25,450 [INFO] [CpuWorker] Current Load: 29.19%
+2026-10-13 21:00:27,214 [INFO] [MemoryWorker] Current Heap: 400MB
+2026-10-13 21:00:28,579 [INFO] [CpuWorker] Current Load: 23.02%
+2026-10-13 21:00:30,251 [INFO] [MemoryWorker] Current Heap: 425MB
+2026-10-13 21:00:31,695 [INFO] [CpuWorker] Current Load: 20.70%
 ```
 
 ## 모니터 로그 발췌
 
 **시작 부근:**
 ```
-[2026-09-25 14:08:37] PID:8650 PPID:8636 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.3% PROC_MEM:0.1% RSS:18276KB SYS_CPU:1.6% SYS_MEM:3.9% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-25 14:08:38] PID:8650 PPID:8636 STATE:SN ELAPSED:00:02 THREADS:1 PROC_CPU:2.2% PROC_MEM:0.1% RSS:18340KB SYS_CPU:0.0% SYS_MEM:3.9% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-25 14:08:39] PID:8650 PPID:8636 STATE:SNl ELAPSED:00:03 THREADS:3 PROC_CPU:2.9% PROC_MEM:0.2% RSS:44176KB SYS_CPU:0.0% SYS_MEM:4.1% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+[2026-10-13 20:58:34] PID:24989 PPID:24975 STATE:SN ELAPSED:00:01 THREADS:1 PROC_CPU:10.5% PROC_MEM:0.3% RSS:25620KB SYS_CPU:2.1% SYS_MEM:12.9% DISK_USED:19% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+[2026-10-13 20:58:36] PID:24989 PPID:24975 STATE:SN ELAPSED:00:02 THREADS:3 PROC_CPU:5.3% PROC_MEM:0.3% RSS:25732KB SYS_CPU:3.1% SYS_MEM:13.4% DISK_USED:19% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+[2026-10-13 20:58:37] PID:24989 PPID:24975 STATE:SNl ELAPSED:00:04 THREADS:3 PROC_CPU:3.8% PROC_MEM:0.6% RSS:51488KB SYS_CPU:3.2% SYS_MEM:13.3% DISK_USED:19% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
 ```
 
 **종료 부근:**
 ```
-[2026-09-25 14:21:27] PID:8650 PPID:8636 STATE:SNl ELAPSED:12:50 THREADS:3 PROC_CPU:1.7% PROC_MEM:2.2% RSS:370544KB SYS_CPU:8.1% SYS_MEM:5.9% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-25 14:21:28] PID:8650 PPID:8636 STATE:SNl ELAPSED:12:52 THREADS:3 PROC_CPU:1.7% PROC_MEM:2.4% RSS:396160KB SYS_CPU:0.0% SYS_MEM:5.9% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
-[2026-09-25 14:21:29] PID:8650 PPID:8636 STATE:SNl ELAPSED:12:53 THREADS:3 PROC_CPU:1.7% PROC_MEM:2.4% RSS:396160KB SYS_CPU:16.7% SYS_MEM:3.8% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
+[2026-10-13 21:00:28] PID:24989 PPID:24975 STATE:SNl ELAPSED:01:55 THREADS:3 PROC_CPU:1.5% PROC_MEM:5.2% RSS:428772KB SYS_CPU:3.2% SYS_MEM:18.5% DISK_USED:19% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+[2026-10-13 21:00:30] PID:24989 PPID:24975 STATE:SNl ELAPSED:01:57 THREADS:3 PROC_CPU:1.5% PROC_MEM:5.5% RSS:454388KB SYS_CPU:3.2% SYS_MEM:18.6% DISK_USED:19% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+[2026-10-13 21:00:31] PID:24989 PPID:24975 STATE:SNl ELAPSED:01:58 THREADS:3 PROC_CPU:1.5% PROC_MEM:5.5% RSS:454388KB SYS_CPU:2.1% SYS_MEM:18.5% DISK_USED:19% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
 ```
 
 ## 시계열 데이터
 
-CSV 원본: [`timeseries.csv`](./timeseries.csv)
+CSV 원본: [`after-timeseries.csv`](./after-timeseries.csv)
 
 
 ## 파일 목록
 
 ```
-drwxr-xr-x 1 agentuser agentuser    448 Sep 25 12:52 .
-drwxr-xr-x 1 agentuser agentuser    128 Sep 25 12:26 ..
--rw-r--r-- 1 agentuser agentuser  40194 Sep 25 14:21 after-app.log
--rw-r--r-- 1 agentuser agentuser    171 Sep 25 14:08 after-env-snapshot.txt
--rw-r--r-- 1 agentuser agentuser 305590 Sep 25 14:21 after-monitor-stdout.log
--rw-r--r-- 1 agentuser agentuser 135719 Sep 25 14:21 after-monitor.log
--rw-r--r-- 1 agentuser agentuser      0 Sep 25 14:21 after-report-snippet.md
--rw-r--r-- 1 agentuser agentuser  30277 Sep 25 14:21 after-timeseries.csv
--rw-r--r-- 1 agentuser agentuser   2167 Sep 25 14:07 before-app.log
--rw-r--r-- 1 agentuser agentuser    172 Sep 25 14:06 before-env-snapshot.txt
--rw-r--r-- 1 agentuser agentuser  11618 Sep 25 14:07 before-monitor-stdout.log
--rw-r--r-- 1 agentuser agentuser   5668 Sep 25 14:07 before-monitor.log
--rw-r--r-- 1 agentuser agentuser   4067 Sep 25 14:07 before-report-snippet.md
--rw-r--r-- 1 agentuser agentuser   1287 Sep 25 14:07 before-timeseries.csv
+drwxr-xr-x 1 agentuser agentuser   512 Oct 13 20:58 .
+drwxr-xr-x 1 agentuser agentuser   192 Oct 13 21:14 ..
+-rw-r--r-- 1 agentuser agentuser  8233 Oct 13 21:00 after-app.log
+-rw-r--r-- 1 agentuser agentuser   171 Oct 13 20:58 after-env-snapshot.txt
+-rw-r--r-- 1 agentuser agentuser 37843 Oct 13 21:00 after-monitor-stdout.log
+-rw-r--r-- 1 agentuser agentuser 18046 Oct 13 21:00 after-monitor.log
+-rw-r--r-- 1 agentuser agentuser     0 Oct 13 21:14 after-report-snippet.md
+-rw-r--r-- 1 agentuser agentuser  2132 Oct 13 21:00 after-run.log
+-rw-r--r-- 1 agentuser agentuser  3551 Oct 13 21:14 after-timeseries.csv
+-rw-r--r-- 1 agentuser agentuser  2103 Oct 13 20:58 before-app.log
+-rw-r--r-- 1 agentuser agentuser   172 Oct 13 20:57 before-env-snapshot.txt
+-rw-r--r-- 1 agentuser agentuser  8962 Oct 13 20:58 before-monitor-stdout.log
+-rw-r--r-- 1 agentuser agentuser  4609 Oct 13 20:58 before-monitor.log
+-rw-r--r-- 1 agentuser agentuser  4600 Oct 13 21:14 before-report-snippet.md
+-rw-r--r-- 1 agentuser agentuser  2002 Oct 13 20:58 before-run.log
+-rw-r--r-- 1 agentuser agentuser   930 Oct 13 21:14 before-timeseries.csv
 ```

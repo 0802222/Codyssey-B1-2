@@ -1,6 +1,6 @@
 # Experiment env snapshot
 # Case: cpu-before
-# Timestamp: 2026-09-25 14:06:47 KST
+# Timestamp: 2026-10-13 20:57:57 KST
 
 APP_NAME=agent-leak-app-x86
 CPU_MAX_OCCUPY=90

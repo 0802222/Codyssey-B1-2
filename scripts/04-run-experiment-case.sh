@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# run-experiment.sh
-# 사용법: bash scripts/run-experiment.sh <case-name>
-# 예:    bash scripts/run-experiment.sh oom-before
+# 04-run-experiment-case.sh
+# 사용법: bash scripts/04-run-experiment-case.sh <case-name>
+# 예:    bash scripts/04-run-experiment-case.sh oom-before
 #
 # 동작:
 #   1) 실험 시점 환경변수 스냅샷 저장
-#   2) monitor.sh 백그라운드 실행 (앱 종료 시 자동 정지)
-#   3) 앱 실행 (포그라운드, 종료까지 대기)
-#   4) 로그 수집 + 시계열 CSV 추출 + 리포트 스니펫 생성
+#   2) 앱과 05-monitor-app-resources.sh 실행, RUN_TIMEOUT 지정 시 시간 초과 후 강제 종료
+#   3) 원본 로그(app, monitor, run) 저장
+#   4) 06-summarize-evidence.sh 로 CSV·리포트 스니펫 생성
 
 set -euo pipefail
 
@@ -17,8 +17,8 @@ set -euo pipefail
 # -----------------------------
 CASE="${1:-}"
 if [[ -z "$CASE" ]]; then
-  echo "[ERROR] Usage: bash scripts/run-experiment.sh <case-name>" >&2
-  echo "        example: bash scripts/run-experiment.sh oom-before" >&2
+  echo "[ERROR] Usage: bash scripts/04-run-experiment-case.sh <case-name>" >&2
+  echo "        example: bash scripts/04-run-experiment-case.sh oom-before" >&2
   exit 1
 fi
 
@@ -35,7 +35,7 @@ if [[ -f /workspace/runtime/agent.env ]]; then
   source /workspace/runtime/agent.env
   set +a
 else
-  echo "[ERROR] /workspace/runtime/agent.env not found. Run provision.sh first." >&2
+  echo "[ERROR] /workspace/runtime/agent.env not found. Run 02-provision-runtime.sh first." >&2
   exit 1
 fi
 
@@ -52,7 +52,8 @@ PHASE="${CASE##*-}"    # oom-after → after
 CASE_DIR="$EVIDENCE_ROOT/$TYPE"
 
 APP_PATH="$WORKSPACE/bin/${APP_NAME:-agent-leak-app-x86}"
-MONITOR_SCRIPT="$WORKSPACE/scripts/monitor.sh"
+MONITOR_SCRIPT="$WORKSPACE/scripts/05-monitor-app-resources.sh"
+COLLECT_SCRIPT="$WORKSPACE/scripts/06-summarize-evidence.sh"
 
 mkdir -p "$CASE_DIR"
 
@@ -60,8 +61,11 @@ APP_LOG="$CASE_DIR/$PHASE-app.log"
 MONITOR_STDOUT="$CASE_DIR/$PHASE-monitor-stdout.log"
 MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"
 ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"
-TIMESERIES_CSV="$CASE_DIR/$PHASE-timeseries.csv"
-REPORT_SNIPPET="$CASE_DIR/$PHASE-report-snippet.md"
+RUN_LOG="$CASE_DIR/$PHASE-run.log"
+
+# 이 스크립트의 콘솔 출력도 증적으로 남긴다 (RUN_TIMEOUT 강제 종료 기록 포함)
+: > "$RUN_LOG"
+exec > >(tee -a "$RUN_LOG") 2>&1
 
 echo "===== Experiment: $CASE ====="
 echo "Started at   : $(date '+%Y-%m-%d %H:%M:%S %Z')"
@@ -121,8 +125,33 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 
+# RUN_TIMEOUT(초)이 지정되면 그 시간 후 앱을 강제 종료 (Deadlock 등 무응답 대비)
+TIMEOUT_PID=""
+TIMEOUT_MARK="$(mktemp -u /tmp/run-timeout.XXXXXX)"
+if [[ "${RUN_TIMEOUT:-0}" -gt 0 ]]; then
+  ( sleep "$RUN_TIMEOUT"
+    if kill -0 "$APP_PID" 2>/dev/null; then
+      echo "[WARN] App still running after ${RUN_TIMEOUT}s. Killing (PID: $APP_PID)"
+      touch "$TIMEOUT_MARK"
+      kill "$APP_PID" 2>/dev/null || true
+    fi ) &
+  TIMEOUT_PID=$!
+  echo "[INFO] Run timeout: ${RUN_TIMEOUT}s"
+fi
+
 # 앱 종료까지 대기
 wait "$APP_PID" || true
+
+# 타이머가 앱을 종료했으면 표시 파일이 남는다
+EXIT_MODE="앱 자체 종료"
+if [[ -n "$TIMEOUT_PID" ]]; then
+  kill "$TIMEOUT_PID" 2>/dev/null || true
+  if [[ -e "$TIMEOUT_MARK" ]]; then
+    EXIT_MODE="RUN_TIMEOUT(${RUN_TIMEOUT}s) 강제 종료"
+    rm -f "$TIMEOUT_MARK"
+  fi
+fi
+echo "[INFO] Exit mode: $EXIT_MODE"
 
 # 앱 종료를 monitor가 감지하고 마지막 상태를 기록할 시간
 sleep 2
@@ -143,109 +172,9 @@ fi
 
 
 # -----------------------------
-# 6. 시계열 CSV 추출
+# 6. CSV·리포트 스니펫 생성
 # -----------------------------
-if [[ -f "$MONITOR_LOG" ]]; then
-  {
-    echo "timestamp,proc_cpu,proc_mem,rss_kb,sys_cpu,sys_mem,threads,state"
-    gawk '
-      match($0, /\[([^]]+)\]/, ts) &&
-      match($0, /PROC_CPU:([0-9.]+)%/, pc) &&
-      match($0, /PROC_MEM:([0-9.]+)%/, pm) &&
-      match($0, /RSS:([0-9]+)KB/, rss) &&
-      match($0, /SYS_CPU:([0-9.]+)%/, sc) &&
-      match($0, /SYS_MEM:([0-9.]+)%/, sm) &&
-      match($0, /THREADS:([0-9]+)/, th) &&
-      match($0, /STATE:([^ ]+)/, st) {
-        print ts[1] "," pc[1] "," pm[1] "," rss[1] "," sc[1] "," sm[1] "," th[1] "," st[1]
-      }
-    ' "$MONITOR_LOG"
-  } > "$TIMESERIES_CSV"
-  ROWS=$(($(wc -l < "$TIMESERIES_CSV") - 1))
-  echo "[INFO] Timeseries CSV: $TIMESERIES_CSV ($ROWS rows)"
-fi
+bash "$COLLECT_SCRIPT" "$CASE"
 
-
-# -----------------------------
-# 7. 리포트 스니펫 생성
-# -----------------------------
-APP_LAST_LINES=$(tail -n 20 "$APP_LOG" 2>/dev/null || echo "(no app log)")
-MON_FIRST=$(head -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")
-MON_LAST=$(tail -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")
-
-# 생존 시간 (모니터 로그의 첫/끝 타임스탬프 차이)
-SURVIVAL=""
-if [[ -f "$MONITOR_LOG" ]]; then
-  FIRST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | head -n 1 | tr -d '[]')
-  LAST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | tail -n 1 | tr -d '[]')
-  if [[ -n "$FIRST_TS" && -n "$LAST_TS" ]]; then
-    FIRST_EPOCH=$(date -d "$FIRST_TS" +%s 2>/dev/null || echo 0)
-    LAST_EPOCH=$(date -d "$LAST_TS" +%s 2>/dev/null || echo 0)
-    if (( LAST_EPOCH > FIRST_EPOCH )); then
-      SURVIVAL="$((LAST_EPOCH - FIRST_EPOCH)) seconds ($FIRST_TS ~ $LAST_TS)"
-    fi
-  fi
-fi
-
-cat > "$REPORT_SNIPPET" <<EOF
-# 실험 스니펫: $CASE
-
-_이 파일은 리포트 작성 시 관측 사실 인용됩니다._
-
-## 실험 조건
-
-- 실험 시각: $(date '+%Y-%m-%d %H:%M:%S %Z')
-- 케이스: \`$CASE\`
-- 생존 시간: ${SURVIVAL:-측정 불가}
-
-### 환경변수
-
-\`\`\`
-$(cat "$ENV_SNAPSHOT" | grep -v '^#')
-\`\`\`
-
-## 앱 로그 (마지막 20줄)
-
-\`\`\`
-$APP_LAST_LINES
-\`\`\`
-
-## 모니터 로그 발췌
-
-**시작 부근:**
-\`\`\`
-$MON_FIRST
-\`\`\`
-
-**종료 부근:**
-\`\`\`
-$MON_LAST
-\`\`\`
-
-## 시계열 데이터
-
-CSV 원본: [\`timeseries.csv\`](./timeseries.csv)
-
-
-## 파일 목록
-
-\`\`\`
-$(ls -la "$CASE_DIR" | tail -n +2)
-\`\`\`
-EOF
-
-echo "[INFO] Report snippet: $REPORT_SNIPPET"
-
-
-# -----------------------------
-# 8. 완료 요약
-# -----------------------------
 echo
 echo "===== Experiment complete: $CASE ====="
-echo "Files saved to $CASE_DIR:"
-ls -la "$CASE_DIR"
-echo
-echo "Next steps:"
-echo "  1) $REPORT_SNIPPET 을 열어 리포트에 인용"
-echo "  2) $TIMESERIES_CSV 를 그래프로 시각화"
-echo "  3) reports/*.md 의 원인 분석/조치 섹션 작성"

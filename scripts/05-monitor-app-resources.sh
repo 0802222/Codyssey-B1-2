@@ -114,7 +114,7 @@ monitor_once() {
     fi
   else
     FIREWALL_STATUS="unknown"
-    FIREWALL_WARNING="[INFO] Firewall status file not found (run provision.sh as root first)"
+    FIREWALL_WARNING="[INFO] Firewall status file not found (run 02-provision-runtime.sh as root first)"
   fi
 
 

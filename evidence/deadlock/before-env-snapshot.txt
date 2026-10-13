@@ -1,0 +1,8 @@
+# Experiment env snapshot
+# Case: deadlock-before
+# Timestamp: 2026-10-13 21:00:35 KST
+
+APP_NAME=agent-leak-app-x86
+CPU_MAX_OCCUPY=50
+MEMORY_LIMIT=512
+MULTI_THREAD_ENABLE=true

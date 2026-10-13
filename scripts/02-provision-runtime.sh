@@ -21,7 +21,7 @@ TZ="${TZ:-Asia/Seoul}"
 
 require_root() {
   if [[ "$(id -u)" -ne 0 ]]; then
-    echo "[ERROR] provision.sh must be run as root." >&2
+    echo "[ERROR] 02-provision-runtime.sh must be run as root." >&2
     echo "        Run it right after entering the container as root." >&2
     exit 1
   fi
@@ -123,9 +123,9 @@ export APP_NAME="$APP_NAME"
 export AGENT_UPLOAD_DIR="$AGENT_UPLOAD_DIR"
 export AGENT_KEY_PATH="$AGENT_KEY_PATH"
 export AGENT_LOG_DIR="$AGENT_LOG_DIR"
-export MEMORY_LIMIT="$MEMORY_LIMIT"
-export CPU_MAX_OCCUPY="$CPU_MAX_OCCUPY"
-export MULTI_THREAD_ENABLE="$MULTI_THREAD_ENABLE"
+export MEMORY_LIMIT="\${MEMORY_LIMIT:-$MEMORY_LIMIT}"
+export CPU_MAX_OCCUPY="\${CPU_MAX_OCCUPY:-$CPU_MAX_OCCUPY}"
+export MULTI_THREAD_ENABLE="\${MULTI_THREAD_ENABLE:-$MULTI_THREAD_ENABLE}"
 TZ="${TZ:-Asia/Seoul}"
 EOF
 
@@ -181,7 +181,7 @@ For monitoring in another container terminal:
   docker exec -it -u $SERVICE_USER codyssey-b1-2 bash
   source $ENV_FILE
   cd /workspace
-  ./scripts/monitor.sh
+  ./scripts/05-monitor-app-resources.sh
 
 EOF
 }

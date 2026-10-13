@@ -36,3 +36,7 @@ runtime/logs/agent-leak-app.log
 .claude
 AGENTS.md
 CLAUDE.md
+# 로컬 전용 (제출 대상 아님)
+logs/
+EXPERIMENT_REPORT.md
+scripts/run-local-experiment.sh

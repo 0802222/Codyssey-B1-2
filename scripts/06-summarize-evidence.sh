@@ -68,7 +68,8 @@ fi
 # -----------------------------
 STARTED_AT=$(grep -m 1 '^# Timestamp:' "$ENV_SNAPSHOT" | sed 's/^# Timestamp: //')
 EXIT_MODE=$(grep -m 1 'Exit mode:' "$RUN_LOG" 2>/dev/null | sed 's/.*Exit mode: //' || true)
-RUN_LINES=$(grep -E '^\[(INFO|WARN)\] (App started|Run timeout|App still running|Exit mode)' "$RUN_LOG" 2>/dev/null || true)
+EXIT_CODE=$(grep -m 1 'Exit code:' "$RUN_LOG" 2>/dev/null | sed 's/.*Exit code: //' || true)    # 예: 143 (SIGTERM)
+RUN_LINES=$(grep -E '^\[(INFO|WARN)\] (App started|Run timeout|App still running|Exit mode|Exit code)' "$RUN_LOG" 2>/dev/null || true)
 
 APP_LAST_LINES=$(tail -n 20 "$APP_LOG" 2>/dev/null || echo "(no app log)")
 MON_FIRST=$(head -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")
@@ -99,6 +100,7 @@ _이 파일은 리포트 작성 시 관측 사실 인용됩니다._
 - 케이스: \`$CASE\`
 - 생존 시간: ${SURVIVAL:-측정 불가}
 - 종료 방식: ${EXIT_MODE:-기록 없음}
+- 종료 코드: ${EXIT_CODE:-기록 없음}
 
 ### 환경변수
 

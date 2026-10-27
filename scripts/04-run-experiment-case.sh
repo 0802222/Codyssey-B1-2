@@ -100,8 +100,13 @@ echo "[INFO] Env snapshot saved: $ENV_SNAPSHOT"
 echo "[INFO] Starting app: $APP_PATH"
 echo
 
-PYTHONUNBUFFERED=1 "$APP_PATH" > "$APP_LOG" 2>&1 &
-APP_PID=$!
+# 앱은 stdout이 파일이면 print 출력을 버퍼에 모아 두는데, 자가 종료(SIGTERM/SIGKILL) 시
+# 이 버퍼가 비워지지 않아 "WATCHDOG ... (SIGTERM)", "SELF-TERMINATED" 배너가 사라진다.
+# script 로 가상 터미널(pty)을 붙여 줄 단위 출력이 되게 하고, -e 로 앱의 종료 코드를 그대로 돌려받는다.
+#   -q: 시작/종료 안내문 생략, -e: 자식 종료 코드 반환, -f: 매 출력마다 flush, -c: 실행할 명령
+#   typescript 파일은 /dev/null 로 버리고, script 의 stdout 을 앱 로그 파일로 받는다.
+script -qefc "exec $APP_PATH" /dev/null > "$APP_LOG" 2>&1 &
+APP_PID=$!    # script 프로세스 PID (앱은 이 프로세스의 자식)
 
 echo "[INFO] App started (PID: $APP_PID)"
 
@@ -118,8 +123,8 @@ cleanup() {
   fi
 
   if kill -0 "$APP_PID" 2>/dev/null; then
-    kill "$APP_PID" 2>/dev/null || true
-    wait "$APP_PID" 2>/dev/null || true
+    pkill -TERM -f "^$APP_PATH" 2>/dev/null || true    # pty 안의 실제 앱 프로세스 종료
+    wait "$APP_PID" 2>/dev/null || true                 # script 프로세스 회수
   fi
 }
 trap cleanup EXIT INT TERM
@@ -133,14 +138,25 @@ if [[ "${RUN_TIMEOUT:-0}" -gt 0 ]]; then
     if kill -0 "$APP_PID" 2>/dev/null; then
       echo "[WARN] App still running after ${RUN_TIMEOUT}s. Killing (PID: $APP_PID)"
       touch "$TIMEOUT_MARK"
-      kill "$APP_PID" 2>/dev/null || true
+      # script 가 아닌 앱 본체에 SIGTERM 을 보내야 종료 코드(143)가 그대로 기록된다
+      pkill -TERM -f "^$APP_PATH" 2>/dev/null || true
     fi ) &
   TIMEOUT_PID=$!
   echo "[INFO] Run timeout: ${RUN_TIMEOUT}s"
 fi
 
-# 앱 종료까지 대기
-wait "$APP_PID" || true
+# 앱 종료까지 대기하고 종료 코드 저장
+APP_EXIT=0                              # 정상 종료면 0 유지
+wait "$APP_PID" || APP_EXIT=$?          # 0이 아니면 종료 코드 저장 (set -e 로 중단되지 않게 || 사용)
+
+# 128보다 크면 시그널로 종료된 것 (예: 143 = 128 + 15 SIGTERM, 137 = 128 + 9 SIGKILL)
+EXIT_DESC="$APP_EXIT"
+if (( APP_EXIT > 128 )); then
+  EXIT_DESC="$APP_EXIT (SIG$(kill -l $((APP_EXIT - 128))))"    # 시그널 번호를 이름으로 변환
+fi
+
+# pty 출력은 줄 끝이 \r\n 이므로 \r 을 제거해 일반 텍스트 로그로 정리
+sed -i 's/\r$//' "$APP_LOG"
 
 # 타이머가 앱을 종료했으면 표시 파일이 남는다
 EXIT_MODE="앱 자체 종료"
@@ -152,6 +168,7 @@ if [[ -n "$TIMEOUT_PID" ]]; then
   fi
 fi
 echo "[INFO] Exit mode: $EXIT_MODE"
+echo "[INFO] Exit code: $EXIT_DESC"
 
 # 앱 종료를 monitor가 감지하고 마지막 상태를 기록할 시간
 sleep 2

@@ -9,20 +9,20 @@
 #   3) 원본 로그(app, monitor, run) 저장
 #   4) 06-summarize-evidence.sh 로 CSV·리포트 스니펫 생성
 
-set -euo pipefail
+set -euo pipefail    # 에러, 미정의 변수, 파이프 중간 실패 시 즉시 중단
 
 
 # -----------------------------
 # 0. 인자와 실행 계정 검증 (agentuser 로 실행)
 # -----------------------------
-CASE="${1:-}"
-if [[ -z "$CASE" ]]; then
+CASE="${1:-}"    # 첫 번째 인자 = 케이스 이름 (예: oom-before)
+if [[ -z "$CASE" ]]; then    # 인자가 없으면 사용법 출력 후 중단
   echo "[ERROR] Usage: bash scripts/04-run-experiment-case.sh <case-name>" >&2
   echo "        example: bash scripts/04-run-experiment-case.sh oom-before" >&2
   exit 1
 fi
 
-if [[ "$(id -un)" != "agentuser" ]]; then
+if [[ "$(id -un)" != "agentuser" ]]; then    # 현재 계정이 agentuser 가 아니면 중단
   echo "[ERROR] Run this as agentuser." >&2
   echo "        docker exec -it -u agentuser codyssey-b1-2 bash" >&2
   exit 1
@@ -31,9 +31,9 @@ fi
 # 환경변수 로드
 if [[ -f /workspace/runtime/agent.env ]]; then
   # shellcheck disable=SC1091
-  set -a
-  source /workspace/runtime/agent.env
-  set +a
+  set -a                                 # 이후 정의되는 변수를 자동으로 export
+  source /workspace/runtime/agent.env    # 02 에서 만든 환경변수 파일 읽기
+  set +a                                 # 자동 export 끄기
 else
   echo "[ERROR] /workspace/runtime/agent.env not found. Run 02-provision-runtime.sh first." >&2
   exit 1
@@ -43,32 +43,32 @@ fi
 # -----------------------------
 # 1. 경로 설정
 # -----------------------------
-WORKSPACE="/workspace"
-EVIDENCE_ROOT="$WORKSPACE/evidence"
+WORKSPACE="/workspace"                  # 컨테이너 안 레포 경로
+EVIDENCE_ROOT="$WORKSPACE/evidence"     # 증적 저장 최상위 폴더
 
 TYPE="${CASE%-*}"      # oom-after → oom
 PHASE="${CASE##*-}"    # oom-after → after
 
-CASE_DIR="$EVIDENCE_ROOT/$TYPE"
+CASE_DIR="$EVIDENCE_ROOT/$TYPE"    # 케이스별 증적 폴더 (예: evidence/oom)
 
-APP_PATH="$WORKSPACE/bin/${APP_NAME:-agent-leak-app-x86}"
-MONITOR_SCRIPT="$WORKSPACE/scripts/05-monitor-app-resources.sh"
-COLLECT_SCRIPT="$WORKSPACE/scripts/06-summarize-evidence.sh"
+APP_PATH="$WORKSPACE/bin/${APP_NAME:-agent-leak-app-x86}"            # 앱 바이너리 경로
+MONITOR_SCRIPT="$WORKSPACE/scripts/05-monitor-app-resources.sh"      # 관제 스크립트
+COLLECT_SCRIPT="$WORKSPACE/scripts/06-summarize-evidence.sh"         # 증적 요약 스크립트
 
-mkdir -p "$CASE_DIR"
+mkdir -p "$CASE_DIR"    # 증적 폴더 생성
 
-APP_LOG="$CASE_DIR/$PHASE-app.log"
-MONITOR_STDOUT="$CASE_DIR/$PHASE-monitor-stdout.log"
-MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"
-ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"
-RUN_LOG="$CASE_DIR/$PHASE-run.log"
+APP_LOG="$CASE_DIR/$PHASE-app.log"                    # 앱 콘솔 출력
+MONITOR_STDOUT="$CASE_DIR/$PHASE-monitor-stdout.log"  # 관제 스크립트 콘솔 출력
+MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"            # 관제 로그 원본 복사본
+ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"      # 실험 시점 환경변수
+RUN_LOG="$CASE_DIR/$PHASE-run.log"                    # 이 스크립트의 실행 기록
 
 # 이 스크립트의 콘솔 출력도 증적으로 남긴다 (RUN_TIMEOUT 강제 종료 기록 포함)
-: > "$RUN_LOG"
-exec > >(tee -a "$RUN_LOG") 2>&1
+: > "$RUN_LOG"                          # 실행 로그 파일 비우기
+exec > >(tee -a "$RUN_LOG") 2>&1        # 이후 모든 출력을 화면과 파일에 동시에 기록
 
 echo "===== Experiment: $CASE ====="
-echo "Started at   : $(date '+%Y-%m-%d %H:%M:%S %Z')"
+echo "Started at   : $(date '+%Y-%m-%d %H:%M:%S %Z')"    # 시작 시각
 echo "Evidence dir : $CASE_DIR"
 echo
 
@@ -76,12 +76,13 @@ echo
 # -----------------------------
 # 2. 환경변수 스냅샷 저장
 # -----------------------------
+# 중괄호 안의 출력을 한 번에 스냅샷 파일로 저장
 {
   echo "# Experiment env snapshot"
   echo "# Case: $CASE"
   echo "# Timestamp: $(date '+%Y-%m-%d %H:%M:%S %Z')"
   echo
-  env | grep -E '^(AGENT_|MEMORY_LIMIT|CPU_MAX_OCCUPY|MULTI_THREAD_ENABLE|APP_NAME)=' | sort
+  env | grep -E '^(AGENT_|MEMORY_LIMIT|CPU_MAX_OCCUPY|MULTI_THREAD_ENABLE|APP_NAME)=' | sort    # 실험 관련 변수만 골라 정렬
 } > "$ENV_SNAPSHOT"
 
 echo "[INFO] Env snapshot saved: $ENV_SNAPSHOT"
@@ -90,8 +91,8 @@ echo "[INFO] Env snapshot saved: $ENV_SNAPSHOT"
 # -----------------------------
 # 3. 이전 로그 초기화
 # -----------------------------
-: > "${AGENT_LOG_DIR}/agent_app.log" 2>/dev/null || true
-: > "${AGENT_LOG_DIR}/monitor.log" 2>/dev/null || true
+: > "${AGENT_LOG_DIR}/agent_app.log" 2>/dev/null || true    # 이전 앱 로그 비우기 (실패해도 계속)
+: > "${AGENT_LOG_DIR}/monitor.log" 2>/dev/null || true      # 이전 관제 로그 비우기 (실패해도 계속)
 
 
 # -----------------------------
@@ -110,16 +111,16 @@ APP_PID=$!    # script 프로세스 PID (앱은 이 프로세스의 자식)
 
 echo "[INFO] App started (PID: $APP_PID)"
 
-INTERVAL=1 bash "$MONITOR_SCRIPT" > "$MONITOR_STDOUT" 2>&1 &
-MONITOR_PID=$!
+INTERVAL=1 bash "$MONITOR_SCRIPT" > "$MONITOR_STDOUT" 2>&1 &    # 1초 간격 관제를 백그라운드로 실행
+MONITOR_PID=$!    # 관제 스크립트 PID
 
 echo "[INFO] Monitor started (PID: $MONITOR_PID, target app PID: $APP_PID)"
 
 
 # 종료 시 모니터 & 앱 정리
 cleanup() {
-  if kill -0 "$MONITOR_PID" 2>/dev/null; then
-    kill "$MONITOR_PID" 2>/dev/null || true
+  if kill -0 "$MONITOR_PID" 2>/dev/null; then    # 관제 스크립트가 살아 있으면
+    kill "$MONITOR_PID" 2>/dev/null || true      # 종료
   fi
 
   if kill -0 "$APP_PID" 2>/dev/null; then
@@ -127,13 +128,14 @@ cleanup() {
     wait "$APP_PID" 2>/dev/null || true                 # script 프로세스 회수
   fi
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT INT TERM    # 정상 종료, Ctrl+C, 종료 신호 때 항상 정리 실행
 
 
 # RUN_TIMEOUT(초)이 지정되면 그 시간 후 앱을 강제 종료 (Deadlock 등 무응답 대비)
-TIMEOUT_PID=""
-TIMEOUT_MARK="$(mktemp -u /tmp/run-timeout.XXXXXX)"
+TIMEOUT_PID=""                                          # 타이머 프로세스 PID (없으면 빈 값)
+TIMEOUT_MARK="$(mktemp -u /tmp/run-timeout.XXXXXX)"     # 타이머가 종료시켰는지 표시할 파일 이름
 if [[ "${RUN_TIMEOUT:-0}" -gt 0 ]]; then
+  # 백그라운드 타이머: 시간이 지나도 앱이 살아 있으면 표시 파일을 만들고 종료시킨다
   ( sleep "$RUN_TIMEOUT"
     if kill -0 "$APP_PID" 2>/dev/null; then
       echo "[WARN] App still running after ${RUN_TIMEOUT}s. Killing (PID: $APP_PID)"
@@ -141,7 +143,7 @@ if [[ "${RUN_TIMEOUT:-0}" -gt 0 ]]; then
       # script 가 아닌 앱 본체에 SIGTERM 을 보내야 종료 코드(143)가 그대로 기록된다
       pkill -TERM -f "^$APP_PATH" 2>/dev/null || true
     fi ) &
-  TIMEOUT_PID=$!
+  TIMEOUT_PID=$!    # 타이머 PID 저장
   echo "[INFO] Run timeout: ${RUN_TIMEOUT}s"
 fi
 
@@ -161,10 +163,10 @@ sed -i 's/\r$//' "$APP_LOG"
 # 타이머가 앱을 종료했으면 표시 파일이 남는다
 EXIT_MODE="앱 자체 종료"
 if [[ -n "$TIMEOUT_PID" ]]; then
-  kill "$TIMEOUT_PID" 2>/dev/null || true
-  if [[ -e "$TIMEOUT_MARK" ]]; then
+  kill "$TIMEOUT_PID" 2>/dev/null || true    # 남아 있는 타이머 정리
+  if [[ -e "$TIMEOUT_MARK" ]]; then          # 표시 파일이 있으면 타이머가 종료시킨 것
     EXIT_MODE="RUN_TIMEOUT(${RUN_TIMEOUT}s) 강제 종료"
-    rm -f "$TIMEOUT_MARK"
+    rm -f "$TIMEOUT_MARK"                    # 표시 파일 삭제
   fi
 fi
 echo "[INFO] Exit mode: $EXIT_MODE"
@@ -181,7 +183,7 @@ cleanup
 # 5. 원본 모니터 로그 복사
 # -----------------------------
 if [[ -f "${AGENT_LOG_DIR}/monitor.log" ]]; then
-  cp "${AGENT_LOG_DIR}/monitor.log" "$MONITOR_LOG"
+  cp "${AGENT_LOG_DIR}/monitor.log" "$MONITOR_LOG"    # 런타임 로그를 증적 폴더로 복사
   echo "[INFO] Monitor log copied: $MONITOR_LOG"
 else
   echo "[WARN] Monitor log not found: ${AGENT_LOG_DIR}/monitor.log"  
@@ -191,7 +193,7 @@ fi
 # -----------------------------
 # 6. CSV·리포트 스니펫 생성
 # -----------------------------
-bash "$COLLECT_SCRIPT" "$CASE"
+bash "$COLLECT_SCRIPT" "$CASE"    # 06 스크립트로 CSV와 요약 파일 생성
 
 echo
 echo "===== Experiment complete: $CASE ====="

@@ -7,9 +7,10 @@
 #   - <phase>-timeseries.csv    : monitor.log 시계열
 #   - <phase>-report-snippet.md : 리포트 인용용 요약
 
-set -euo pipefail
+set -euo pipefail    # 에러, 미정의 변수, 파이프 중간 실패 시 즉시 중단
 
-CASE="${1:-}"
+CASE="${1:-}"    # 첫 번째 인자 = 케이스 이름 (예: oom-before)
+# 인자가 없으면 사용법 출력 후 중단
 if [[ -z "$CASE" ]]; then
   echo "[ERROR] Usage: bash scripts/06-summarize-evidence.sh <case-name>" >&2
   exit 1
@@ -19,20 +20,21 @@ fi
 # -----------------------------
 # 1. 경로 설정
 # -----------------------------
-WORKSPACE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKSPACE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"    # 레포 루트 절대경로 (scripts 폴더의 상위)
 
 TYPE="${CASE%-*}"      # oom-after → oom
 PHASE="${CASE##*-}"    # oom-after → after
 
-CASE_DIR="$WORKSPACE/evidence/$TYPE"
+CASE_DIR="$WORKSPACE/evidence/$TYPE"    # 케이스별 증적 폴더
 
-APP_LOG="$CASE_DIR/$PHASE-app.log"
-MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"
-ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"
-RUN_LOG="$CASE_DIR/$PHASE-run.log"
-TIMESERIES_CSV="$CASE_DIR/$PHASE-timeseries.csv"
-REPORT_SNIPPET="$CASE_DIR/$PHASE-report-snippet.md"
+APP_LOG="$CASE_DIR/$PHASE-app.log"                  # 앱 콘솔 출력
+MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"          # 관제 로그
+ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"    # 실험 시점 환경변수
+RUN_LOG="$CASE_DIR/$PHASE-run.log"                  # 04 실행 기록
+TIMESERIES_CSV="$CASE_DIR/$PHASE-timeseries.csv"    # 만들 CSV
+REPORT_SNIPPET="$CASE_DIR/$PHASE-report-snippet.md" # 만들 요약 파일
 
+# 04 를 먼저 실행해 스냅샷이 있어야 요약 가능
 if [[ ! -f "$ENV_SNAPSHOT" ]]; then
   echo "[ERROR] $ENV_SNAPSHOT not found. Run 04-run-experiment-case.sh $CASE first." >&2
   exit 1
@@ -43,6 +45,7 @@ fi
 # 2. 시계열 CSV 추출
 # -----------------------------
 if [[ -f "$MONITOR_LOG" ]]; then
+  # monitor.log 각 줄에서 값만 뽑아 CSV 로 저장 (gawk 의 match 로 정규식 그룹 추출)
   {
     echo "timestamp,proc_cpu,proc_mem,rss_kb,sys_cpu,sys_mem,threads,state"
     gawk '
@@ -58,7 +61,7 @@ if [[ -f "$MONITOR_LOG" ]]; then
       }
     ' "$MONITOR_LOG"
   } > "$TIMESERIES_CSV"
-  ROWS=$(($(wc -l < "$TIMESERIES_CSV") - 1))
+  ROWS=$(($(wc -l < "$TIMESERIES_CSV") - 1))    # 헤더 1줄을 뺀 데이터 행 수
   echo "[INFO] Timeseries CSV: $TIMESERIES_CSV ($ROWS rows)"
 fi
 
@@ -66,29 +69,31 @@ fi
 # -----------------------------
 # 3. 리포트 스니펫 생성
 # -----------------------------
-STARTED_AT=$(grep -m 1 '^# Timestamp:' "$ENV_SNAPSHOT" | sed 's/^# Timestamp: //')
-EXIT_MODE=$(grep -m 1 'Exit mode:' "$RUN_LOG" 2>/dev/null | sed 's/.*Exit mode: //' || true)
+STARTED_AT=$(grep -m 1 '^# Timestamp:' "$ENV_SNAPSHOT" | sed 's/^# Timestamp: //')    # 실험 시작 시각
+EXIT_MODE=$(grep -m 1 'Exit mode:' "$RUN_LOG" 2>/dev/null | sed 's/.*Exit mode: //' || true)    # 종료 방식 (앱 자체 종료 / 강제 종료)
 EXIT_CODE=$(grep -m 1 'Exit code:' "$RUN_LOG" 2>/dev/null | sed 's/.*Exit code: //' || true)    # 예: 143 (SIGTERM)
+# run 로그에서 요약에 넣을 주요 줄만 추출
 RUN_LINES=$(grep -E '^\[(INFO|WARN)\] (App started|Run timeout|App still running|Exit mode|Exit code)' "$RUN_LOG" 2>/dev/null || true)
 
-APP_LAST_LINES=$(tail -n 20 "$APP_LOG" 2>/dev/null || echo "(no app log)")
-MON_FIRST=$(head -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")
-MON_LAST=$(tail -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")
+APP_LAST_LINES=$(tail -n 20 "$APP_LOG" 2>/dev/null || echo "(no app log)")    # 앱 로그 마지막 20줄
+MON_FIRST=$(head -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")                # 관제 로그 처음 3줄
+MON_LAST=$(tail -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")                 # 관제 로그 마지막 3줄
 
 # 생존 시간 (모니터 로그의 첫/끝 타임스탬프 차이)
 SURVIVAL=""
 if [[ -f "$MONITOR_LOG" ]]; then
-  FIRST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | head -n 1 | tr -d '[]')
-  LAST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | tail -n 1 | tr -d '[]')
+  FIRST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | head -n 1 | tr -d '[]')    # 첫 타임스탬프
+  LAST_TS=$(grep -oE '\[[0-9-]+ [0-9:]+\]' "$MONITOR_LOG" | tail -n 1 | tr -d '[]')     # 마지막 타임스탬프
   if [[ -n "$FIRST_TS" && -n "$LAST_TS" ]]; then
-    FIRST_EPOCH=$(date -d "$FIRST_TS" +%s 2>/dev/null || echo 0)
-    LAST_EPOCH=$(date -d "$LAST_TS" +%s 2>/dev/null || echo 0)
+    FIRST_EPOCH=$(date -d "$FIRST_TS" +%s 2>/dev/null || echo 0)    # 초 단위 숫자로 변환
+    LAST_EPOCH=$(date -d "$LAST_TS" +%s 2>/dev/null || echo 0)      # 초 단위 숫자로 변환
     if (( LAST_EPOCH > FIRST_EPOCH )); then
-      SURVIVAL="$((LAST_EPOCH - FIRST_EPOCH)) seconds ($FIRST_TS ~ $LAST_TS)"
+      SURVIVAL="$((LAST_EPOCH - FIRST_EPOCH)) seconds ($FIRST_TS ~ $LAST_TS)"    # 차이 = 생존 시간
     fi
   fi
 fi
 
+# 아래 내용으로 리포트 인용용 마크다운 파일 생성 ($변수와 $(명령)은 실제 값으로 바뀜)
 cat > "$REPORT_SNIPPET" <<SNIPPET
 # 실험 스니펫: $CASE
 

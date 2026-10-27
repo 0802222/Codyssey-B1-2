@@ -106,7 +106,7 @@ monitor_once() {
   FIREWALL_WARNING=""            # 방화벽 경고 메시지
   FIREWALL_STATUS="unknown"      # 방화벽 상태 기본값
 
-  FIREWALL_STATUS_FILE="${AGENT_HOME}/firewall-status.txt"    # 02·03 스크립트가 기록한 상태 파일
+  FIREWALL_STATUS_FILE="${AGENT_HOME}/firewall-status.txt"    # 03 스크립트가 기록한 상태 파일
 
   if [[ -r "$FIREWALL_STATUS_FILE" ]]; then
     FIREWALL_STATUS="$(cat "$FIREWALL_STATUS_FILE")"    # 파일 내용 = 상태 값
@@ -118,7 +118,7 @@ monitor_once() {
     fi
   else
     FIREWALL_STATUS="unknown"
-    FIREWALL_WARNING="[INFO] Firewall status file not found (run 02-provision-runtime.sh as root first)"
+    FIREWALL_WARNING="[INFO] Firewall status file not found (run 03-configure-firewall.sh as root first)"
   fi
 
 

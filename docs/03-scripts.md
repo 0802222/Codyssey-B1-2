@@ -99,7 +99,7 @@ sequenceDiagram
 | 01-setup-container.sh | 호스트 사용자 | 실험 전 (00-run-all-experiments.sh가 호출) | 컨테이너 생성·시작, provision·방화벽 실행 |
 | experiment-cases.conf | - | - | 케이스 이름과 케이스별 환경변수 정의 (데이터) |
 | 02-provision-runtime.sh | root | 컨테이너 생성 직후 | 패키지 설치, 사용자·경로·`agent.env` 준비 |
-| 03-configure-firewall.sh | root | provision 이후 | UFW 규칙·포트 정책 구성 |
+| 03-configure-firewall.sh | root | provision 이후 | UFW 규칙·포트 정책 구성, 관제용 방화벽 상태 파일(`firewall-status.txt`) 기록 |
 | 04-run-experiment-case.sh | agentuser | 케이스마다 | 앱을 pty(`script`)로 실행, monitor 실행, `RUN_TIMEOUT` 처리, 종료 코드 기록, 원본 로그(app·monitor·run·env) 저장 |
 | 05-monitor-app-resources.sh | agentuser | 앱 실행 중 | 프로세스·CPU·메모리·RSS·스레드·포트 상태 기록 |
 | 06-summarize-evidence.sh | agentuser | run-experiment 마지막, 또는 단독 | 원본 로그로 시계열 CSV·리포트 스니펫 생성 (실험 없이 재생성 가능) |

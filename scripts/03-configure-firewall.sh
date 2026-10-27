@@ -25,8 +25,8 @@ ufw allow "${AGENT_PORT}/tcp"    # 앱 포트 TCP 허용 규칙 추가
 ufw --force enable               # 확인 질문 없이 방화벽 활성화
 ufw status numbered              # 규칙을 번호와 함께 출력
 ufw status verbose               # 기본 정책까지 자세히 출력
-# 05-monitor 가 읽는 방화벽 상태 파일 갱신
-# 02-provision-runtime.sh 는 방화벽을 켜기 전에 상태를 기록하므로, 활성화 후 여기서 다시 기록한다
+# 05-monitor 가 읽는 방화벽 상태 파일 기록
+# agentuser 는 ufw 상태를 직접 볼 수 없으므로 root 가 방화벽을 켠 뒤 결과를 파일로 남긴다
 AGENT_HOME="${AGENT_HOME:-/workspace/runtime}"         # 상태 파일이 있는 경로
 SERVICE_USER="${SERVICE_USER:-agentuser}"              # 파일 소유자 (관제 스크립트 실행 계정)
 if ufw status | grep -q "Status: active"; then         # ufw 활성 여부 확인

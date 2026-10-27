@@ -182,6 +182,8 @@ sequenceDiagram
 
 [03-configure-firewall.sh](../scripts/03-configure-firewall.sh) 끝에서 ufw를 켠 뒤 `firewall-status.txt`를 다시 기록하도록 추가했다. 재실행 결과 6개 케이스의 관제 로그가 모두 `FIREWALL:active`로 기록되었다.
 
+이후 02의 상태 기록 함수(`check_firewall_status`)는 항상 03이 덮어쓰는 값을 남기기만 해서 삭제했다. 지금은 방화벽을 켜는 03만 상태 파일을 기록한다.
+
 <br>
 
 <br>

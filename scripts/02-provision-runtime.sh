@@ -149,30 +149,6 @@ EOF
   echo "[INFO] Environment file created: $ENV_FILE"
 }
 
-# 방화벽 상태를 파일로 기록 (agentuser 는 ufw 를 직접 못 보므로 05 관제 스크립트가 이 파일을 읽음)
-check_firewall_status() {
-  local status="unknown"    # 기본값
-
-  if command -v ufw >/dev/null 2>&1; then                            # ufw 가 있으면
-    if ufw status 2>/dev/null | grep -q "Status: active"; then
-      status="active"
-    else
-      status="inactive"
-    fi
-  elif command -v firewall-cmd >/dev/null 2>&1; then                 # firewalld 가 있으면
-    if firewall-cmd --state 2>/dev/null | grep -q "running"; then
-      status="active"
-    else
-      status="inactive"
-    fi
-  else
-    status="not found"                                               # 방화벽 도구가 없음
-  fi
-
-  echo "$status" > "$AGENT_HOME/firewall-status.txt"                      # 상태 파일 기록
-  chown "$SERVICE_USER:$SERVICE_USER" "$AGENT_HOME/firewall-status.txt"   # 서비스 계정이 읽을 수 있게
-}
-
 # 준비 결과와 다음에 할 명령 안내 출력
 print_result() {
   cat <<EOF
@@ -194,7 +170,7 @@ Next commands:
 
 For monitoring in another container terminal:
 
-  docker exec -it -u $SERVICE_USER codyssey-b1-2 bash
+  docker exec -it -u $SERVICE_USER codyssey-b1-2-lab bash
   source $ENV_FILE
   cd /workspace
   ./scripts/05-monitor-app-resources.sh
@@ -202,7 +178,8 @@ For monitoring in another container terminal:
 EOF
 }
 
-# 전체 순서: 권한 확인 → 값 검증 → 설치 → 계정 → 폴더 → 앱 → env 파일 → 방화벽 상태 → 결과 출력
+# 전체 순서: 권한 확인 → 값 검증 → 설치 → 계정 → 폴더 → 앱 → env 파일 → 결과 출력
+# 방화벽 상태 파일은 ufw 를 켠 뒤 03-configure-firewall.sh 가 기록한다
 main() {
   require_root
   validate_port
@@ -212,7 +189,6 @@ main() {
   prepare_directories
   prepare_app
   write_env_file
-  check_firewall_status
   print_result
 }
 

@@ -24,7 +24,7 @@ fi
 
 if [[ "$(id -un)" != "agentuser" ]]; then    # 현재 계정이 agentuser 가 아니면 중단
   echo "[ERROR] Run this as agentuser." >&2
-  echo "        docker exec -it -u agentuser codyssey-b1-2 bash" >&2
+  echo "        docker exec -it -u agentuser codyssey-b1-2-lab bash" >&2
   exit 1
 fi
 

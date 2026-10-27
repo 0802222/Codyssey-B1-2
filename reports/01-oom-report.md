@@ -1,8 +1,10 @@
 # [Bug] OOM Crash - MemoryGuard 임계치 도달에 따른 프로세스 자가 종료 및 메모리 누수 분석
 
+<br>
+
 ### 1. Description
 
-- **발생 시각**: 2026-10-13 20:57:09 ~ 20:57:20 KST (Before 기준)
+- **발생 시각**: 2026-10-27 19:11:58 ~ 19:12:09 KST (Before 기준)
 - **실행 환경**: Linux x86_64 (Ubuntu 24.04 LTS 컨테이너 환경, hostname: `codyssey-b1-2-lab`), 서비스 계정 `agentuser` (uid=1001)
 - **적용한 환경변수**:
   - `APP_NAME=agent-leak-app-x86`
@@ -13,21 +15,24 @@
   - `MULTI_THREAD_ENABLE=true`
 - **발생 조건**: `MEMORY_LIMIT`이 기본값(100MB)으로 설정된 상태에서 애플리케이션(`agent-leak-app-x86`) 구동
 - **관측한 현상**:
-  - 프로그램 실행 직후 정상 부팅되었으나, 약 11초 후 `[CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB)` 로그와 함께 프로세스가 강제 자가 종료(`SELF-TERMINATED`)됨.
+  - 프로그램 실행 직후 정상 부팅되었으나, 약 11초 후 `[CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB)` 로그와 `>>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<` 배너가 출력되고 프로세스가 강제 자가 종료됨.
+  - 종료 코드는 `137 (SIGKILL)`.
 
 ---
+
+<br>
 
 ### 2. Evidence & Logs
 
 #### (1) 05-monitor-app-resources.sh 관제 데이터 ([before-monitor.log](../evidence/oom/before-monitor.log))
 
 ```text
-[2026-10-13 20:57:10] PID:23029 PPID:23023 STATE:SN ELAPSED:00:01 THREADS:1 PROC_CPU:10.4% PROC_MEM:0.3% RSS:25620KB SYS_CPU:1.0% SYS_MEM:13.2% DISK_USED:19% PORT:15034 FIREWALL:active
-[2026-10-13 20:57:11] PID:23029 PPID:23023 STATE:SN ELAPSED:00:02 THREADS:1 PROC_CPU:5.0% PROC_MEM:0.6% RSS:51224KB SYS_CPU:2.1% SYS_MEM:13.4% DISK_USED:19% PORT:15034 FIREWALL:active
-[2026-10-13 20:57:13] PID:23029 PPID:23023 STATE:SN ELAPSED:00:04 THREADS:1 PROC_CPU:3.2% PROC_MEM:0.6% RSS:51224KB SYS_CPU:3.1% SYS_MEM:13.6% DISK_USED:19% PORT:15034 FIREWALL:active
-[2026-10-13 20:57:15] PID:23029 PPID:23023 STATE:SN ELAPSED:00:06 THREADS:1 PROC_CPU:2.5% PROC_MEM:0.9% RSS:76828KB SYS_CPU:2.1% SYS_MEM:14.0% DISK_USED:19% PORT:15034 FIREWALL:active
-[2026-10-13 20:57:16] PID:23029 PPID:23023 STATE:SN ELAPSED:00:08 THREADS:1 PROC_CPU:1.9% PROC_MEM:0.9% RSS:76828KB SYS_CPU:2.2% SYS_MEM:14.2% DISK_USED:19% PORT:15034 FIREWALL:active
-[2026-10-13 20:57:18] PID:23029 PPID:23023 STATE:SN ELAPSED:00:09 THREADS:1 PROC_CPU:1.6% PROC_MEM:1.2% RSS:102432KB SYS_CPU:2.1% SYS_MEM:14.1% DISK_USED:19% PORT:15034 FIREWALL:active
+[2026-10-27 19:11:59] PID:370 PPID:360 STATE:SN+ ELAPSED:00:01 THREADS:1 PROC_CPU:16.7% PROC_MEM:0.3% RSS:25600KB SYS_CPU:3.1% SYS_MEM:13.9% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-27 19:12:01] PID:370 PPID:360 STATE:SN+ ELAPSED:00:03 THREADS:1 PROC_CPU:7.3% PROC_MEM:0.6% RSS:51204KB SYS_CPU:2.1% SYS_MEM:13.7% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-27 19:12:03] PID:370 PPID:360 STATE:SN+ ELAPSED:00:05 THREADS:1 PROC_CPU:4.6% PROC_MEM:0.6% RSS:51204KB SYS_CPU:3.1% SYS_MEM:14.2% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-27 19:12:05] PID:370 PPID:360 STATE:SN+ ELAPSED:00:07 THREADS:1 PROC_CPU:3.3% PROC_MEM:0.9% RSS:76808KB SYS_CPU:3.0% SYS_MEM:14.3% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-27 19:12:07] PID:370 PPID:360 STATE:SN+ ELAPSED:00:09 THREADS:1 PROC_CPU:2.8% PROC_MEM:1.2% RSS:102412KB SYS_CPU:2.1% SYS_MEM:14.7% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-27 19:12:09] PID:370 PPID:360 STATE:SN+ ELAPSED:00:11 THREADS:1 PROC_CPU:2.3% PROC_MEM:1.2% RSS:102412KB SYS_CPU:3.0% SYS_MEM:13.5% DISK_USED:4% PORT:15034 FIREWALL:active
 ```
 
 #### (2) 프로그램 실행 로그 ([before-app.log](../evidence/oom/before-app.log))
@@ -49,8 +54,8 @@
 ------------------------------------------------------------
 All Boot Checks Passed!
 Agent READY
-2026-10-13 20:57:09,053 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-10-13 20:57:09,055 [INFO] Agent listening at port 15034
+2026-10-27 19:11:58,867 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-10-27 19:11:58,869 [INFO] Agent listening at port 15034
 
 ==================================================
  [ Agent Initiate ] Resource Check 
@@ -62,24 +67,39 @@ Agent READY
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-10-13 20:57:11,083 [INFO] [MemoryWorker] Current Heap: 25MB
-2026-10-13 20:57:14,091 [INFO] [MemoryWorker] Current Heap: 50MB
-2026-10-13 20:57:17,116 [INFO] [MemoryWorker] Current Heap: 75MB
-2026-10-13 20:57:20,165 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-10-13 20:57:20,167 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
-2026-10-13 20:57:20,167 [CRITICAL] [MemoryGuard] Self-terminating process 23029 to prevent system instability.
+2026-10-27 19:12:00,883 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-10-27 19:12:03,907 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-10-27 19:12:06,940 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-10-27 19:12:09,971 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
+2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Self-terminating process 370 to prevent system instability.
+
+>>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<
 ```
+
+#### (2-1) 실행 스크립트 출력 ([before-run.log](../evidence/oom/before-run.log))
+
+```sh
+[INFO] App started (PID: 357)
+[INFO] Exit mode: 앱 자체 종료
+[INFO] Exit code: 137 (SIGKILL)
+```
+
+- 종료 코드 137은 `128 + 9`이며, 9번 신호는 `SIGKILL`이다. `MemoryGuard`가 자신에게 SIGKILL을 보내 즉시 종료했음을 뜻한다.
+- `App started`의 PID(357)는 앱을 감싼 `script` 프로세스이고, 실제 앱은 그 아래 자식 프로세스(370)이다. 구조는 [01-concepts.md](../docs/01-concepts.md#부모와-자식-프로세스)에 정리했다.
 
 #### (3) 시계열 데이터 요약 ([before-timeseries.csv](../evidence/oom/before-timeseries.csv))
 
 | 시각 (Timestamp) | 프로세스 CPU (%) | 시스템 CPU (%) | RSS (KB) | RSS 환산 (MB) | 프로세스 상태 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| 20:57:10 | 10.4 | 1.0 | 25,620 | ~25.0 MB | `SN` |
-| 20:57:11 | 5.0 | 2.1 | 51,224 | ~50.0 MB | `SN` |
-| 20:57:13 | 3.2 | 3.1 | 51,224 | ~50.0 MB | `SN` |
-| 20:57:15 | 2.5 | 2.1 | 76,828 | ~75.0 MB | `SN` |
-| 20:57:16 | 1.9 | 2.2 | 76,828 | ~75.0 MB | `SN` |
-| 20:57:18 | 1.6 | 2.1 | 102,432 | ~100.0 MB | `SN` |
+| 19:11:59 | 16.7 | 3.1 | 25,600 | ~25.0 MB | `SN+` |
+| 19:12:01 | 7.3 | 2.1 | 51,204 | ~50.0 MB | `SN+` |
+| 19:12:03 | 4.6 | 3.1 | 51,204 | ~50.0 MB | `SN+` |
+| 19:12:05 | 3.3 | 3.0 | 76,808 | ~75.0 MB | `SN+` |
+| 19:12:07 | 2.8 | 2.1 | 102,412 | ~100.0 MB | `SN+` |
+| 19:12:09 | 2.3 | 3.0 | 102,412 | ~100.0 MB | `SN+` |
+
+- `STATE`의 `+`는 앱이 가상 터미널(pty)의 포그라운드 프로세스로 실행 중이라는 뜻이다. 종료 배너를 수집하려고 `script`로 실행했기 때문이다 ([06-troubleshooting.md](../docs/06-troubleshooting.md)).
 
 #### (4) 관련 증적 파일 목록
 - [before-app.log](../evidence/oom/before-app.log)
@@ -91,16 +111,19 @@ Agent READY
 
 ---
 
+<br>
+
 ### 3. Root Cause Analysis
 
 #### (1) 증거로 직접 확인한 사실
-1. **계단식 메모리 증가**: 관제 데이터(`monitor.log`) 상에서 프로세스의 물리 메모리 사용량(RSS)이 초기 `25,620KB`에서 약 3초 간격으로 `+25,604KB`씩 계단식으로 급증(`25MB` ➔ `50MB` ➔ `75MB` ➔ `100MB`)함.
+1. **계단식 메모리 증가**: 관제 데이터(`monitor.log`) 상에서 프로세스의 물리 메모리 사용량(RSS)이 초기 `25,600KB`에서 약 3초 간격으로 `+25,604KB`씩 계단식으로 급증(`25MB` ➔ `50MB` ➔ `75MB` ➔ `100MB`)함.
 2. **할당 주기와 일치**: 앱 로그(`before-app.log`)에서 `MemoryWorker`가 약 3초 간격으로 정확히 `Current Heap: 25MB ➔ 50MB ➔ 75MB ➔ 100MB`를 기록하며, 메모리가 한 번도 해제(Free/GC)되지 않음.
-3. **임계치 도달 즉시 자가 종료**: 힙 메모리가 `100MB`에 도달한 `20:57:20`에 `[CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB)` 로그가 출력되고 프로세스 `23029`가 즉각 종료됨.
+3. **임계치 도달 즉시 자가 종료**: 힙 메모리가 `100MB`에 도달한 `19:12:09`에 `[CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB)` 로그와 `SELF-TERMINATED` 배너가 출력되고 프로세스 `370`이 즉각 종료됨.
+4. **SIGKILL 종료**: 실행 스크립트가 받은 종료 코드는 `137 (SIGKILL)`이다.
 
 #### (2) 증거를 바탕으로 추론한 원인
 - **애플리케이션 레벨 메모리 누수(Memory Leak)**: `MemoryWorker`가 반복 작업 수행 시 25MB 크기의 청크(Chunk) 데이터를 동적 생성한 후 참조를 해제하지 않아 힙 메모리에 영구 적재되고 있음.
-- **MemoryGuard에 의한 의도된 강제 종료**: 운영체제 커널의 OOM Killer가 동작하기 전, 애플리케이션에 내장된 자체 보호 루틴(`MemoryGuard`)이 `MEMORY_LIMIT` 초과를 감지하고 시스템 전체 불능 상태를 막기 위해 스스로 프로세스를 `exit`/`SIGKILL` 처리함.
+- **MemoryGuard에 의한 의도된 강제 종료**: 운영체제 커널의 OOM Killer가 동작하기 전, 애플리케이션에 내장된 자체 보호 루틴(`MemoryGuard`)이 `MEMORY_LIMIT` 초과를 감지하고 시스템 전체 불능 상태를 막기 위해 스스로 프로세스를 `SIGKILL`로 종료함 (종료 코드 137로 확인).
 
 #### (3) 관련 운영체제 동작 원리
 - **가상 메모리와 RSS (Resident Set Size)**:
@@ -112,6 +135,8 @@ Agent READY
 
 ---
 
+<br>
+
 ### 4. Workaround & Verification
 
 #### (1) 변경한 환경변수
@@ -119,22 +144,23 @@ Agent READY
 - (앱 로그의 경고문 `[ WARNING: Recommend Over 256MB ]`을 반영하여 256MB로 증설)
 
 #### (2) 변경 전 결과 (`oom-before`)
-- **생존 시간**: **약 11초** (앱 로그 기준 20:57:09 기동 ~ 20:57:20 자가 종료, 모니터 마지막 샘플은 20:57:18)
-- **최종 RSS (모니터 마지막 샘플)**: **102,432 KB** (~100.0 MB)
+- **생존 시간**: **약 11초** (앱 로그 기준 19:11:58 기동 ~ 19:12:09 자가 종료)
+- **최종 RSS (모니터 마지막 샘플)**: **102,412 KB** (~100.0 MB)
 - **종료 시점 힙 사용량**: **100MB** (`100MB >= 100MB`)
-- **종료 방식**: 앱 자체 종료 ([before-report-snippet.md](../evidence/oom/before-report-snippet.md))
+- **종료 방식**: 앱 자체 종료, 종료 코드 `137 (SIGKILL)` ([before-report-snippet.md](../evidence/oom/before-report-snippet.md))
 
 #### (3) 변경 후 결과 (`oom-after`)
-- **생존 시간**: **약 32초** (앱 로그 기준 20:57:22 기동 ~ 20:57:55 자가 종료)
-- **최종 RSS (모니터 마지막 샘플)**: **281,660 KB** (~275.1 MB)
+- **생존 시간**: **약 32초** (앱 로그 기준 19:12:13 기동 ~ 19:12:45 자가 종료)
+- **최종 RSS (모니터 마지막 샘플)**: **281,636 KB** (~275.0 MB)
 - **종료 시점 힙 사용량**: **275MB** (`275MB >= 256MB`)
-- **종료 방식**: 앱 자체 종료 ([after-report-snippet.md](../evidence/oom/after-report-snippet.md))
+- **종료 방식**: 앱 자체 종료, 종료 코드 `137 (SIGKILL)` ([after-report-snippet.md](../evidence/oom/after-report-snippet.md))
 - **관찰 로그 ([after-app.log](../evidence/oom/after-app.log))**:
   ```text
-  2026-10-13 20:57:52,312 [INFO] [MemoryWorker] Current Heap: 250MB
-  2026-10-13 20:57:55,331 [INFO] [MemoryWorker] Current Heap: 275MB
-  2026-10-13 20:57:55,331 [CRITICAL] [MemoryGuard] Memory limit exceeded (275MB >= 256MB) / (Recommend Over 256MB)
-  2026-10-13 20:57:55,331 [CRITICAL] [MemoryGuard] Self-terminating process 23354 to prevent system instability.
+  2026-10-27 19:12:42,771 [INFO] [MemoryWorker] Current Heap: 250MB
+  2026-10-27 19:12:45,793 [INFO] [MemoryWorker] Current Heap: 275MB
+  2026-10-27 19:12:45,795 [CRITICAL] [MemoryGuard] Memory limit exceeded (275MB >= 256MB) / (Recommend Over 256MB)
+  2026-10-27 19:12:45,795 [CRITICAL] [MemoryGuard] Self-terminating process 695 to prevent system instability.
+  >>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<
   ```
 
 #### (4) Before & After 비교 요약
@@ -142,12 +168,13 @@ Agent READY
 | 비교 지표 | Before (`MEMORY_LIMIT=100`) | After (`MEMORY_LIMIT=256`) | 변화 분석 |
 | :--- | :---: | :---: | :--- |
 | **생존 시간** | 약 11 초 | 약 32 초 | **약 +21 초 (약 2.9배)** |
-| **시작 RSS** | 25,620 KB | 25,600 KB | 기동 시 기본 메모리는 동일 (~25MB) |
-| **종료 직전 RSS** | 102,432 KB | 281,660 KB | 임계치까지 지속 증가 |
+| **시작 RSS** | 25,600 KB | 25,596 KB | 기동 시 기본 메모리는 동일 (~25MB) |
+| **종료 직전 RSS** | 102,412 KB | 281,636 KB | 임계치까지 지속 증가 |
 | **최종 도달 힙** | 100 MB | 275 MB | 25MB 청크 단위 누적 |
 | **증가 속도** | 약 25MB / 3초 | 약 25MB / 3초 | **변화 없음** |
 | **종료 원인** | Memory limit exceeded (100MB) | Memory limit exceeded (256MB) | **동일 원인으로 종료** |
 | **프로세스 상태** | SELF-TERMINATED | SELF-TERMINATED | **자가 종료 재발** |
+| **종료 코드** | 137 (SIGKILL) | 137 (SIGKILL) | 동일 |
 
 #### (5) 임시 조치의 한계
 - `MEMORY_LIMIT`을 256MB로 상향하여 프로세스의 가동 유지 시간을 약 11초에서 약 32초로 연장하는 데는 성공하였다.

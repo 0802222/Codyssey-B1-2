@@ -2,7 +2,9 @@
 
 ### 1. Description
 
-- **발생 시각**: 2026-10-13 21:00:36 ~ 21:02:35 KST (Before 기준, 21:00:45 이후 무응답)
+<br>
+
+- **발생 시각**: 2026-10-27 19:15:25 ~ 19:17:23 KST (Before 기준, 19:15:34 이후 무응답)
 - **실행 환경**: Linux x86_64 (Ubuntu 24.04 컨테이너 `codyssey-b1-2-lab`, `--platform linux/amd64`), 서비스 계정 `agentuser` (uid=1001)
 - **적용한 환경변수**:
   - `APP_NAME=agent-leak-app-x86`
@@ -13,9 +15,11 @@
 - **관측한 현상**:
   - 부팅 시 `[ THREAD ] Concurrency: True [ WARNING ]`, `>>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.` 경고 출력.
   - 기동 약 9초 후 두 Worker 스레드가 각각 `WAITING ... (Status: BLOCKED)`를 출력한 뒤 **로그가 완전히 멈춤**.
-  - 프로세스는 종료되지 않고 PID가 유지되었으며, 120초 관찰 후 `RUN_TIMEOUT`으로 강제 종료함.
+  - 프로세스는 종료되지 않고 PID가 유지되었으며, 120초 관찰 후 `RUN_TIMEOUT`으로 강제 종료함 (종료 코드 `143 (SIGTERM)`, 스크립트가 보낸 신호).
 
 ---
+
+<br>
 
 ### 2. Evidence & Logs
 
@@ -29,45 +33,62 @@
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-10-13 21:00:38,055 [WARNING] [AgentWorker] Initializing concurrent transaction processors...
-2026-10-13 21:00:38,058 [WARNING] [System] CAUTION: Strict resource locking is enabled.
-2026-10-13 21:00:43,099 [INFO] [Worker-Thread-1] Process Started. Attempting to lock [Shared_Memory_A]...
-2026-10-13 21:00:43,101 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
-2026-10-13 21:00:43,100 [INFO] [AgentWorker] Waiting for worker threads to complete transactions...
-2026-10-13 21:00:43,101 [INFO] [AgentWorker][Worker-Thread-1] Processing critical data in Memory A...
-2026-10-13 21:00:43,100 [INFO] [AgentWorker][Worker-Thread-2] Process Started. Attempting to lock [Socket_Pool_B]...
-2026-10-13 21:00:43,102 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
-2026-10-13 21:00:43,102 [INFO] [AgentWorker][Worker-Thread-2] Establishing network connections in Pool B...
-2026-10-13 21:00:45,114 [INFO] [AgentWorker][Worker-Thread-1] Need resource [Socket_Pool_B] to finish job.
-2026-10-13 21:00:45,116 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)
-2026-10-13 21:00:45,116 [INFO] [AgentWorker][Worker-Thread-2] Need resource [Shared_Memory_A] to write logs.
-2026-10-13 21:00:45,117 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
+2026-10-27 19:15:27,326 [WARNING] [AgentWorker] Initializing concurrent transaction processors...
+2026-10-27 19:15:27,327 [WARNING] [System] CAUTION: Strict resource locking is enabled.
+2026-10-27 19:15:32,357 [INFO] [Worker-Thread-1] Process Started. Attempting to lock [Shared_Memory_A]...
+2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
+2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-1] Processing critical data in Memory A...
+2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-2] Process Started. Attempting to lock [Socket_Pool_B]...
+2026-10-27 19:15:32,358 [INFO] [AgentWorker] Waiting for worker threads to complete transactions...
+2026-10-27 19:15:32,359 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
+2026-10-27 19:15:32,359 [INFO] [AgentWorker][Worker-Thread-2] Establishing network connections in Pool B...
+2026-10-27 19:15:34,360 [INFO] [AgentWorker][Worker-Thread-2] Need resource [Shared_Memory_A] to write logs.
+2026-10-27 19:15:34,360 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
+2026-10-27 19:15:34,373 [INFO] [AgentWorker][Worker-Thread-1] Need resource [Socket_Pool_B] to finish job.
+2026-10-27 19:15:34,373 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)
 ```
 
-→ 위 마지막 줄(`21:00:45,117`)이 파일의 **마지막 로그**이며, 이후 강제 종료(약 21:02:35)까지 약 110초 동안 새 로그가 없다.
+→ 위 마지막 줄(`19:15:34,373`)이 파일의 **마지막 로그**이며, 이후 강제 종료(약 19:17:25)까지 약 110초 동안 새 로그가 없다.
 
 #### (2) 05-monitor-app-resources.sh 관제 데이터 ([before-timeseries.csv](../evidence/deadlock/before-timeseries.csv))
 
 | 시각 | PROC_CPU (%) | RSS (KB) | THREADS | STATE | 비고 |
 | :---: | :---: | :---: | :---: | :---: | :--- |
-| 21:00:37 | 13.2 | 25,640 | 1 | `SN` | 기동 직후 |
-| 21:00:42 | 2.6 | 25,640 | 1 | `SN` | |
-| 21:00:43 | 2.4 | 25,600 | **3** | `SNl` | Worker 스레드 2개 생성, Lock 획득 |
-| 21:00:45 | 2.0 | 25,600 | 3 | `SNl` | 두 스레드 BLOCKED |
-| 21:01:59 | 0.2 | 22,440 | 3 | `SNl` | |
-| 21:02:35 | 0.1 | 22,440 | 3 | `SNl` | 모니터 마지막 샘플 |
+| 19:15:26 | 16.7 | 25,600 | 1 | `SN+` | 기동 직후 |
+| 19:15:32 | 3.0 | 25,600 | 1 | `SN+` | |
+| 19:15:33 | 2.5 | 25,576 | **3** | `SNl+` | Worker 스레드 2개 생성, Lock 획득 |
+| 19:15:35 | 2.0 | 25,576 | 3 | `SNl+` | 두 스레드 BLOCKED |
+| 19:17:23 | 0.1 | 18,488 | 3 | `SNl+` | 모니터 마지막 샘플 |
 
-- 70개 샘플 중 66개가 `THREADS:3`, `STATE:SNl` (`S` 대기, `N` 저우선순위, `l` 멀티스레드).
+- 61개 샘플 중 57개가 `THREADS:3`, `STATE:SNl+` (`S` 대기, `N` 저우선순위, `l` 멀티스레드, `+` 가상 터미널의 포그라운드 프로세스).
 - BLOCKED 이후 `PROC_CPU` 최대 2.0%로 계속 감소 → 아무 연산도 하지 않음.
-- RSS는 증가 없이 25,600KB ➔ 22,440KB로 소폭 감소 후 고정 → 새 메모리 할당 없음.
+- RSS는 한 번도 증가하지 않고 25,600KB ➔ 22,416KB ➔ 18,488KB로 줄어든 뒤 고정 → 새 메모리 할당 없음. 감소분은 쓰지 않는 페이지를 커널이 회수한 것으로 추정한다.
+
+#### (2-1) 스레드별 대기 지점 (보조 측정)
+
+같은 조건(`MULTI_THREAD_ENABLE=true`)으로 앱을 따로 띄우고, 두 스레드가 BLOCKED를 출력한 뒤 `/proc/<PID>/task/<TID>/`의 `status`와 `wchan`(커널에서 잠들어 있는 함수)을 읽었다 (2026-10-27 19:22, 별도 실행).
+
+```text
+== 9697 (부모: PyInstaller 부트로더)
+  tid=9697 state=S wchan=do_wait        ← 자식 프로세스 종료 대기
+== 9698 (자식: 실제 앱)
+  tid=9698 state=S wchan=futex_wait     ← 메인(AgentWorker): Worker 종료 대기
+  tid=9699 state=S wchan=futex_wait     ← Worker-Thread-1: Lock 대기
+  tid=9700 state=S wchan=futex_wait     ← Worker-Thread-2: Lock 대기
+```
+
+- 3개 스레드가 모두 `S`(sleep) 상태로 `futex_wait`에서 멈춰 있다. `futex`는 Linux에서 Lock 대기를 구현하는 커널 기능이다.
+- BLOCKED 직전(기동 9초 시점)에는 Worker 스레드 2개가 `do_select`(작업 중 `sleep`)였다가, BLOCKED 이후 `futex_wait`로 바뀌었다. 즉, 작업 대기가 아니라 Lock 대기로 멈춘 것이다.
+- 어떤 TID가 어느 Worker인지는 커널 정보만으로 구분되지 않는다 (스레드 이름이 모두 `agent-leak-app-`). 생성 순서로 대응시켰다.
 
 #### (3) 실행 스크립트 출력 ([before-run.log](../evidence/deadlock/before-run.log))
 
 ```sh
-[INFO] App started (PID: 27864)
+[INFO] App started (PID: 4596)
 [INFO] Run timeout: 120s
-[WARN] App still running after 120s. Killing (PID: 27864)
+[WARN] App still running after 120s. Killing (PID: 4596)
 [INFO] Exit mode: RUN_TIMEOUT(120s) 강제 종료
+[INFO] Exit code: 143 (SIGTERM)
 ```
 
 → 120초 시점에도 프로세스가 살아 있었음(PID 유지)을 스크립트가 확인하고 종료함.
@@ -82,12 +103,14 @@
 
 ---
 
+<br>
+
 ### 3. Root Cause Analysis
 
 #### (1) 증거로 직접 확인한 사실
 1. **PID 유지**: 120초 시점에 `App still running after 120s` — 프로세스는 종료되지 않았다.
-2. **로그 정지**: 마지막 로그는 `21:00:45` 두 스레드의 `WAITING ... (Status: BLOCKED)`이며, 이후 약 110초간 로그가 한 줄도 추가되지 않았다.
-3. **자원 정체**: BLOCKED 이후 `PROC_CPU`는 2.0% ➔ 0.1%로 감소, RSS는 증가하지 않고 고정, 상태는 `SNl`(대기)로 유지되었다.
+2. **로그 정지**: 마지막 로그는 `19:15:34` 두 스레드의 `WAITING ... (Status: BLOCKED)`이며, 이후 약 110초간 로그가 한 줄도 추가되지 않았다.
+3. **자원 정체**: BLOCKED 이후 `PROC_CPU`는 2.0% ➔ 0.1%로 감소, RSS는 증가 없이 감소 후 고정, 상태는 `SNl+`(대기)로 유지되었다.
 4. **Lock 획득 순서가 서로 반대**: Thread-1은 `Shared_Memory_A`를 잡은 채 `Socket_Pool_B`를, Thread-2는 `Socket_Pool_B`를 잡은 채 `Shared_Memory_A`를 기다린다.
 
 #### (2) 증거를 바탕으로 추론한 원인
@@ -105,29 +128,33 @@
 
 ---
 
+<br>
+
 ### 4. Workaround & Verification
 
 #### (1) 변경한 환경변수
 - `MULTI_THREAD_ENABLE`: `true` ➔ `false`
 
 #### (2) 변경 전 결과 (`deadlock-before`)
-- **Lock 경합 발생**: 기동 약 9초 후(21:00:45) 두 스레드 BLOCKED
-- **로그 진행**: 21:00:45 이후 정지
+- **Lock 경합 발생**: 기동 약 9초 후(19:15:34) 두 스레드 BLOCKED
+- **로그 진행**: 19:15:34 이후 정지
 - **PID 유지 / 무응답**: 120초 관찰 동안 유지 / 무응답
-- **종료 방식**: RUN_TIMEOUT(120s) 강제 종료
+- **종료 방식**: RUN_TIMEOUT(120s) 강제 종료, 종료 코드 `143 (SIGTERM)`
 
 #### (3) 변경 후 결과 (`deadlock-after`)
 - **앱 시나리오**: `Scenario Selected: [Healthy System Monitoring]` (Lock 경합 로그 없음)
-- **로그 진행**: 종료 직전(21:04:37)까지 계속 기록
+- **로그 진행**: 종료 직전(19:19:27)까지 계속 기록
   ```text
-  2026-10-13 21:03:14,961 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
-  2026-10-13 21:03:39,965 [INFO] [CpuWorker] Cooldown complete (5.00%). Resuming load increase...
-  2026-10-13 21:03:42,212 [WARNING] [MemoryWorker] Memory Usage Reached Limit (525MB). Starting cleanup...
-  2026-10-13 21:04:04,974 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
-  2026-10-13 21:04:35,762 [INFO] [MemoryWorker] Current Heap: 425MB
-  2026-10-13 21:04:37,270 [INFO] [CpuWorker] Current Load: 13.28%
+  2026-10-27 19:17:58,775 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
+  2026-10-27 19:18:32,253 [WARNING] [MemoryWorker] Memory Usage Reached Limit (525MB). Starting cleanup...
+  2026-10-27 19:18:32,278 [INFO] [System] Memory Cache Flushed. Process Stabilized.
+  >>> [SYSTEM] MEMORY RECOVERED (Cache Cleared) <<<
+  2026-10-27 19:18:33,147 [INFO] [CpuWorker] Cooldown complete (5.00%). Resuming load increase...
+  2026-10-27 19:19:04,389 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
+  2026-10-27 19:19:25,785 [INFO] [MemoryWorker] Current Heap: 425MB
+  2026-10-27 19:19:27,244 [INFO] [CpuWorker] Current Load: 14.24%
   ```
-- **자원 변화**: RSS가 증가 ➔ cleanup ➔ 재증가를 반복 (최대 535,164KB), 정상적으로 작업 중임을 보여줌
+- **자원 변화**: RSS가 증가 ➔ cleanup ➔ 재증가를 반복 (최대 538,004KB), 정상적으로 작업 중임을 보여줌
 - **종료 방식**: RUN_TIMEOUT(120s) 강제 종료 ([after-run.log](../evidence/deadlock/after-run.log)) — 정상 동작 중이라 스스로 끝나지 않음
 
 #### (4) Before & After 비교 요약
@@ -136,10 +163,11 @@
 | :--- | :---: | :---: | :--- |
 | **부팅 판정** | `WARNING` + `POTENTIAL DEADLOCK` | `OK` | 경고 해소 |
 | **PID 유지** | 120초 유지 | 120초 유지 | 둘 다 살아 있음 |
-| **로그 마지막 위치** | 21:00:45 `WAITING ... BLOCKED` | 21:04:37 (종료 직전까지 진행) | **Before만 정지** |
+| **로그 마지막 위치** | 19:15:34 `WAITING ... BLOCKED` | 19:19:27 (종료 직전까지 진행) | **Before만 정지** |
 | **CPU 변화** | BLOCKED 이후 2.0% ➔ 0.1% | 앱 Load 5~50% 주기 변동 | Before는 정체 |
-| **메모리 변화** | 22,440KB에서 고정 | 증가·cleanup 반복 (최대 535,164KB) | Before는 정체 |
-| **스레드 상태** | 3개, `SNl`, 2개 BLOCKED | 3개, `SNl`, 정상 작업 | |
+| **메모리 변화** | 증가 없이 18,488KB에서 고정 | 증가·cleanup 반복 (최대 538,004KB) | Before는 정체 |
+| **스레드 상태** | 3개, `SNl+`, 2개 BLOCKED | 3개, `SNl+`, 정상 작업 | |
+| **종료 코드** | 143 (타임아웃 SIGTERM) | 143 (타임아웃 SIGTERM) | 둘 다 스스로 끝나지 않음 |
 | **무응답 발생** | **발생** | 발생하지 않음 | 장애 회피 |
 
 #### (5) 임시 조치의 한계

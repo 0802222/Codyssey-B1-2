@@ -2,7 +2,29 @@
 
 장애 유형별 분석 절차, 증거 수집 명령어, 리포트 작성 기준을 정리한다.
 
+<br>
+
 ## 장애 유형별 분석 절차
+
+```mermaid
+flowchart TD
+    S["장애 발생"] --> Q1{"PID가 남아 있나?<br/>ps -ef"}
+    Q1 -- "없음 (종료됨)" --> Q2{"종료 직전 로그"}
+    Q2 -- "Memory limit exceeded<br/>SELF-TERMINATED" --> OOM["OOM<br/>RSS 증가 추세 확인"]
+    Q2 -- "CPU Threshold Violated<br/>WATCHDOG ... SIGTERM" --> CPU["CPU 과점유<br/>Load 상승 구간 확인"]
+    Q1 -- "있음" --> Q3{"로그가 계속 진행되나?"}
+    Q3 -- "예" --> OK["정상 동작"]
+    Q3 -- "아니오, CPU·RSS 정체" --> Q4{"마지막 로그에<br/>WAITING / BLOCKED?"}
+    Q4 -- "예" --> DL["Deadlock<br/>ps -L 로 스레드 상태 확인"]
+    OOM --> FIX["관련 환경변수 1개만 변경 후 재실행"]
+    CPU --> FIX
+    DL --> FIX
+    FIX --> CMP["Before / After 비교 → 리포트"]
+```
+
+- 종료 코드도 함께 본다. `137`(128+9)은 SIGKILL, `143`(128+15)은 SIGTERM으로 종료된 것이다.
+
+<br>
 
 ### 1. OOM 분석
 
@@ -20,11 +42,13 @@
 
 설정값을 높인 후 생존 시간이 증가하더라도 메모리가 계속 증가한다면 임시 조치만 성공한 것이다. 근본 원인인 메모리 누수는 해결되지 않은 것으로 판단한다.
 
+<br>
+
 ### 2. CPU 과점유 분석
 
 `05-monitor-app-resources.sh`, `top`, `ps`를 사용하여 CPU 사용률이 급격히 상승하는 구간을 찾는다. 시스템 전체가 아닌 `agent-leak-app` 프로세스의 CPU 사용률이 높아졌는지 확인한다.
 
-종료 전후의 프로그램 로그에서 `WATCHDOG`, `SIGTERM`과 같은 메시지를 찾는다. 이를 근거로 CPU 임계치 초과와 Watchdog의 보호 동작을 연결한다.
+종료 전후의 프로그램 로그에서 `WATCHDOG`, `SIGTERM`과 같은 메시지를 찾는다. 이를 근거로 CPU 임계치 초과와 Watchdog의 보호 동작을 연결한다. 이 메시지는 출력이 파일로 리다이렉트되면 사라질 수 있으므로, 종료 코드(143)를 함께 확인한다. 자세한 내용은 [06-troubleshooting.md](./06-troubleshooting.md)를 참고한다.
 
 `CPU_MAX_OCCUPY`를 변경하기 전과 변경한 후에 각각 실행한다. 다음 항목을 비교한다.
 
@@ -35,6 +59,8 @@
 - Watchdog 관련 로그
 
 설정값을 높인 뒤 프로세스가 더 오래 실행되어도 CPU 사용률 자체가 계속 높다면 근본 원인은 해결되지 않은 것이다.
+
+<br>
 
 ### 3. Deadlock 분석
 

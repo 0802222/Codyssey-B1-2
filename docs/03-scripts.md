@@ -2,6 +2,8 @@
 
 실험 자동화 스크립트의 구조, 실행 방법, 관제 로그 형식을 정리한다.
 
+<br>
+
 ## 구조
 
 미션에서 필수로 요구하는 파일만 중심으로 구성한다. 보너스 과제는 실제로 수행할 때 별도의 리포트를 추가한다.
@@ -10,13 +12,13 @@
 Codyssey-B1-2/
 ├── README.md
 ├── .gitignore
-├── docs/                         # README 상세 문서
+├── docs/                            # README 상세 문서
 ├── bin/
 │   └── agent-leak-app-x86
 ├── scripts/
+│   ├── experiment-cases.conf        # 실험 케이스별 환경변수
 │   ├── 00-run-all-experiments.sh    # 전체 실행 진입점 (호스트)
 │   ├── 01-setup-container.sh        # 컨테이너 생성·시작 + 프로비전 + 방화벽 (호스트)
-│   ├── experiment-cases.conf     # 실험 케이스별 환경변수
 │   ├── 02-provision-runtime.sh      # 패키지·사용자·디렉터리·agent.env 준비 (root)
 │   ├── 03-configure-firewall.sh     # UFW 포트 정책 적용 (root)
 │   ├── 04-run-experiment-case.sh    # 케이스 1개 실행 + 원본 로그 저장 (agentuser)
@@ -32,20 +34,64 @@ Codyssey-B1-2/
     └── deadlock/
 ```
 
+<br>
+
 ## 각 스크립트의 역할
 
 `00-run-all-experiments.sh`는 순서만 조율하고, 각 단계는 한 가지 책임을 가진 스크립트가 담당한다.
 
-```text
-00-run-all-experiments.sh (호스트)
-├── 01-setup-container.sh                (호스트)
-│   ├── 02-provision-runtime.sh                  (컨테이너, root)
-│   └── 03-configure-firewall.sh         (컨테이너, root)
-└── experiment-cases.conf 의 케이스마다
-    └── 04-run-experiment-case.sh             (컨테이너, agentuser)
-        ├── 05-monitor-app-resources.sh                (백그라운드)
-        └── 06-summarize-evidence.sh
+```mermaid
+flowchart TD
+    subgraph HOST["호스트 (Mac)"]
+        R00["00-run-all-experiments.sh"]
+        R01["01-setup-container.sh"]
+        CONF[("experiment-cases.conf")]
+    end
+    subgraph CT["컨테이너 codyssey-b1-2-lab (linux/amd64)"]
+        R02["02-provision-runtime.sh<br/>(root)"]
+        R03["03-configure-firewall.sh<br/>(root)"]
+        R04["04-run-experiment-case.sh<br/>(agentuser)"]
+        R05["05-monitor-app-resources.sh<br/>(백그라운드)"]
+        R06["06-summarize-evidence.sh"]
+        EV[("evidence/type/")]
+    end
+    R00 --> R01
+    R01 --> R02 --> R03
+    R00 -- "케이스마다" --> R04
+    CONF -. "환경변수" .-> R04
+    R04 --> R05
+    R04 --> R06
+    R04 --> EV
+    R06 --> EV
 ```
+
+<br>
+
+### 04-run-experiment-case.sh 한 케이스의 진행 순서
+
+```mermaid
+sequenceDiagram
+    participant Run as 04-run-experiment-case.sh
+    participant Pty as script (pty)
+    participant App as agent-leak-app-x86
+    participant Mon as 05-monitor
+    Run->>Run: env 스냅샷 저장
+    Run->>Pty: script -qefc 로 앱 실행
+    Pty->>App: 가상 터미널에서 실행
+    Run->>Mon: 1초 간격 관제 시작
+    alt 앱이 스스로 종료 (OOM, CPU)
+        App-->>Pty: 종료 코드 137 / 143
+    else RUN_TIMEOUT 도달 (Deadlock, After)
+        Run->>App: pkill -TERM
+        App-->>Pty: 종료 코드 143
+    end
+    Pty-->>Run: 종료 코드 전달 (-e 옵션)
+    Run->>Run: run.log에 Exit mode, Exit code 기록
+    Run->>Mon: 관제 종료
+    Run->>Run: 06-summarize-evidence.sh 로 CSV·스니펫 생성
+```
+
+- 앱을 `script`로 감싸는 이유는 [06-troubleshooting.md](./06-troubleshooting.md)에 정리했다.
 
 | 스크립트 | 실행 주체 | 실행 시점 | 역할 |
 | --- | --- | --- | --- |
@@ -54,9 +100,11 @@ Codyssey-B1-2/
 | experiment-cases.conf | - | - | 케이스 이름과 케이스별 환경변수 정의 (데이터) |
 | 02-provision-runtime.sh | root | 컨테이너 생성 직후 | 패키지 설치, 사용자·경로·`agent.env` 준비 |
 | 03-configure-firewall.sh | root | provision 이후 | UFW 규칙·포트 정책 구성 |
-| 04-run-experiment-case.sh | agentuser | 케이스마다 | 앱·monitor 실행, `RUN_TIMEOUT` 처리, 원본 로그(app·monitor·run·env) 저장 |
+| 04-run-experiment-case.sh | agentuser | 케이스마다 | 앱을 pty(`script`)로 실행, monitor 실행, `RUN_TIMEOUT` 처리, 종료 코드 기록, 원본 로그(app·monitor·run·env) 저장 |
 | 05-monitor-app-resources.sh | agentuser | 앱 실행 중 | 프로세스·CPU·메모리·RSS·스레드·포트 상태 기록 |
 | 06-summarize-evidence.sh | agentuser | run-experiment 마지막, 또는 단독 | 원본 로그로 시계열 CSV·리포트 스니펫 생성 (실험 없이 재생성 가능) |
+
+<br>
 
 ## 실행 방법
 
@@ -96,7 +144,7 @@ SKIP_SETUP=1 bash scripts/00-run-all-experiments.sh deadlock-before
 | deadlock-after | 512 | 50 | **false** | 120s |
 
 - 각 실험은 굵게 표시한 변수만 바꾸고, 나머지는 다른 장애가 먼저 일어나지 않도록 고정한다.
-- 세 값이 모두 권장 범위면 앱이 `Healthy System Monitoring` 시나리오로 종료 없이 계속 동작한다. 그래서 CPU·Deadlock 실험에는 `RUN_TIMEOUT`(초)을 걸어 시간이 지나면 앱을 종료하고 증적을 수집한다. 종료 방식은 각 `*-report-snippet.md`와 `*-run.log`에 기록된다.
+- 세 값이 모두 권장 범위면 앱이 `Healthy System Monitoring` 시나리오로 종료 없이 계속 동작한다. 그래서 CPU·Deadlock 실험에는 `RUN_TIMEOUT`(초)을 걸어 시간이 지나면 앱을 종료하고 증적을 수집한다. 종료 방식과 종료 코드(`143 (SIGTERM)` 등)는 각 `*-report-snippet.md`와 `*-run.log`에 기록된다.
 - 기존 컨테이너가 `--platform linux/amd64` 없이 만들어졌다면 `docker rm -f codyssey-b1-2-lab` 후 다시 실행한다.
 
 <br>
@@ -114,7 +162,7 @@ SKIP_SETUP=1 bash scripts/00-run-all-experiments.sh deadlock-before
 | **타임스탬프** | `[2026-09-10 16:19:27]` | 스냅샷이 수집된 시각 | **시계열 차트의 X축**, 장애 발생 시각 특정, 프로그램 로그와의 교차 검증용 |
 | **`PID`** | `7237` | Process ID (프로세스 고유 식별자) | 대상 프로세스 정상 구동 여부 확인 및 제어/디버깅 대상 지정 |
 | **`PPID`** | `7223` | Parent Process ID (부모 프로세스 ID) | 프로세스를 실행한 부모 셸 식별 및 프로세스 계층 트리 추적 |
-| **`STATE`** | `SN` | 프로세스 상태 플래그 (`S`: Sleep 대기, `N`: Nice 저우선순위) | 프로세스의 실행/대기/좀비/교착상태 여부 진단 |
+| **`STATE`** | `SN+` | 프로세스 상태 플래그 (`S`: Sleep 대기, `N`: Nice 저우선순위, `l`: 멀티스레드, `+`: 터미널 포그라운드 그룹) | 프로세스의 실행/대기/좀비/교착상태 여부 진단 |
 | **`ELAPSED`** | `00:00` | 누적 실행 시간 (`MM:SS`) | 프로세스 시작 후 경과 시간, **프로세스 생존 시간(Survival Time)** 측정용 |
 | **`THREADS`** | `1` | 프로세스 내 활성 스레드 개수 | 멀티스레드 여부, 스레드 누수 감지, **Deadlock 장애 식별용** |
 | **`PROC_CPU`** | `4.3%` | 프로세스 단독 CPU 코어 사용률 | **CPU 과점유 장애(CPU Spike/Loop) 진단**용 |

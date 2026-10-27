@@ -7,20 +7,20 @@
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
+Process state : SN+
 Elapsed time  : 00:01
 Thread count  : 1
-Process CPU   : 10.5%
+Process CPU   : 16.9%
 Process MEM   : 0.3%
-Process RSS   : 25600 KB
+Process RSS   : 25596 KB
 
-System CPU    : 2.1%
+System CPU    : 3.2%
 System MEM    : 13.3%
-DISK Used     : 19%
+DISK Used     : 4%
 
 Firewall      : active
 
@@ -30,431 +30,364 @@ Firewall      : active
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:02
+Process state : SN+
+Elapsed time  : 00:03
 Thread count  : 1
-Process CPU   : 5.4%
+Process CPU   : 6.9%
 Process MEM   : 0.6%
-Process RSS   : 51224 KB
-
-System CPU    : 2.1%
-System MEM    : 13.6%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] MEM threshold exceeded (13.6% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:04
-Thread count  : 1
-Process CPU   : 3.4%
-Process MEM   : 0.6%
-Process RSS   : 51224 KB
-
-System CPU    : 2.2%
-System MEM    : 13.6%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] MEM threshold exceeded (13.6% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:06
-Thread count  : 1
-Process CPU   : 2.5%
-Process MEM   : 0.9%
-Process RSS   : 76828 KB
-
-System CPU    : 2.1%
-System MEM    : 14.0%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] MEM threshold exceeded (14.0% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:08
-Thread count  : 1
-Process CPU   : 1.9%
-Process MEM   : 0.9%
-Process RSS   : 76828 KB
+Process RSS   : 51200 KB
 
 System CPU    : 3.2%
-System MEM    : 14.3%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] MEM threshold exceeded (14.3% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:09
-Thread count  : 1
-Process CPU   : 1.7%
-Process MEM   : 1.2%
-Process RSS   : 102432 KB
-
-System CPU    : 2.1%
 System MEM    : 13.8%
-DISK Used     : 19%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (102432KB > 102400KB)
 [WARNING] MEM threshold exceeded (13.8% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:11
+Process state : SN+
+Elapsed time  : 00:05
 Thread count  : 1
-Process CPU   : 1.5%
-Process MEM   : 1.5%
-Process RSS   : 128036 KB
+Process CPU   : 4.3%
+Process MEM   : 0.6%
+Process RSS   : 51200 KB
 
 System CPU    : 2.1%
-System MEM    : 14.3%
-DISK Used     : 19%
+System MEM    : 14.2%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (128036KB > 102400KB)
-[WARNING] MEM threshold exceeded (14.3% > 10%)
+[WARNING] MEM threshold exceeded (14.2% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:13
+Process state : SN+
+Elapsed time  : 00:07
 Thread count  : 1
-Process CPU   : 1.3%
-Process MEM   : 1.5%
-Process RSS   : 128036 KB
+Process CPU   : 3.4%
+Process MEM   : 0.9%
+Process RSS   : 76804 KB
 
 System CPU    : 2.1%
 System MEM    : 14.4%
-DISK Used     : 19%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (128036KB > 102400KB)
 [WARNING] MEM threshold exceeded (14.4% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:15
+Process state : SN+
+Elapsed time  : 00:09
 Thread count  : 1
-Process CPU   : 1.3%
-Process MEM   : 1.8%
-Process RSS   : 153640 KB
+Process CPU   : 2.8%
+Process MEM   : 1.2%
+Process RSS   : 102408 KB
 
-System CPU    : 1.1%
-System MEM    : 14.7%
-DISK Used     : 19%
+System CPU    : 3.1%
+System MEM    : 14.4%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (153640KB > 102400KB)
-[WARNING] MEM threshold exceeded (14.7% > 10%)
+[WARNING] Process RSS threshold exceeded (102408KB > 102400KB)
+[WARNING] MEM threshold exceeded (14.4% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:17
+Process state : SN+
+Elapsed time  : 00:11
 Thread count  : 1
-Process CPU   : 1.2%
-Process MEM   : 1.8%
-Process RSS   : 153640 KB
+Process CPU   : 2.3%
+Process MEM   : 1.2%
+Process RSS   : 102408 KB
 
-System CPU    : 4.2%
-System MEM    : 15.1%
-DISK Used     : 19%
+System CPU    : 4.1%
+System MEM    : 14.8%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (153640KB > 102400KB)
-[WARNING] MEM threshold exceeded (15.1% > 10%)
+[WARNING] Process RSS threshold exceeded (102408KB > 102400KB)
+[WARNING] MEM threshold exceeded (14.8% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:18
+Process state : SN+
+Elapsed time  : 00:13
 Thread count  : 1
-Process CPU   : 1.2%
-Process MEM   : 2.1%
-Process RSS   : 179244 KB
-
-System CPU    : 1.1%
-System MEM    : 15.2%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] Process RSS threshold exceeded (179244KB > 102400KB)
-[WARNING] MEM threshold exceeded (15.2% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:20
-Thread count  : 1
-Process CPU   : 1.1%
-Process MEM   : 2.4%
-Process RSS   : 204848 KB
-
-System CPU    : 2.0%
-System MEM    : 15.1%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] Process RSS threshold exceeded (204848KB > 102400KB)
-[WARNING] MEM threshold exceeded (15.1% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:22
-Thread count  : 1
-Process CPU   : 1.0%
-Process MEM   : 2.4%
-Process RSS   : 204848 KB
-
-System CPU    : 2.2%
-System MEM    : 15.2%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] Process RSS threshold exceeded (204848KB > 102400KB)
-[WARNING] MEM threshold exceeded (15.2% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:23
-Thread count  : 1
-Process CPU   : 1.0%
-Process MEM   : 2.8%
-Process RSS   : 230452 KB
+Process CPU   : 2.0%
+Process MEM   : 1.5%
+Process RSS   : 128012 KB
 
 System CPU    : 2.1%
-System MEM    : 15.6%
-DISK Used     : 19%
+System MEM    : 14.9%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (230452KB > 102400KB)
+[WARNING] Process RSS threshold exceeded (128012KB > 102400KB)
+[WARNING] MEM threshold exceeded (14.9% > 10%)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN+
+Elapsed time  : 00:15
+Thread count  : 1
+Process CPU   : 1.9%
+Process MEM   : 1.8%
+Process RSS   : 153616 KB
+
+System CPU    : 2.1%
+System MEM    : 15.2%
+DISK Used     : 4%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (153616KB > 102400KB)
+[WARNING] MEM threshold exceeded (15.2% > 10%)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN+
+Elapsed time  : 00:17
+Thread count  : 1
+Process CPU   : 1.6%
+Process MEM   : 1.8%
+Process RSS   : 153616 KB
+
+System CPU    : 3.1%
+System MEM    : 15.6%
+DISK Used     : 4%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (153616KB > 102400KB)
 [WARNING] MEM threshold exceeded (15.6% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:25
+Process state : SN+
+Elapsed time  : 00:19
 Thread count  : 1
-Process CPU   : 1.0%
-Process MEM   : 2.8%
-Process RSS   : 230452 KB
+Process CPU   : 1.5%
+Process MEM   : 2.1%
+Process RSS   : 179220 KB
 
-System CPU    : 2.1%
-System MEM    : 15.7%
-DISK Used     : 19%
+System CPU    : 3.2%
+System MEM    : 15.6%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (230452KB > 102400KB)
+[WARNING] Process RSS threshold exceeded (179220KB > 102400KB)
+[WARNING] MEM threshold exceeded (15.6% > 10%)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN+
+Elapsed time  : 00:21
+Thread count  : 1
+Process CPU   : 1.5%
+Process MEM   : 2.4%
+Process RSS   : 204824 KB
+
+System CPU    : 2.1%
+System MEM    : 15.6%
+DISK Used     : 4%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (204824KB > 102400KB)
+[WARNING] MEM threshold exceeded (15.6% > 10%)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN+
+Elapsed time  : 00:22
+Thread count  : 1
+Process CPU   : 1.4%
+Process MEM   : 2.4%
+Process RSS   : 204824 KB
+
+System CPU    : 2.1%
+System MEM    : 15.7%
+DISK Used     : 4%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (204824KB > 102400KB)
 [WARNING] MEM threshold exceeded (15.7% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:27
+Process state : SN+
+Elapsed time  : 00:24
 Thread count  : 1
-Process CPU   : 0.9%
-Process MEM   : 3.1%
-Process RSS   : 256056 KB
+Process CPU   : 1.3%
+Process MEM   : 2.8%
+Process RSS   : 230428 KB
 
-System CPU    : 1.0%
-System MEM    : 16.1%
-DISK Used     : 19%
+System CPU    : 3.2%
+System MEM    : 16.0%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (256056KB > 102400KB)
-[WARNING] MEM threshold exceeded (16.1% > 10%)
+[WARNING] Process RSS threshold exceeded (230428KB > 102400KB)
+[WARNING] MEM threshold exceeded (16.0% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:29
+Process state : SN+
+Elapsed time  : 00:26
 Thread count  : 1
-Process CPU   : 0.9%
+Process CPU   : 1.3%
 Process MEM   : 3.1%
-Process RSS   : 256056 KB
+Process RSS   : 256032 KB
 
-System CPU    : 2.1%
-System MEM    : 16.2%
-DISK Used     : 19%
+System CPU    : 2.2%
+System MEM    : 17.3%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (256056KB > 102400KB)
-[WARNING] MEM threshold exceeded (16.2% > 10%)
+[WARNING] Process RSS threshold exceeded (256032KB > 102400KB)
+[WARNING] MEM threshold exceeded (17.3% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
 Checking port 15034... [OK]
 
 [RESOURCE MONITORING]
-Process state : SN
+Process state : SN+
+Elapsed time  : 00:28
+Thread count  : 1
+Process CPU   : 1.2%
+Process MEM   : 3.1%
+Process RSS   : 256032 KB
+
+System CPU    : 3.1%
+System MEM    : 17.4%
+DISK Used     : 4%
+
+Firewall      : active
+
+[WARNING] Process RSS threshold exceeded (256032KB > 102400KB)
+[WARNING] MEM threshold exceeded (17.4% > 10%)
+
+[INFO] Log appended: /workspace/runtime/logs/monitor.log
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-leak-app-x86'... [OK] (PID: 695)
+Checking port 15034... [OK]
+
+[RESOURCE MONITORING]
+Process state : SN+
 Elapsed time  : 00:30
 Thread count  : 1
-Process CPU   : 0.9%
+Process CPU   : 1.1%
 Process MEM   : 3.4%
-Process RSS   : 281660 KB
+Process RSS   : 281636 KB
 
 System CPU    : 2.1%
-System MEM    : 16.1%
-DISK Used     : 19%
+System MEM    : 17.2%
+DISK Used     : 4%
 
 Firewall      : active
 
-[WARNING] Process RSS threshold exceeded (281660KB > 102400KB)
-[WARNING] MEM threshold exceeded (16.1% > 10%)
+[WARNING] Process RSS threshold exceeded (281636KB > 102400KB)
+[WARNING] MEM threshold exceeded (17.2% > 10%)
 
 [INFO] Log appended: /workspace/runtime/logs/monitor.log
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]
-Checking process 'agent-leak-app-x86'... [OK] (PID: 23354)
-Checking port 15034... [OK]
-
-[RESOURCE MONITORING]
-Process state : SN
-Elapsed time  : 00:32
-Thread count  : 1
-Process CPU   : 0.8%
-Process MEM   : 3.4%
-Process RSS   : 281660 KB
-
-System CPU    : 2.1%
-System MEM    : 13.1%
-DISK Used     : 19%
-
-Firewall      : active
-
-[WARNING] Process RSS threshold exceeded (281660KB > 102400KB)
-[WARNING] MEM threshold exceeded (13.1% > 10%)
-
-[INFO] Log appended: /workspace/runtime/logs/monitor.log
+[ERROR] Process 'agent-leak-app-x86' not running
 ====== SYSTEM MONITOR RESULT ======
 
 [HEALTH CHECK]

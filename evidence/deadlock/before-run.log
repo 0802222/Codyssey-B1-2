@@ -1,39 +1,18 @@
 ===== Experiment: deadlock-before =====
-Started at   : 2026-10-13 21:00:35 KST
+Started at   : 2026-10-27 19:15:24 KST
 Evidence dir : /workspace/evidence/deadlock
 
 [INFO] Env snapshot saved: /workspace/evidence/deadlock/before-env-snapshot.txt
 [INFO] Starting app: /workspace/bin/agent-leak-app-x86
 
-[INFO] App started (PID: 27864)
-[INFO] Monitor started (PID: 27865, target app PID: 27864)
+[INFO] App started (PID: 4596)
+[INFO] Monitor started (PID: 4597, target app PID: 4596)
 [INFO] Run timeout: 120s
-[WARN] App still running after 120s. Killing (PID: 27864)
+[WARN] App still running after 120s. Killing (PID: 4596)
 [INFO] Exit mode: RUN_TIMEOUT(120s) 강제 종료
+[INFO] Exit code: 143 (SIGTERM)
 [INFO] Monitor log copied: /workspace/evidence/deadlock/before-monitor.log
-[INFO] Timeseries CSV: /workspace/evidence/deadlock/before-timeseries.csv (70 rows)
+[INFO] Timeseries CSV: /workspace/evidence/deadlock/before-timeseries.csv (61 rows)
 [INFO] Report snippet: /workspace/evidence/deadlock/before-report-snippet.md
 
 ===== Experiment complete: deadlock-before =====
-Files saved to /workspace/evidence/deadlock:
-total 168
-drwxr-xr-x 1 agentuser agentuser   480 Oct 13 21:00 .
-drwxr-xr-x 1 agentuser agentuser   192 Oct 13 20:43 ..
--rw-r--r-- 1 agentuser agentuser  8331 Oct 13 20:47 after-app.log
--rw-r--r-- 1 agentuser agentuser   176 Oct 13 20:45 after-env-snapshot.txt
--rw-r--r-- 1 agentuser agentuser 37742 Oct 13 20:47 after-monitor-stdout.log
--rw-r--r-- 1 agentuser agentuser 18046 Oct 13 20:47 after-monitor.log
--rw-r--r-- 1 agentuser agentuser  4474 Oct 13 20:47 after-report-snippet.md
--rw-r--r-- 1 agentuser agentuser  3551 Oct 13 20:47 after-timeseries.csv
--rw-r--r-- 1 agentuser agentuser  2648 Oct 13 21:00 before-app.log
--rw-r--r-- 1 agentuser agentuser   176 Oct 13 21:00 before-env-snapshot.txt
--rw-r--r-- 1 agentuser agentuser 34092 Oct 13 21:02 before-monitor-stdout.log
--rw-r--r-- 1 agentuser agentuser 17987 Oct 13 21:02 before-monitor.log
--rw-r--r-- 1 agentuser agentuser  5128 Oct 13 21:02 before-report-snippet.md
--rw-r--r-- 1 agentuser agentuser   815 Oct 13 21:02 before-run.log
--rw-r--r-- 1 agentuser agentuser  3492 Oct 13 21:02 before-timeseries.csv
-
-Next steps:
-  1) /workspace/evidence/deadlock/before-report-snippet.md 을 열어 리포트에 인용
-  2) /workspace/evidence/deadlock/before-timeseries.csv 를 그래프로 시각화
-  3) reports/*.md 의 원인 분석/조치 섹션 작성

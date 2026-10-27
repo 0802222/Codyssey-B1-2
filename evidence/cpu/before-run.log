@@ -1,38 +1,17 @@
 ===== Experiment: cpu-before =====
-Started at   : 2026-10-13 20:57:57 KST
+Started at   : 2026-10-27 19:12:48 KST
 Evidence dir : /workspace/evidence/cpu
 
 [INFO] Env snapshot saved: /workspace/evidence/cpu/before-env-snapshot.txt
 [INFO] Starting app: /workspace/bin/agent-leak-app-x86
 
-[INFO] App started (PID: 24180)
-[INFO] Monitor started (PID: 24181, target app PID: 24180)
+[INFO] App started (PID: 1417)
+[INFO] Monitor started (PID: 1418, target app PID: 1417)
 [INFO] Run timeout: 120s
 [INFO] Exit mode: 앱 자체 종료
+[INFO] Exit code: 143 (SIGTERM)
 [INFO] Monitor log copied: /workspace/evidence/cpu/before-monitor.log
-[INFO] Timeseries CSV: /workspace/evidence/cpu/before-timeseries.csv (18 rows)
+[INFO] Timeseries CSV: /workspace/evidence/cpu/before-timeseries.csv (14 rows)
 [INFO] Report snippet: /workspace/evidence/cpu/before-report-snippet.md
 
 ===== Experiment complete: cpu-before =====
-Files saved to /workspace/evidence/cpu:
-total 132
-drwxr-xr-x 1 agentuser agentuser   480 Oct 13 20:57 .
-drwxr-xr-x 1 agentuser agentuser   192 Oct 13 20:43 ..
--rw-r--r-- 1 agentuser agentuser  8327 Oct 13 20:43 after-app.log
--rw-r--r-- 1 agentuser agentuser   171 Oct 13 20:41 after-env-snapshot.txt
--rw-r--r-- 1 agentuser agentuser 37779 Oct 13 20:43 after-monitor-stdout.log
--rw-r--r-- 1 agentuser agentuser 18045 Oct 13 20:43 after-monitor.log
--rw-r--r-- 1 agentuser agentuser  4462 Oct 13 20:43 after-report-snippet.md
--rw-r--r-- 1 agentuser agentuser  3550 Oct 13 20:43 after-timeseries.csv
--rw-r--r-- 1 agentuser agentuser  2103 Oct 13 20:58 before-app.log
--rw-r--r-- 1 agentuser agentuser   172 Oct 13 20:57 before-env-snapshot.txt
--rw-r--r-- 1 agentuser agentuser  8934 Oct 13 20:58 before-monitor-stdout.log
--rw-r--r-- 1 agentuser agentuser  4609 Oct 13 20:58 before-monitor.log
--rw-r--r-- 1 agentuser agentuser  4534 Oct 13 20:58 before-report-snippet.md
--rw-r--r-- 1 agentuser agentuser   703 Oct 13 20:58 before-run.log
--rw-r--r-- 1 agentuser agentuser   930 Oct 13 20:58 before-timeseries.csv
-
-Next steps:
-  1) /workspace/evidence/cpu/before-report-snippet.md 을 열어 리포트에 인용
-  2) /workspace/evidence/cpu/before-timeseries.csv 를 그래프로 시각화
-  3) reports/*.md 의 원인 분석/조치 섹션 작성

@@ -14,8 +14,8 @@
 ------------------------------------------------------------
 All Boot Checks Passed!
 Agent READY
-2026-10-13 20:57:09,053 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-10-13 20:57:09,055 [INFO] Agent listening at port 15034
+2026-10-27 19:11:58,867 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-10-27 19:11:58,869 [INFO] Agent listening at port 15034
 
 ==================================================
  [ Agent Initiate ] Resource Check 
@@ -27,9 +27,13 @@ Agent READY
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-10-13 20:57:11,083 [INFO] [MemoryWorker] Current Heap: 25MB
-2026-10-13 20:57:14,091 [INFO] [MemoryWorker] Current Heap: 50MB
-2026-10-13 20:57:17,116 [INFO] [MemoryWorker] Current Heap: 75MB
-2026-10-13 20:57:20,165 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-10-13 20:57:20,167 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
-2026-10-13 20:57:20,167 [CRITICAL] [MemoryGuard] Self-terminating process 23029 to prevent system instability.
+2026-10-27 19:12:00,883 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-10-27 19:12:03,907 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-10-27 19:12:06,940 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-10-27 19:12:09,971 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
+2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Self-terminating process 370 to prevent system instability.
+
+
+>>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<
+

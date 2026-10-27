@@ -14,8 +14,8 @@
 ------------------------------------------------------------
 All Boot Checks Passed!
 Agent READY
-2026-10-13 21:00:36,039 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-10-13 21:00:36,040 [INFO] Agent listening at port 15034
+2026-10-27 19:15:25,308 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-10-27 19:15:25,310 [INFO] Agent listening at port 15034
 
 ==================================================
  [ Agent Initiate ] Resource Check 
@@ -27,16 +27,16 @@ Agent READY
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-10-13 21:00:38,055 [WARNING] [AgentWorker] Initializing concurrent transaction processors...
-2026-10-13 21:00:38,058 [WARNING] [System] CAUTION: Strict resource locking is enabled.
-2026-10-13 21:00:43,099 [INFO] [Worker-Thread-1] Process Started. Attempting to lock [Shared_Memory_A]...
-2026-10-13 21:00:43,101 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
-2026-10-13 21:00:43,100 [INFO] [AgentWorker] Waiting for worker threads to complete transactions...
-2026-10-13 21:00:43,101 [INFO] [AgentWorker][Worker-Thread-1] Processing critical data in Memory A...
-2026-10-13 21:00:43,100 [INFO] [AgentWorker][Worker-Thread-2] Process Started. Attempting to lock [Socket_Pool_B]...
-2026-10-13 21:00:43,102 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
-2026-10-13 21:00:43,102 [INFO] [AgentWorker][Worker-Thread-2] Establishing network connections in Pool B...
-2026-10-13 21:00:45,114 [INFO] [AgentWorker][Worker-Thread-1] Need resource [Socket_Pool_B] to finish job.
-2026-10-13 21:00:45,116 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)
-2026-10-13 21:00:45,116 [INFO] [AgentWorker][Worker-Thread-2] Need resource [Shared_Memory_A] to write logs.
-2026-10-13 21:00:45,117 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
+2026-10-27 19:15:27,326 [WARNING] [AgentWorker] Initializing concurrent transaction processors...
+2026-10-27 19:15:27,327 [WARNING] [System] CAUTION: Strict resource locking is enabled.
+2026-10-27 19:15:32,357 [INFO] [Worker-Thread-1] Process Started. Attempting to lock [Shared_Memory_A]...
+2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
+2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-1] Processing critical data in Memory A...
+2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-2] Process Started. Attempting to lock [Socket_Pool_B]...
+2026-10-27 19:15:32,358 [INFO] [AgentWorker] Waiting for worker threads to complete transactions...
+2026-10-27 19:15:32,359 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
+2026-10-27 19:15:32,359 [INFO] [AgentWorker][Worker-Thread-2] Establishing network connections in Pool B...
+2026-10-27 19:15:34,360 [INFO] [AgentWorker][Worker-Thread-2] Need resource [Shared_Memory_A] to write logs.
+2026-10-27 19:15:34,360 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
+2026-10-27 19:15:34,373 [INFO] [AgentWorker][Worker-Thread-1] Need resource [Socket_Pool_B] to finish job.
+2026-10-27 19:15:34,373 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)

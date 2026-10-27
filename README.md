@@ -13,7 +13,7 @@
 - [x] CPU Latency 분석 리포트 ([02-cpu-report.md](./reports/02-cpu-report.md))
 - [x] Deadlock 분석 리포트 ([03-deadlock-report.md](./reports/03-deadlock-report.md))
 - [x] 각 장애의 Before & After 증거 ([evidence/](./evidence/))
-- [x] 실행 방법과 실험 결과가 정리된 README ([실행 방법](#실행-방법), [결과 비교](#결과-비교))
+- [x] 실행 방법과 실험 결과 정리 ([실행 방법](./docs/03-scripts.md#실행-방법), [결과 비교](#결과-비교))
 
 <br>
 <br>
@@ -44,448 +44,37 @@
 <br>
 <br>
 
-## 먼저 알아야 할 기본 개념
+## 요구사항별 수행 내용
 
-### 1. 프로그램, 프로세스, 스레드
+| 요구사항 | 수행 내용 | 확인 위치 |
+|---|---|---|
+| 실행 조건 충족 | 일반 사용자(`agentuser`), 필수 환경변수, 디렉터리, `secret.key`, `0.0.0.0:15034` 바인딩을 스크립트로 준비 | [02-environment.md](./docs/02-environment.md), [02-provision-runtime.sh](./scripts/02-provision-runtime.sh) |
+| OOM 증거 | 관제 로그의 RSS 상승 수치, `Memory limit exceeded` / `SELF-TERMINATED` 로그, `MEMORY_LIMIT` 100 → 256 두 번 실행 비교 | [01-oom-report.md](./reports/01-oom-report.md), [evidence/oom/](./evidence/oom/) |
+| CPU 증거 | 부하 상승 구간(관제 로그, `ps`, `top`), 종료 로그, `CPU_MAX_OCCUPY` 90 → 50 비교 | [02-cpu-report.md](./reports/02-cpu-report.md), [evidence/cpu/](./evidence/cpu/) |
+| Deadlock 증거 | 120초 동안 PID 유지, 관제 로그의 CPU/RSS 정체와 `THREADS:3` `STATE:SNl` 유지, 마지막 `WAITING ... BLOCKED` 로그, 순환 대기 추론, `MULTI_THREAD_ENABLE` true → false 비교 | [03-deadlock-report.md](./reports/03-deadlock-report.md), [evidence/deadlock/](./evidence/deadlock/) |
+| 리포트 형식 | 세 리포트 모두 `[Bug]` 제목, Description / Evidence & Logs / Root Cause Analysis / Workaround & Verification 구조 | [reports/](./reports/) |
+| 관련 OS 동작 원리 | 메모리 누수, RSS, Watchdog, SIGTERM, Deadlock 4대 조건, Lock | [01-concepts.md](./docs/01-concepts.md) |
+| 표준 명령어 사용 | `ps`, `top`, `kill`, 관제 스크립트만 사용. 바이너리 디컴파일 없음 | [04-analysis.md](./docs/04-analysis.md#증거-수집-명령어) |
 
-`프로그램`은 저장장치에 있는 실행 파일이다. 프로그램을 실행하면 운영체제가 메모리와 CPU를 할당하는데, 이렇게 실행 중인 프로그램을 `프로세스`라고 한다.
+<br>
+<br>
 
-`스레드`는 프로세스 안에서 실제 작업을 수행하는 실행 단위이다. 하나의 식당을 프로세스라고 한다면, 식당 안에서 각자 일을 수행하는 직원들을 스레드라고 생각할 수 있다.
+## 빠른 실행
 
-### 2. PID
-
-PID는 `Process ID`의 약자로, 운영체제가 실행 중인 프로세스를 구분하기 위해 부여하는 번호이다. 프로그램이 응답하지 않더라도 PID가 조회된다면 프로세스 자체는 아직 종료되지 않은 상태이다.
+레포 루트에서 실행한다. 컨테이너 준비부터 6개 케이스 실험, 증거 저장까지 한 번에 진행된다.
 
 ```bash
-ps -ef | grep agent-leak-app
-```
-
-PID가 존재한다는 사실만으로 프로그램이 `정상 동작한다고 판단할 수는 없다`. 
-
-`CPU`와 `메모리 변화`, `로그 진행 여부`, `스레드 상태`도 함께 확인해야 한다.
-
-<br>
-
-### 3. OOM
-
-OOM은 `Out Of Memory`의 약자로, 프로그램이나 시스템에서 사용할 수 있는 메모리가 부족한 상태를 의미한다. 프로그램이 데이터를 계속 메모리에 쌓으면 사용할 수 있는 메모리가 줄어들고, 결국 프로그램이 더 이상 정상적으로 동작하기 어려워진다.
-
-이번 미션에서는 메모리 사용량이 `MEMORY_LIMIT`에 도달했을 때 애플리케이션의 `MemoryGuard`가 프로세스를 종료하는지 확인한다. 이는 시스템 전체가 불안정해지기 전에 애플리케이션을 종료하는 자체 보호 동작이다.
-
-### 4. 메모리 누수
-
-메모리 누수는 프로그램이 더 이상 필요하지 않은 데이터를 계속 참조하여 메모리에서 정리되지 않는 현상이다. 물을 계속 받으면서 비우지 않는 물통처럼, 시간이 지날수록 사용 중인 메모리가 증가한다.
-
-이번 미션에서는 `05-monitor-app-resources.sh`, `ps`, `top`을 사용하여 `agent-leak-app`의 메모리 사용량이 시간에 따라 계속 증가하는지 확인한다. 메모리 사용량이 반복해서 증가하고 감소하지 않는다면 메모리 누수를 의심할 수 있다.
-
-### 5. RSS
-
-RSS는 `Resident Set Size`의 약자로, 코드, 전역변수, 힙, 스택을 모두 포함해서 프로세스가 현재 실제 물리 메모리에서 사용하고 있는 크기이다.
-
-반면 VSZ(Virtual Set Size)는 프로세스가 OS로부터 할당받은 가상 메모리 전체 크기이다.
-따라서, 동적 할당을 하면 VSZ는 증가하지만 RSS는 바로 증가하지 않고, OS가 실제로 메모리를 할당하는 시점에 Page Fault가 발생하고, 물리 RAM이 매핑되면서 RSS가 증가한다. 
-
-즉, VSZ는 프로세스가 요청한 메모리 크기이고, RSS는 실제로 사용 중인 메모리 크기이다.
-
-### 6. MemoryGuard
-
-`MemoryGuard`는 애플리케이션의 메모리 사용량을 감시하는 보호 기능이다. 사용량이 `MEMORY_LIMIT`을 넘으면 시스템 전체의 불안정을 막기 위해 애플리케이션을 종료할 수 있다.
-
-다음과 같은 로그가 기록되는지 확인한다.
-
-```text
-Memory limit exceeded
-SELF-TERMINATED
-```
-
-`MEMORY_LIMIT`을 높이면 프로그램이 더 오래 실행될 수 있다. 하지만 메모리 사용량이 계속 증가한다면 누수 자체가 해결된 것은 아니므로, 환경변수 변경은 임시 조치이다.
-
-<br>
-
-### 7. CPU와 CPU 과점유
-
-`CPU`는 프로그램의 명령을 계산하고 처리하는 장치이다. 여러 프로세스는 CPU를 번갈아 사용하며 작업을 수행한다.
-
-`CPU 과점유`는 특정 프로세스가 CPU를 지나치게 많이 사용하는 상태이다. 한 사람이 공용 도구를 오랫동안 독점하면 다른 사람이 기다려야 하는 것처럼, 특정 프로세스가 CPU를 과도하게 사용하면 다른 프로세스의 실행이 늦어져 시스템 응답 지연이 발생할 수 있다.
-
-이번 미션에서는 시스템 전체 CPU 사용률만 보는 것이 아니라, `top`과 `ps`를 사용하여 `agent-leak-app`의 CPU 사용률이 급격히 상승하는지 확인한다.
-
-### 8. CPU Latency
-
-`Latency`는 요청을 보낸 뒤 응답을 받을 때까지 걸리는 지연 시간을 의미한다. 특정 프로세스가 CPU를 과도하게 사용하면 다른 작업이 CPU를 할당받기까지 기다리는 시간이 길어질 수 있다.
-
-따라서 이번 미션의 CPU Latency 분석에서는 대상 프로세스의 CPU 사용률 상승과 프로그램의 응답 또는 종료 상태를 함께 확인한다.
-
-### 9. Watchdog과 SIGTERM
-
-`Watchdog`은 프로그램의 상태와 자원 사용량을 감시하는 보호 기능이다. CPU 사용률이 설정된 `CPU_MAX_OCCUPY`를 넘으면 시스템을 보호하기 위해 프로세스에 종료 신호를 보낼 수 있다.
-
-`SIGTERM`은 프로세스에 정상적인 종료를 요청하는 Linux 신호이다. 다음과 같은 로그가 기록된다면 단순 오류가 아니라 Watchdog의 보호 조치로 종료되었는지 분석한다.
-
-```text
-WATCHDOG
-INITIATING EMERGENCY ABORT
-SIGTERM
-```
-
-`CPU_MAX_OCCUPY`를 높이는 것은 Watchdog의 종료 기준을 변경하는 조치이다. 프로그램이 사용하는 CPU 자체를 줄이는 근본 해결책은 아니다.
-
-<br>
-
-### 10. Deadlock
-
-`Deadlock`은 교착상태라는 뜻이다. 둘 이상의 스레드가 서로 상대방이 가진 자원을 기다리면서 아무도 다음 작업으로 진행하지 못하는 상태이다.
-
-```text
-예를 들어 스레드 A가 펜을 가진 상태에서 노트를 기다리고, 스레드 B가 노트를 가진 상태에서 펜을 기다린다고 가정한다. A는 B가 노트를 놓기를 기다리고, B는 A가 펜을 놓기를 기다린다. 두 스레드 모두 가진 것을 놓지 않기 때문에 기다림이 끝나지 않는다.
-```
-
-Deadlock이 발생해도 프로세스가 바로 종료되는 것은 아니다. PID는 존재하지만 CPU와 메모리 사용량의 변화가 거의 없고, 새로운 로그도 출력되지 않는 무응답 상태가 나타날 수 있다.
-
-### 10-1. Deadlock의 네 가지 조건
-
-Deadlock은 다음 네 가지 조건이 모두 성립할 때 발생할 수 있다.
-
-1. 상호 배제는 하나의 자원을 한 번에 하나의 스레드만 사용할 수 있는 상태이다.
-2. 점유 대기는 스레드가 자원 하나를 가진 채 다른 자원을 기다리는 상태이다.
-3. 비선점은 다른 스레드가 가진 자원을 강제로 빼앗을 수 없는 상태이다.
-4. 순환 대기는 스레드들이 원을 그리듯 서로가 가진 자원을 기다리는 상태이다.
-
-이번 미션에서는 PID 존재 여부, CPU와 메모리의 정체, 마지막 로그의 `WAITING` 또는 `BLOCKED` 메시지를 함께 확인한다. 이 증거를 바탕으로 스레드들이 서로의 Lock을 기다리고 있는지 논리적으로 설명한다.
-
-### 11. Lock
-
-`Lock`은 여러 스레드가 같은 데이터나 자원을 동시에 변경하지 못하도록 접근을 제한하는 장치이다. 한 번에 한 사람만 사용할 수 있는 화장실 열쇠와 비슷하다.
-
-Lock 자체는 데이터를 안전하게 보호하기 위해 필요하다. 하지만 여러 스레드가 서로 다른 Lock을 다른 순서로 획득하면 Deadlock이 발생할 수 있다.
-
-
-<br>
-<br>
-
-## 실행 환경
-
-### 필수 조건
-
-애플리케이션 실행 전 다음 조건을 확인한다.
-조건이 충족되지 않으면 부트 시퀀스에서 자동으로 실패 처리된다.
-
-| 항목 | 설정 조건 |
-|---|---|
-| 실행 계정 | root가 아닌 일반 사용자 |
-| `AGENT_HOME` | 필수 환경변수 |
-| `AGENT_PORT` | `15034` |
-| `AGENT_UPLOAD_DIR` | `$AGENT_HOME/upload_files`이며 디렉터리가 존재해야 함 |
-| `AGENT_KEY_PATH` | `$AGENT_HOME/api_keys`이며 경로가 존재해야 함 |
-| `AGENT_LOG_DIR` | 디렉터리가 존재하고 쓰기 권한이 있어야 함 |
-| `MEMORY_LIMIT` | 50부터 512 사이의 정수이며 단위는 MB |
-| `CPU_MAX_OCCUPY` | 10부터 100 사이의 정수이며 단위는 % |
-| `MULTI_THREAD_ENABLE` | `true` 또는 `false` |
-| `secret.key` | `$AGENT_HOME/api_keys/secret.key`에 존재해야 함 |
-| `secret.key` 내용 | `agent_api_key_test` |
-| 네트워크 | `0.0.0.0:15034`에 바인딩할 수 있어야 함 |
-
-### 환경변수 설정 예시
-
-다음 값은 형식을 보여 주는 예시이다. 실제 실험에서는 사용한 경로와 설정값을 기록한다.
-
-```bash
-export AGENT_HOME="/path/to/agent-home"
-export AGENT_PORT="15034"
-export AGENT_UPLOAD_DIR="$AGENT_HOME/upload_files"
-export AGENT_KEY_PATH="$AGENT_HOME/api_keys"
-export AGENT_LOG_DIR="$AGENT_HOME/logs"
-
-export MEMORY_LIMIT="100"
-export CPU_MAX_OCCUPY="50"
-export MULTI_THREAD_ENABLE="true"
-```
-
-### 필수 디렉터리와 파일 생성
-
-```bash
-mkdir -p "$AGENT_UPLOAD_DIR"
-mkdir -p "$AGENT_KEY_PATH"
-mkdir -p "$AGENT_LOG_DIR"
-
-printf '%s' 'agent_api_key_test' > "$AGENT_KEY_PATH/secret.key"
-```
-
-<br>
-<br>
-
-## Repository 구성
-
-### 구조
-
-미션에서 필수로 요구하는 파일만 중심으로 구성한다. 보너스 과제는 실제로 수행할 때 별도의 리포트를 추가한다.
-
-```text
-Codyssey-B1-2/
-├── README.md
-├── .gitignore
-├── bin/
-│   └── agent-leak-app-x86
-├── scripts/
-│   ├── 00-run-all-experiments.sh    # 전체 실행 진입점 (호스트)
-│   ├── 01-setup-container.sh        # 컨테이너 생성·시작 + 프로비전 + 방화벽 (호스트)
-│   ├── experiment-cases.conf     # 실험 케이스별 환경변수
-│   ├── 02-provision-runtime.sh      # 패키지·사용자·디렉터리·agent.env 준비 (root)
-│   ├── 03-configure-firewall.sh     # UFW 포트 정책 적용 (root)
-│   ├── 04-run-experiment-case.sh    # 케이스 1개 실행 + 원본 로그 저장 (agentuser)
-│   ├── 05-monitor-app-resources.sh  # 앱 프로세스·시스템 자원 주기 기록
-│   └── 06-summarize-evidence.sh     # 원본 로그 → CSV·리포트 스니펫
-├── reports/
-│   ├── 01-oom-report.md
-│   ├── 02-cpu-report.md
-│   └── 03-deadlock-report.md
-└── evidence/
-    ├── oom/
-    ├── cpu/
-    └── deadlock/
-```
-
-### 각 스크립트의 역할
-
-`00-run-all-experiments.sh`는 순서만 조율하고, 각 단계는 한 가지 책임을 가진 스크립트가 담당한다.
-
-```text
-00-run-all-experiments.sh (호스트)
-├── 01-setup-container.sh                (호스트)
-│   ├── 02-provision-runtime.sh                  (컨테이너, root)
-│   └── 03-configure-firewall.sh         (컨테이너, root)
-└── experiment-cases.conf 의 케이스마다
-    └── 04-run-experiment-case.sh             (컨테이너, agentuser)
-        ├── 05-monitor-app-resources.sh                (백그라운드)
-        └── 06-summarize-evidence.sh
-```
-
-| 스크립트 | 실행 주체 | 실행 시점 | 역할 |
-| --- | --- | --- | --- |
-| 00-run-all-experiments.sh | 호스트 사용자 | 실험 전체를 돌릴 때 | 셋업 후 `experiment-cases.conf`의 케이스를 순서대로 실행 |
-| 01-setup-container.sh | 호스트 사용자 | 실험 전 (00-run-all-experiments.sh가 호출) | 컨테이너 생성·시작, provision·방화벽 실행 |
-| experiment-cases.conf | - | - | 케이스 이름과 케이스별 환경변수 정의 (데이터) |
-| 02-provision-runtime.sh | root | 컨테이너 생성 직후 | 패키지 설치, 사용자·경로·`agent.env` 준비 |
-| 03-configure-firewall.sh | root | provision 이후 | UFW 규칙·포트 정책 구성 |
-| 04-run-experiment-case.sh | agentuser | 케이스마다 | 앱·monitor 실행, `RUN_TIMEOUT` 처리, 원본 로그(app·monitor·run·env) 저장 |
-| 05-monitor-app-resources.sh | agentuser | 앱 실행 중 | 프로세스·CPU·메모리·RSS·스레드·포트 상태 기록 |
-| 06-summarize-evidence.sh | agentuser | run-experiment 마지막, 또는 단독 | 원본 로그로 시계열 CSV·리포트 스니펫 생성 (실험 없이 재생성 가능) |
-
-### 실행 방법
-
-파일 이름 앞 번호는 실행 순서이다. `00`이 전체를 순서대로 실행하고, 각 단계는 아래처럼 따로 실행할 수도 있다.
-
-```bash
-# 전체: 셋업 + 6개 실험 (약 8분, 레포 루트에서)
+# 전체: 셋업 + 6개 실험 (약 8분)
 bash scripts/00-run-all-experiments.sh
 
-# 특정 케이스만: 셋업 + 지정 케이스
+# 특정 케이스만
 bash scripts/00-run-all-experiments.sh cpu-before cpu-after
 
 # 셋업 없이 특정 케이스만 (컨테이너가 이미 준비된 경우)
 SKIP_SETUP=1 bash scripts/00-run-all-experiments.sh deadlock-before
 ```
 
-| 단계 | 개별 실행 명령 | 실행 위치 |
-| --- | --- | --- |
-| 01 셋업 전체 | `bash scripts/01-setup-container.sh` | 호스트 |
-| 02 프로비전 | `docker exec codyssey-b1-2-lab ./scripts/02-provision-runtime.sh` | 컨테이너 (root) |
-| 03 방화벽 | `docker exec codyssey-b1-2-lab ./scripts/03-configure-firewall.sh` | 컨테이너 (root) |
-| 04 케이스 1개 (값 직접 지정) | `docker exec -u agentuser -e MEMORY_LIMIT=100 codyssey-b1-2-lab ./scripts/04-run-experiment-case.sh oom-before` | 컨테이너 (agentuser) |
-| 05 모니터만 | `docker exec -u agentuser codyssey-b1-2-lab ./scripts/05-monitor-app-resources.sh` | 컨테이너 (agentuser) |
-| 06 CSV·스니펫 재생성 | `docker exec -u agentuser codyssey-b1-2-lab ./scripts/06-summarize-evidence.sh oom-before` | 컨테이너 (agentuser) |
-
-- `04`를 직접 실행할 때 `-e`로 넘기지 않은 변수는 `agent.env` 기본값(100 / 50 / true)이 쓰인다. `experiment-cases.conf`의 값으로 돌리려면 `00`에 케이스 이름을 넘기는 방식을 쓴다.
-
-케이스별 설정값은 [`scripts/experiment-cases.conf`](./scripts/experiment-cases.conf)에서 관리한다.
-
-| 케이스 | MEMORY_LIMIT | CPU_MAX_OCCUPY | MULTI_THREAD_ENABLE | RUN_TIMEOUT |
-| --- | --- | --- | --- | --- |
-| oom-before | **100** | 50 | true | - |
-| oom-after | **256** | 50 | true | - |
-| cpu-before | 512 | **90** | false | 120s |
-| cpu-after | 512 | **50** | false | 120s |
-| deadlock-before | 512 | 50 | **true** | 120s |
-| deadlock-after | 512 | 50 | **false** | 120s |
-
-- 각 실험은 굵게 표시한 변수만 바꾸고, 나머지는 다른 장애가 먼저 일어나지 않도록 고정한다.
-- 세 값이 모두 권장 범위면 앱이 `Healthy System Monitoring` 시나리오로 종료 없이 계속 동작한다. 그래서 CPU·Deadlock 실험에는 `RUN_TIMEOUT`(초)을 걸어 시간이 지나면 앱을 종료하고 증적을 수집한다. 종료 방식은 각 `*-report-snippet.md`와 `*-run.log`에 기록된다.
-- 기존 컨테이너가 `--platform linux/amd64` 없이 만들어졌다면 `docker rm -f codyssey-b1-2-lab` 후 다시 실행한다.
-
-<br>
-
-### 05-monitor-app-resources.sh 관제 로그 형식 및 지표 설명
-
-`05-monitor-app-resources.sh`는 프로세스와 시스템의 핵심 자원을 1초 간격으로 수집하여 `monitor.log`에 한 줄씩 기록한다.
-
-```text
-[2026-09-10 16:19:27] PID:7237 PPID:7223 STATE:SN ELAPSED:00:00 THREADS:1 PROC_CPU:4.3% PROC_MEM:0.1% RSS:18352KB SYS_CPU:1.6% SYS_MEM:3.6% DISK_USED:1% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86
-```
-
-| 항목 | 예시 값 | 기술적 의미 | 수집 목적 및 용도 |
-| :--- | :--- | :--- | :--- |
-| **타임스탬프** | `[2026-09-10 16:19:27]` | 스냅샷이 수집된 시각 | **시계열 차트의 X축**, 장애 발생 시각 특정, 프로그램 로그와의 교차 검증용 |
-| **`PID`** | `7237` | Process ID (프로세스 고유 식별자) | 대상 프로세스 정상 구동 여부 확인 및 제어/디버깅 대상 지정 |
-| **`PPID`** | `7223` | Parent Process ID (부모 프로세스 ID) | 프로세스를 실행한 부모 셸 식별 및 프로세스 계층 트리 추적 |
-| **`STATE`** | `SN` | 프로세스 상태 플래그 (`S`: Sleep 대기, `N`: Nice 저우선순위) | 프로세스의 실행/대기/좀비/교착상태 여부 진단 |
-| **`ELAPSED`** | `00:00` | 누적 실행 시간 (`MM:SS`) | 프로세스 시작 후 경과 시간, **프로세스 생존 시간(Survival Time)** 측정용 |
-| **`THREADS`** | `1` | 프로세스 내 활성 스레드 개수 | 멀티스레드 여부, 스레드 누수 감지, **Deadlock 장애 식별용** |
-| **`PROC_CPU`** | `4.3%` | 프로세스 단독 CPU 코어 사용률 | **CPU 과점유 장애(CPU Spike/Loop) 진단**용 |
-| **`PROC_MEM`** | `0.1%` | 시스템 전체 물리 메모리 대비 점유율 (%) | 전체 시스템 관점에서 대상 프로세스의 메모리 점유 비중 확인 |
-| **`RSS`** | `18352KB` | Resident Set Size (실제 물리 메모리 점유 크기, 1MB=1024KB) | **메모리 누수(Memory Leak) 진단의 핵심 지표**, 시간에 따른 증가 추세 추적 |
-| **`SYS_CPU`** | `1.6%` | 시스템 전체 CPU 사용률 | 부하 원인이 대상 프로세스인지, 시스템 전체 문제인지 비교 판별 |
-| **`SYS_MEM`** | `3.6%` | 시스템 전체 물리 메모리 사용률 | OS 레벨의 시스템 OOM 발생 위험 여부 감시 |
-| **`DISK_USED`** | `1%` | 루트 파티션(`/`) 디스크 사용률 | 로그 폭증 등으로 인한 디스크 풀(Disk Full) 장애 방지 |
-| **`PORT`** | `15034` | 바인딩된 서비스 포트 번호 | 서비스 헬스체크 (포트 리슨 정상 여부 확인) |
-| **`FIREWALL`** | `active` | 시스템 방화벽(`ufw`) 상태 | 보안 규칙 준수 여부 및 트래픽 차단 원인 규명 |
-| **`CMD`** | `/workspace/bin/...` | 실제 실행된 바이너리/명령어 경로 | 모니터링 대상 프로그램의 바이너리 경로 검증 |
-
-<br>
-<br>
-
-
-
-## 장애 분석 방법
-
-### 1. OOM 분석
-
-`05-monitor-app-resources.sh`를 사용하여 시간에 따른 메모리 사용량을 확인한다. 한 번의 측정값만 보는 것이 아니라, 시작부터 종료까지 여러 시점의 값을 기록하여 메모리가 계속 증가하는지 확인한다.
-
-종료 직전과 직후의 프로그램 로그에서 `Memory limit exceeded`, `SELF-TERMINATED`와 같은 메시지를 찾는다. 이를 근거로 메모리 임계치 초과와 `MemoryGuard`의 종료 동작을 연결한다.
-
-`MEMORY_LIMIT`을 변경하기 전과 변경한 후에 각각 실행한다. 다음 항목을 비교한다.
-
-- 시간에 따른 메모리 사용량
-- 종료 직전 메모리 사용량
-- 프로세스 생존 시간
-- 프로세스 종료 여부
-- `MemoryGuard` 관련 로그
-
-설정값을 높인 후 생존 시간이 증가하더라도 메모리가 계속 증가한다면 임시 조치만 성공한 것이다. 근본 원인인 메모리 누수는 해결되지 않은 것으로 판단한다.
-
-### 2. CPU 과점유 분석
-
-`05-monitor-app-resources.sh`, `top`, `ps`를 사용하여 CPU 사용률이 급격히 상승하는 구간을 찾는다. 시스템 전체가 아닌 `agent-leak-app` 프로세스의 CPU 사용률이 높아졌는지 확인한다.
-
-종료 전후의 프로그램 로그에서 `WATCHDOG`, `SIGTERM`과 같은 메시지를 찾는다. 이를 근거로 CPU 임계치 초과와 Watchdog의 보호 동작을 연결한다.
-
-`CPU_MAX_OCCUPY`를 변경하기 전과 변경한 후에 각각 실행한다. 다음 항목을 비교한다.
-
-- CPU 사용률 상승 구간
-- 관측된 최대 CPU 사용률
-- 프로세스 생존 시간
-- 프로세스 종료 여부
-- Watchdog 관련 로그
-
-설정값을 높인 뒤 프로세스가 더 오래 실행되어도 CPU 사용률 자체가 계속 높다면 근본 원인은 해결되지 않은 것이다.
-
-### 3. Deadlock 분석
-
-먼저 `ps -ef`를 사용하여 `agent-leak-app`의 PID가 계속 존재하는지 확인한다. PID가 존재한다면 프로세스가 종료되지 않았다는 의미이다.
-
-다음으로 `top -H` 또는 `ps -L`을 사용하여 프로세스 내부의 스레드 상태를 확인한다. CPU와 메모리 사용량의 변화가 거의 없고 프로그램 로그가 `WAITING`, `BLOCKED` 이후 멈췄는지 확인한다.
-
-`MULTI_THREAD_ENABLE=true`와 `MULTI_THREAD_ENABLE=false` 상태에서 각각 실행한다. 다음 항목을 비교한다.
-
-- PID 유지 여부
-- CPU와 메모리 변화
-- 로그가 마지막으로 기록된 위치
-- 스레드 상태
-- 무응답 발생 여부
-
-`true`일 때 무응답이 발생하고 `false`일 때 정상적으로 진행된다면, 멀티스레드 환경의 자원 경쟁이 문제와 관련되어 있다고 추론할 수 있다. 단순히 프로그램이 멈췄다는 사실만으로 Deadlock이라고 확정하지 않고, 여러 증거를 함께 제시한다.
-
-<br>
-<br>
-
-## 증거 수집 명령어
-
-### 프로세스 확인
-
-```bash
-ps -ef | grep agent-leak-app
-```
-
-### CPU와 메모리 확인
-
-```bash
-ps -p <PID> -o pid,ppid,stat,etime,%cpu,%mem,rss,cmd
-
-top -p <PID>
-```
-
-### 스레드 상태 확인
-
-```bash
-top -H -p <PID>
-
-ps -L -p <PID> -o pid,tid,stat,%cpu,%mem,etime,comm
-```
-
-### 실행 조건과 시각 기록
-
-```bash
-date
-
-env | grep -E \
-'AGENT_|MEMORY_LIMIT|CPU_MAX_OCCUPY|MULTI_THREAD_ENABLE'
-```
-
-명령어를 실행한 시각을 함께 기록한다. 같은 시간대의 관제 로그와 프로그램 로그를 연결하면 장애 발생 순서를 설명하기 쉽다.
-
-<br>
-<br>
-
-## 장애 리포트 작성
-
-### 공통 템플릿
-
-```markdown
-# [Bug] 장애 유형 - 한 줄 요약
-
-### 1. Description
-
-- 발생 시각:
-- 실행 환경:
-- 적용한 환경변수:
-- 발생 조건:
-- 관측한 현상:
-
-### 2. Evidence & Logs
-
-- 05-monitor-app-resources.sh 관제 데이터:
-- 프로그램 실행 로그:
-- Linux 명령어 출력:
-- 스크린샷:
-
-### 3. Root Cause Analysis
-
-- 증거로 직접 확인한 사실:
-- 증거를 바탕으로 추론한 원인:
-- 관련 운영체제 동작 원리:
-
-### 4. Workaround & Verification
-
-- 변경한 환경변수:
-- 변경 전 결과:
-- 변경 후 결과:
-- 임시 조치의 한계:
-- 근본적인 해결 제안:
-```
-
-### 관측 사실과 원인 추론
-
-관측한 사실과 원인에 대한 추론을 구분하여 작성한다. 
-
-```text
-관측 사실:
-05-monitor-app-resources.sh에서 프로세스의 메모리 사용량이 시간에 따라 증가했다.
-MEMORY_LIMIT에 도달한 직후 SELF-TERMINATED 로그와 함께 프로세스가 종료되었다.
-
-원인 추론:
-프로그램이 사용한 메모리를 정상적으로 정리하지 않아 사용량이 증가한 것으로 보인다.
-MemoryGuard가 설정된 임계치를 감지하여 프로세스를 종료한 것으로 판단한다.
-```
+단계별 개별 실행, 케이스별 설정값, 관제 로그 형식은 [03-scripts.md](./docs/03-scripts.md)에 정리했다.
 
 <br>
 <br>
@@ -507,73 +96,12 @@ MemoryGuard가 설정된 임계치를 감지하여 프로세스를 종료한 것
 <br>
 <br>
 
-## Study
-### 실행계정을 왜 root 가 아닌 일반 사용자로 설정할까?
-- 최소 권한의 원칙 (Principle of Least Privilege)
-    : 서비스 애플리케이션은 동작에 필요한 최소한의 권한만 가져야 한다.
-    : root 계정은 시스템 제어 권한을 가지므로, 일반 계정으로 실행하여 실수로 시스템에 해를 끼치는 상황을 방지해야 한다.
-- 보안
-    : root 권한 탈취 시 시스템 전체가 감염될 수 있으나, 일반 계정은 해당 프로세스에 한정되어 피해를 최소화할 수 있다.
-- Well-known port 제한
-    : 0 ~ 1023번 포트는 well-known port로써, root 권한이 있어야 바인딩 할 수 있다.
-    : 1024 이상의 포트는 일반 사용자도 바인딩 할 수 있어, 일반 계정으로 실행하더라도 well-known port가 아닌 포트를 사용하면 된다.
+## 상세 문서
 
-
-### 메모리 누수(Memory Leak)란?
-- 메모리 누수는 프로그램이 동적으로 할당한 메모리를 사용한 후 운영체제에 반환하지 않는 현상으로 인해 발생한다.
-
-- 메모리 누수가 발생하면 프로그램이 사용하는 메모리 양이 점차 늘어나고, 이는 프로세스의 응답 지연, 시스템 불안정, 다른 프로세스의 오작동, 심한 경우 시스템 충돌로 이어질 수 있다.
-
-
-### 그럼 메모리 누수가 발생했는지 어떻게 알 수 있을까?
-- 정상적인 프로그램은 메모리 사용 이후 작업이 끝나면 GC나 free()를 통해 할당했던 메모리를 운영체제에 반환한다.
-- 따라서 메모리 사용량이 일정 수준 이상으로 증가하지 않는다.
-- 하지만 메모리 누수가 발생하면 할당했던 메모리를 운영체제에 반환하지 않아 메모리 사용량이 계속해서 늘어난다.
-    실제로 agent-leak-app 바이너리앱을 실행하면 3초마다 25MB씩 메모리를 할당받고 반환하지 않는다.
-
-    
-### 메모리 누수는 왜 Heap 영역에서 발생할까?
-- `Stack 영역`
-    : 함수 호출 시 필요한 지역 변수, 매개변수, 복귀 주소가 저장되는 영역
-    : 함수가 종료(`return`)되면 OS/컴파일러에 의해 자동으로 pop(해제)되므로 메모리 누수가 발생하지 않는다. (단, 무한 재귀 시 Stack Overflow 발생)
-    
-- `Heap 영역`
-    : 프로그램 실행 중 동적으로 할당되는 객체/인스턴스가 저장되는 영역
-    : 스택과 달리 함수가 끝나도 자동으로 해제되지 않으며, 개발자가 명시적으로 해제하거나 가비지 컬렉터(GC)가 수거해야 한다.
-    : 더 이상 사용하지 않음에도 참조를 물고 있으면 메모리가 계속 유지되어 **메모리 누수의 직접적인 원인**이 된다.
-    
-- `가비지 컬렉터 (GC)`
-    : 스택 영역은 함수 반환 시 자동으로 정리되므로 GC의 대상이 아니며, **GC는 오직 Heap 영역의 미참조 객체들을 추적하여 회수**한다.
-
-
-### 리눅스 OS 커널의 OOM Killer
-- `oom_score`
-    : 각 프로세스가 시스템 메모리를 얼마나 차지하고 있는지를 점수화한 값(0~1000 범위)
-    : 물리 메모리(RAM) 점유율이 높고 시스템 중요도가 낮을수록 점수가 높아지며, 메모리 고갈 시 `oom_score`가 가장 높은 프로세스에 `SIGKILL` 시그널을 보내 즉각 강제 종료한다.
-        
-- `oom_score_adj`
-    : 프로세스별로 oom_score를 가감 조정할 수 있는 설정값 (-1000 ~ 1000)
-    : `-1000`은 OOM Killer에 의해 절대 죽지 않도록 보호(예: SSHD 등 필수 데몬)하고, 양수 값은 우선 사살 대상이 되도록 유도한다.
-
-
-### 메모리 누수의 근본적인 해결방법 (코드 레벨)
-- 명시적 참조 해제 (`del` / `.clear()` / `pop()`)
-    : 파이썬 등 고수준 언어에서 전역 리스트나 컨테이너에 객체를 보관한 경우, 작업 완료 즉시 참조를 해제하여 참조 카운트를 0으로 만들어 GC가 회수할 수 있게 한다.
-- 약한 참조 사용 (`weakref`)
-    : 캐시나 관찰자 패턴 구현 시 객체의 참조 카운트를 증가시키지 않는 약한 참조를 사용하여 메모리 누수를 방지한다.
-- 크기 제한이 있는 캐시 정책 (Bounded Cache)
-    : 캐시나 버퍼를 무제한 적재하지 않고, LRU(가장 오래 미사용 항목 제거), LFU(최소 빈도 제거), FIFO 등의 제거 정책이나 Ring Buffer(원형 큐)를 적용해 최대 점유 용량을 제한한다.
-- 컨텍스트 매니저 (`with` 문)
-    : 작업 도중 예외가 발생하더라도 `finally` 구문처럼 파일 핸들, 네트워크 소켓, 메모리 버퍼 등의 리소스를 안전하게 자동 정리한다.
-
-
-### 실제 운영환경에서 대형 장애를 막기 위한 인프라/운영 완화책
-- 사전 임계치 모니터링 및 알림 (Early Alerting)
-    : 메모리가 100% 찰 때까지 방치하지 않고, 70%~80% 구간에서 Prometheus/Grafana를 통해 온콜(Slack, PagerDuty 등) 경고를 발송하여 선제 조치할 시간을 확보한다.
-- 헬스체크 기반 롤링 재기동 (Health Check & Graceful Rolling Restart)
-    : Kubernetes의 Liveness Probe나 systemd를 연동하여 프로세스가 비정상 상태나 과도한 메모리 점유에 도달하면 자동으로 안전하게 종료(Graceful Shutdown)하고 새 인스턴스를 띄운다.
-- 트래픽 분리 (Readiness Probe)
-    : 메모리 정리 작업 중이거나 재부팅 중인 인스턴스는 Readiness Probe를 통해 로드밸런서의 트래픽 인입 목록에서 일시 제외하여 클라이언트 요청 실패를 막는다.
-- 다중 인스턴스 및 고가용성(HA) 구성
-    : 서비스를 다중 복제본(Replica)으로 운영하여, 한 인스턴스가 OOM이나 재기동으로 내려가더라도 다른 인스턴스가 트래픽을 처리함으로써 무중단 서비스를 유지한다.
-    
+| 문서 | 내용 |
+|---|---|
+| [01-concepts.md](./docs/01-concepts.md) | 프로세스, PID, OOM, 메모리 누수, RSS, MemoryGuard, CPU 과점유, Watchdog, Deadlock, Lock |
+| [02-environment.md](./docs/02-environment.md) | 실행 필수 조건, 환경변수 예시, 필수 디렉터리와 파일 생성 |
+| [03-scripts.md](./docs/03-scripts.md) | Repository 구조, 스크립트별 역할, 실행 방법, 케이스별 설정값, 관제 로그 지표 |
+| [04-analysis.md](./docs/04-analysis.md) | 장애 유형별 분석 절차, 증거 수집 명령어, 리포트 템플릿, 관측 사실과 추론 구분 |
+| [05-study.md](./docs/05-study.md) | 일반 사용자 실행 이유, Heap과 Stack, OOM Killer, 누수 해결 방법, 운영 환경 완화책 |

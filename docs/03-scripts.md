@@ -12,7 +12,7 @@
 Codyssey-B1-2/
 ├── README.md
 ├── .gitignore
-├── docs/                            # README 상세 문서
+├── docs/                            # README 상세 문서, 동료평가 대본
 ├── bin/
 │   └── agent-leak-app-x86
 ├── scripts/

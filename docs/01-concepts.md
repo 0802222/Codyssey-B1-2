@@ -113,7 +113,7 @@ flowchart TD
 | 자식 (실제 앱) | 370 | 360 | 앱 기능 전체, 로그 출력 | RSS 약 25MB부터 증가, 스레드 1~3 |
 
 - 두 프로세스의 명령어(`CMD`)가 똑같아서 `ps`로는 구분이 어렵다. `PPID` 관계와 RSS 크기로 구분한다. 관제 스크립트는 RSS가 가장 큰 쪽을 골라 자식(실제 앱)을 감시한다.
-- `run.log`의 `App started (PID: 357)`과 앱 로그의 `Self-terminating process 370`이 다른 이유도 이 구조 때문이다.
+- [before-run.log](../evidence/oom/before-run.log)의 `App started (PID: 357)`과 앱 로그의 `Self-terminating process 370`이 다른 이유도 이 구조 때문이다.
 - 앱이 종료되면 부모가 `/tmp/_MEI*` 임시 폴더를 지운다 (종료 후 폴더 없음 확인).
 
 ```bash

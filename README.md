@@ -190,3 +190,4 @@ SKIP_SETUP=1 bash scripts/00-run-all-experiments.sh deadlock-before
 | [04-analysis.md](./docs/04-analysis.md) | 장애 유형별 분석 절차, 증거 수집 명령어, 리포트 템플릿, 관측 사실과 추론 구분 |
 | [05-study.md](./docs/05-study.md) | 일반 사용자 실행 이유, Heap과 Stack, OOM Killer, 누수 해결 방법, 운영 환경 완화책 |
 | [06-troubleshooting.md](./docs/06-troubleshooting.md) | 종료 배너가 로그에 남지 않던 문제(출력 버퍼링, 종료 코드), 방화벽 상태 오기록 문제 |
+| [07-peer-review.md](./docs/07-peer-review.md) | 동료평가 1:1 진행 대본, 요구사항 체크리스트, 꼬리 질문 |

@@ -1,17 +1,19 @@
 ===== Experiment: deadlock-after =====
-Started at   : 2026-10-27 19:17:28 KST
+Started at   : 2026-10-28 16:22:27 KST
 Evidence dir : /workspace/evidence/deadlock
 
 [INFO] Env snapshot saved: /workspace/evidence/deadlock/after-env-snapshot.txt
 [INFO] Starting app: /workspace/bin/agent-leak-app-x86
 
-[INFO] App started (PID: 7138)
-[INFO] Monitor started (PID: 7139, target app PID: 7138)
+[INFO] App started (PID: 8489)
+[INFO] Monitor started (PID: 8490, target app PID: 8489)
+[INFO] System tools capture started (PID: 8491, interval: 3s)
 [INFO] Run timeout: 120s
-[WARN] App still running after 120s. Killing (PID: 7138)
+[WARN] App still running after 120s. Killing (PID: 8489)
 [INFO] Exit mode: RUN_TIMEOUT(120s) 강제 종료
 [INFO] Exit code: 143 (SIGTERM)
 [INFO] Monitor log copied: /workspace/evidence/deadlock/after-monitor.log
+[INFO] System tools snapshot: /workspace/evidence/deadlock/after-systools.log (27 samples)
 [INFO] Timeseries CSV: /workspace/evidence/deadlock/after-timeseries.csv (61 rows)
 [INFO] Report snippet: /workspace/evidence/deadlock/after-report-snippet.md
 

@@ -77,10 +77,10 @@ flowchart LR
 
 | PCB 항목 | 이번 미션에서 확인한 값 | 확인 명령 |
 |---|---|---|
-| PID / PPID | `PID:370 PPID:360` (OOM before) | `ps -o pid,ppid` |
+| PID / PPID | `PID:1110 PPID:1095` (OOM before) | `ps -o pid,ppid` |
 | 프로세스 상태 | `STATE:SN+` (S 대기, N 낮은 우선순위, + 터미널 포그라운드) | `ps -o stat` |
 | 스케줄링 정보 | `nice=10` (`SafetyGuard` 로그) | `ps -o ni` |
-| 메모리 관리 정보 | `RSS:25600KB` (OOM before 시작 직후) | `ps -o rss` |
+| 메모리 관리 정보 | `RSS:25592KB` (OOM before 시작 직후) | `ps -o rss` |
 | 스레드 | `THREADS:3` (Deadlock 실험) | `ps -L -p <PID>` |
 
 - 관제 스크립트가 기록하는 값은 결국 커널이 PCB에 들고 있는 정보를 `/proc` 파일 시스템을 통해 읽어 온 것이다.
@@ -101,19 +101,19 @@ OOM before 실험의 실제 PID로 그리면 다음과 같다.
 
 ```mermaid
 flowchart TD
-    S["04-run-experiment-case.sh<br/>(bash)"] -- "실행" --> SC["script · PID 357<br/>가상 터미널 제공<br/>run.log의 App started PID"]
-    SC -- "fork + exec" --> A1["부모: agent-leak-app-x86 · PID 360<br/>PyInstaller 부트로더<br/>Python 환경을 /tmp/_MEI*에 풀고 자식 대기"]
-    A1 -- "fork + exec" --> A2["자식: agent-leak-app-x86 · PID 370<br/>실제 앱 코드 실행<br/>관제 로그의 PID, PPID는 360"]
+    S["04-run-experiment-case.sh<br/>(bash)"] -- "실행" --> SC["script · PID 1091<br/>가상 터미널 제공<br/>run.log의 App started PID"]
+    SC -- "fork + exec" --> A1["부모: agent-leak-app-x86 · PID 1095<br/>PyInstaller 부트로더<br/>Python 환경을 /tmp/_MEI*에 풀고 자식 대기"]
+    A1 -- "fork + exec" --> A2["자식: agent-leak-app-x86 · PID 1110<br/>실제 앱 코드 실행<br/>관제 로그의 PID, PPID는 1095"]
 ```
 
 | 구분 | PID | PPID | 하는 일 | 별도 실행에서 측정한 값 |
 |---|---|---|---|---|
-| `script` | 357 | 04 스크립트 | 가상 터미널 제공, 종료 코드 전달 | RSS 약 3.7MB, 스레드 1 |
-| 부모 (부트로더) | 360 | 357 | Python 환경 압축 해제, 자식 대기 (`wchan=do_wait`) | RSS 약 3.9MB, 스레드 1 |
-| 자식 (실제 앱) | 370 | 360 | 앱 기능 전체, 로그 출력 | RSS 약 25MB부터 증가, 스레드 1~3 |
+| `script` | 1091 | 04 스크립트 | 가상 터미널 제공, 종료 코드 전달 | RSS 약 3.7MB, 스레드 1 |
+| 부모 (부트로더) | 1095 | 1091 | Python 환경 압축 해제, 자식 대기 (`wchan=do_wait`) | RSS 약 3.9MB, 스레드 1 |
+| 자식 (실제 앱) | 1110 | 1095 | 앱 기능 전체, 로그 출력 | RSS 약 25MB부터 증가, 스레드 1~3 |
 
-- 두 프로세스의 명령어(`CMD`)가 똑같아서 `ps`로는 구분이 어렵다. `PPID` 관계와 RSS 크기로 구분한다. 관제 스크립트는 RSS가 가장 큰 쪽을 골라 자식(실제 앱)을 감시한다.
-- [before-run.log](../evidence/oom/before-run.log)의 `App started (PID: 357)`과 앱 로그의 `Self-terminating process 370`이 다른 이유도 이 구조 때문이다.
+- 두 프로세스의 명령어(`CMD`)가 똑같아서 `ps`로는 구분이 어렵다. `PPID` 관계와 RSS 크기로 구분한다. 관제 스크립트(05)는 RSS가 가장 큰 쪽을, 스냅샷 스크립트(07)는 "부모도 같은 이름인 프로세스"를 골라 자식(실제 앱)을 감시한다. 실제 `ps -ef` 출력은 [before-systools.log](../evidence/oom/before-systools.log)에 있다.
+- [before-run.log](../evidence/oom/before-run.log)의 `App started (PID: 1091)`과 앱 로그의 `Self-terminating process 1110`이 다른 이유도 이 구조 때문이다.
 - 앱이 종료되면 부모가 `/tmp/_MEI*` 임시 폴더를 지운다 (종료 후 폴더 없음 확인).
 
 ```bash

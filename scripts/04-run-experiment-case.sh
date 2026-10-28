@@ -5,8 +5,8 @@
 #
 # 동작:
 #   1) 실험 시점 환경변수 스냅샷 저장
-#   2) 앱과 05-monitor-app-resources.sh 실행, RUN_TIMEOUT 지정 시 시간 초과 후 강제 종료
-#   3) 원본 로그(app, monitor, run) 저장
+#   2) 앱, 05-monitor-app-resources.sh, 07-capture-system-tools.sh 실행, RUN_TIMEOUT 지정 시 시간 초과 후 강제 종료
+#   3) 원본 로그(app, monitor, systools, run) 저장
 #   4) 06-summarize-evidence.sh 로 CSV·리포트 스니펫 생성
 
 set -euo pipefail    # 에러, 미정의 변수, 파이프 중간 실패 시 즉시 중단
@@ -54,6 +54,7 @@ CASE_DIR="$EVIDENCE_ROOT/$TYPE"    # 케이스별 증적 폴더 (예: evidence/o
 APP_PATH="$WORKSPACE/bin/${APP_NAME:-agent-leak-app-x86}"            # 앱 바이너리 경로
 MONITOR_SCRIPT="$WORKSPACE/scripts/05-monitor-app-resources.sh"      # 관제 스크립트
 COLLECT_SCRIPT="$WORKSPACE/scripts/06-summarize-evidence.sh"         # 증적 요약 스크립트
+SYSTOOLS_SCRIPT="$WORKSPACE/scripts/07-capture-system-tools.sh"      # ps/top 스냅샷 수집 스크립트
 
 mkdir -p "$CASE_DIR"    # 증적 폴더 생성
 
@@ -62,6 +63,7 @@ MONITOR_STDOUT="$CASE_DIR/$PHASE-monitor-stdout.log"  # 관제 스크립트 콘�
 MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"            # 관제 로그 원본 복사본
 ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"      # 실험 시점 환경변수
 RUN_LOG="$CASE_DIR/$PHASE-run.log"                    # 이 스크립트의 실행 기록
+SYSTOOLS_LOG="$CASE_DIR/$PHASE-systools.log"          # ps -ef, ps -L, top -H 스냅샷
 
 # 이 스크립트의 콘솔 출력도 증적으로 남긴다 (RUN_TIMEOUT 강제 종료 기록 포함)
 : > "$RUN_LOG"                          # 실행 로그 파일 비우기
@@ -116,11 +118,20 @@ MONITOR_PID=$!    # 관제 스크립트 PID
 
 echo "[INFO] Monitor started (PID: $MONITOR_PID, target app PID: $APP_PID)"
 
+bash "$SYSTOOLS_SCRIPT" "$SYSTOOLS_LOG" &    # ps/top 스냅샷 수집을 백그라운드로 실행
+SYSTOOLS_PID=$!    # 수집 스크립트 PID
 
-# 종료 시 모니터 & 앱 정리
+echo "[INFO] System tools capture started (PID: $SYSTOOLS_PID, interval: ${SYSTOOLS_INTERVAL:-3}s)"
+
+
+# 종료 시 모니터, 스냅샷 수집, 앱 정리
 cleanup() {
   if kill -0 "$MONITOR_PID" 2>/dev/null; then    # 관제 스크립트가 살아 있으면
     kill "$MONITOR_PID" 2>/dev/null || true      # 종료
+  fi
+
+  if kill -0 "$SYSTOOLS_PID" 2>/dev/null; then   # 스냅샷 수집 스크립트가 살아 있으면
+    kill "$SYSTOOLS_PID" 2>/dev/null || true     # 종료
   fi
 
   if kill -0 "$APP_PID" 2>/dev/null; then
@@ -188,6 +199,9 @@ if [[ -f "${AGENT_LOG_DIR}/monitor.log" ]]; then
 else
   echo "[WARN] Monitor log not found: ${AGENT_LOG_DIR}/monitor.log"  
 fi
+
+SAMPLES=$(grep -c '^===== ' "$SYSTOOLS_LOG" 2>/dev/null || true)    # 스냅샷 회차 수
+echo "[INFO] System tools snapshot: $SYSTOOLS_LOG (${SAMPLES:-0} samples)"
 
 
 # -----------------------------

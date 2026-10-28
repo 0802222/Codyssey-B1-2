@@ -1,6 +1,6 @@
 # Experiment env snapshot
 # Case: deadlock-before
-# Timestamp: 2026-10-27 19:15:24 KST
+# Timestamp: 2026-10-28 16:20:24 KST
 
 APP_NAME=agent-leak-app-x86
 CPU_MAX_OCCUPY=50

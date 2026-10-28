@@ -100,10 +100,14 @@ top -p <PID>
 ### 스레드 상태 확인
 
 ```bash
-top -H -p <PID>
+top -H -b -n 2 -d 1 -p <PID>
 
-ps -L -p <PID> -o pid,tid,stat,%cpu,%mem,etime,comm
+ps -L -p <PID> -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
 ```
+
+- `top -H -b -n 2 -d 1`: 스레드별로 1초 간격 2회 측정한다. 1회차는 누적값이라 2회차(직전 1초의 순간 CPU)를 본다.
+- `wchan`: 스레드가 커널 안에서 잠들어 있는 함수 이름이다. `futex_wait`면 Lock 대기, `do_select`면 작업 사이 sleep이다.
+- 실험 중에는 `07-capture-system-tools.sh`가 위 명령과 `ps -ef`를 3초마다 실행해 `evidence/<type>/<phase>-systools.log`에 저장한다.
 
 ### 실행 조건과 시각 기록
 

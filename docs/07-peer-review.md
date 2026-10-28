@@ -30,7 +30,7 @@
 
 **평가자**: 오늘은 B1-2 미션 결과물을 같이 볼게요. 과제 이해, 요구사항, 레포 구조, 실험 세 가지, 인사이트 순서로 진행하고, 마지막에 요구사항 체크리스트로 정리하겠습니다. 중간에 꼬리 질문을 많이 할 텐데, 정답을 확인하려는 게 아니라 근거를 어떻게 세웠는지 보려는 거예요.
 
-**발표자**: 네. OOM, CPU, Deadlock 세 리포트를 모두 작성했고, 모든 증거는 2026-10-27에 `00-run-all-experiments.sh` 한 번으로 다시 수집한 결과입니다. 보너스 과제(스케줄링 추론)는 하지 않았습니다.
+**발표자**: 네. OOM, CPU, Deadlock 세 리포트를 모두 작성했고, 모든 증거는 2026-10-28에 `00-run-all-experiments.sh` 한 번으로 다시 수집한 결과입니다. 보너스 과제(스케줄링 추론)는 하지 않았습니다.
 
 **평가자**: 좋아요. 그럼 리포트 숫자가 전부 레포 안의 `evidence/` 파일과 맞는지도 같이 확인하겠습니다.
 
@@ -111,7 +111,8 @@ Codyssey-B1-2/
 │   ├── 03-configure-firewall.sh     # ufw 15034/tcp 허용·활성화, 방화벽 상태 파일 기록 (root)
 │   ├── 04-run-experiment-case.sh    # 케이스 1개 실행, 원본 로그 저장 (agentuser)
 │   ├── 05-monitor-app-resources.sh  # 앱 프로세스·시스템 자원 주기 기록
-│   └── 06-summarize-evidence.sh     # 원본 로그 → CSV·리포트 스니펫
+│   ├── 06-summarize-evidence.sh     # 원본 로그 → CSV·리포트 스니펫
+│   └── 07-capture-system-tools.sh   # ps -ef, ps -L, top -H 출력 3초마다 저장
 ├── reports/                         # 01-oom, 02-cpu, 03-deadlock 리포트
 └── evidence/                        # oom, cpu, deadlock 별 before/after 원본 로그
 ```
@@ -123,7 +124,7 @@ Codyssey-B1-2/
 1. 호스트에서 `bash scripts/00-run-all-experiments.sh`를 실행합니다.
 2. 00이 01을 부르고, 01이 `codyssey-b1-2-lab` 컨테이너를 만들고(없을 때만) root로 02와 03을 실행합니다.
 3. 00이 `experiment-cases.conf`를 한 줄씩 읽어 케이스마다 `docker exec -u agentuser -e 변수=값 ... 04-run-experiment-case.sh <케이스>`를 실행합니다.
-4. 04는 환경변수 스냅샷 저장 → 앱과 05 모니터 실행 → 종료 대기(필요하면 `RUN_TIMEOUT`) → 종료 코드 기록 → 모니터 로그 복사 → 06으로 CSV·스니펫 생성까지 진행합니다.
+4. 04는 환경변수 스냅샷 저장 → 앱, 05 모니터, 07 시스템 도구 스냅샷 실행 → 종료 대기(필요하면 `RUN_TIMEOUT`) → 종료 코드 기록 → 모니터 로그 복사 → 06으로 CSV·스니펫 생성까지 진행합니다.
 
 **평가자**: 컨테이너를 만들 때 `--platform linux/amd64`를 준 이유는요?
 
@@ -142,7 +143,7 @@ Codyssey-B1-2/
 **발표자**: OOM Before의 첫 줄입니다.
 
 ```text
-[2026-10-27 19:11:59] PID:370 PPID:360 STATE:SN+ ELAPSED:00:01 THREADS:1 PROC_CPU:16.7% PROC_MEM:0.3% RSS:25600KB SYS_CPU:3.1% SYS_MEM:13.9% DISK_USED:4% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+[2026-10-28 16:17:00] PID:1110 PPID:1095 STATE:SN+ ELAPSED:00:01 THREADS:1 PROC_CPU:17.3% PROC_MEM:0.3% RSS:25592KB SYS_CPU:4.1% SYS_MEM:13.4% DISK_USED:4% PORT:15034 FIREWALL:active CMD:/workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
 ```
 
 프로세스 지표(PID, 상태, 스레드 수, CPU, RSS)와 시스템 지표(SYS_CPU, SYS_MEM, DISK)를 같은 줄에 남겨서, 특정 프로세스 문제인지 시스템 전체 문제인지를 한 줄로 비교할 수 있게 했습니다. `THREADS`와 `STATE`는 Deadlock 진단에 썼습니다.
@@ -151,11 +152,11 @@ Codyssey-B1-2/
 
 **발표자**: `S`는 대기(sleep), `N`은 낮은 우선순위(nice)입니다. 앱 로그에 `[SafetyGuard] Process priority lowered (nice=10)`가 찍히는데, 그 결과가 그대로 드러난 겁니다. `+`는 포그라운드 프로세스 그룹이라는 뜻인데, 종료 배너를 수집하려고 앱을 `script`로 가상 터미널에 붙여 실행했기 때문에 생겼습니다.
 
-**평가자**: `PID:370`인데 run 로그에는 `App started (PID: 357)`이에요. 왜 달라요?
+**평가자**: `PID:1110`인데 run 로그에는 `App started (PID: 1091)`이에요. 왜 달라요?
 
-**발표자**: 357은 앱을 감싼 `script` 프로세스입니다. 그 아래에 PyInstaller 부트로더(360)가 있고, 실제 앱은 부트로더의 자식인 370입니다. 이름이 같아서 모니터는 RSS가 가장 큰 프로세스를 실제 앱으로 고릅니다. [01-concepts.md](./01-concepts.md#부모와-자식-프로세스)에 그림으로 정리했습니다.
+**발표자**: 1091은 앱을 감싼 `script` 프로세스입니다. 그 아래에 PyInstaller 부트로더(1095)가 있고, 실제 앱은 부트로더의 자식인 1110입니다. 07 스크립트가 같은 실행 중에 남긴 `ps -ef` 출력에 이 부모-자식 관계가 그대로 찍혀 있습니다. 이름이 같아서 모니터는 RSS가 가장 큰 프로세스를 실제 앱으로 고릅니다. [01-concepts.md](./01-concepts.md#부모와-자식-프로세스)에 그림으로 정리했습니다.
 
-**평가자**: `INTERVAL=1`인데 로그 타임스탬프는 19:11:59, 12:01, 12:03처럼 2초 간격이에요.
+**평가자**: `INTERVAL=1`인데 로그 타임스탬프는 16:17:00, 17:02, 17:04처럼 2초 간격이에요.
 
 **발표자**: 루프 안에서 `top -bn1`, `ss`, `free`, `df`를 매번 실행하고 그 뒤에 `sleep 1`을 하기 때문에, 실제 주기는 "수집 시간 + 1초"가 됩니다. 특히 `top -bn1`이 CPU 사용률을 계산하느라 시간이 걸립니다. 이 차이 때문에 OOM에서 마지막 할당이 관제에 안 잡혔는데, 그건 OOM 파트에서 말씀드리겠습니다.
 
@@ -172,9 +173,9 @@ Codyssey-B1-2/
 **발표자**: `MEMORY_LIMIT=100`으로 실행했더니 부트 체크는 모두 통과했는데 약 11초 뒤에 이런 로그를 남기고 종료됐습니다.
 
 ```text
-2026-10-27 19:12:09,971 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
-2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Self-terminating process 370 to prevent system instability.
+2026-10-28 16:17:10,625 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-10-28 16:17:10,626 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
+2026-10-28 16:17:10,626 [CRITICAL] [MemoryGuard] Self-terminating process 1110 to prevent system instability.
 
 >>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<
 ```
@@ -189,21 +190,21 @@ run 로그에는 `Exit code: 137 (SIGKILL)`이 남았습니다.
 
 | 관제 시각 | RSS (KB) | 직전 앱 로그 Heap |
 |---|---|---|
-| 19:11:59 | 25,600 | (할당 전) |
-| 19:12:01 | 51,204 | 25MB (12:00.883) |
-| 19:12:05 | 76,808 | 50MB (12:03.907) |
-| 19:12:07 | 102,412 | 75MB (12:06.940) |
-| 19:12:09 | 102,412 | 75MB (100MB 할당은 12:09.971) |
+| 16:17:00 | 25,592 | (할당 전) |
+| 16:17:02 | 51,196 | 25MB (17:01.551) |
+| 16:17:06 | 76,800 | 50MB (17:04.575) |
+| 16:17:08 | 102,404 | 75MB (17:07.596) |
+| 16:17:10 | 102,404 | 75MB (100MB 할당은 17:10.625) |
 
-RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려가지 않습니다. 증가 시점이 `Current Heap` 로그와 맞습니다.
+RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려가지 않습니다. 증가 시점이 `Current Heap` 로그와 맞습니다. 같은 실행에서 07 스크립트가 남긴 `ps -L` 출력도 RSS 25,592 → 76,800 → 102,404KB로 같은 값이고, `top` 순간 CPU는 0.0%였습니다.
 
-**평가자**: 마지막 RSS가 102,412KB, 약 100MB인데 Heap도 100MB예요. 같은 값인가요?
+**평가자**: 마지막 RSS가 102,404KB, 약 100MB인데 Heap도 100MB예요. 같은 값인가요?
 
-**발표자**: 아닙니다. 할당 전부터 RSS가 약 25MB였습니다. 이건 앱 자체가 쓰는 기본 메모리이고, CPU 실험처럼 누수가 없는 케이스에서도 RSS가 25,612KB 근처로 유지됩니다. 그래서 마지막 샘플 102,412KB는 "기본 25MB + Heap 75MB"입니다. 100MB 할당은 19:12:09,971에 일어났고 1ms 뒤에 종료됐는데, 모니터의 마지막 샘플은 그보다 앞이었습니다. 샘플링 주기(약 2초)보다 짧은 사건은 관제에 안 잡힌다는 예입니다. After도 같아서, 마지막 RSS 281,636KB는 "25MB + Heap 250MB"이고 275MB 할당 순간은 찍히지 않았습니다.
+**발표자**: 아닙니다. 할당 전부터 RSS가 약 25MB였습니다. 이건 앱 자체가 쓰는 기본 메모리이고, CPU 실험처럼 누수가 없는 케이스에서도 RSS가 25,608KB 근처로 유지됩니다. 그래서 마지막 샘플 102,404KB는 "기본 25MB + Heap 75MB"입니다. 100MB 할당은 16:17:10,625에 일어났고 1ms 뒤에 종료됐는데, 모니터의 마지막 샘플은 그보다 앞이었습니다. 샘플링 주기(약 2초)보다 짧은 사건은 관제에 안 잡힌다는 예입니다. After도 같아서, 마지막 RSS 281,636KB는 "25MB + Heap 250MB"이고 275MB 할당 순간은 찍히지 않았습니다.
 
 **평가자**: 시스템 전체에는 어떤 영향이 있었나요?
 
-**발표자**: `SYS_MEM`은 13.5~14.7%로 거의 변화가 없었고 `PROC_MEM`도 최대 1.2%였습니다. 컨테이너 메모리가 넉넉해서 100MB 누수가 시스템 전체에 영향을 주기 전에 MemoryGuard가 먼저 종료시켰습니다. CPU도 2~3%대로 안정적이어서 CPU 문제는 아니라고 판단했습니다.
+**발표자**: `SYS_MEM`은 13.1~14.6%로 거의 변화가 없었고 `PROC_MEM`도 최대 1.2%였습니다. 컨테이너 메모리가 넉넉해서 100MB 누수가 시스템 전체에 영향을 주기 전에 MemoryGuard가 먼저 종료시켰습니다. `SYS_CPU`도 2~4%대로 안정적이어서 CPU 문제는 아니라고 판단했습니다.
 
 ### 4-3. 원인 분석
 
@@ -234,9 +235,9 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 
 | 지표 | Before (`MEMORY_LIMIT=100`) | After (`MEMORY_LIMIT=256`) |
 |---|---|---|
-| 생존 시간 | 약 11초 (19:11:58 ~ 19:12:09) | 약 32초 (19:12:13 ~ 19:12:45) |
-| 시작 RSS | 25,600 KB | 25,596 KB |
-| 마지막 RSS (관제) | 102,412 KB | 281,636 KB |
+| 생존 시간 | 약 11초 (16:16:59 ~ 16:17:10) | 약 32초 (16:17:14 ~ 16:17:46) |
+| 시작 RSS | 25,592 KB | 25,596 KB |
+| 마지막 RSS (관제) | 102,404 KB | 281,636 KB |
 | 종료 시 Heap | 100MB | 275MB |
 | 증가 속도 | 25MB / 약 3초 | 25MB / 약 3초 |
 | 종료 코드 | 137 (SIGKILL) | 137 (SIGKILL) |
@@ -279,18 +280,18 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 **발표자**:
 
 ```text
-2026-10-27 19:12:51,312 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
-2026-10-27 19:12:51,314 [INFO] [CpuWorker] Current Load: 5.00%
-2026-10-27 19:12:54,438 [INFO] [CpuWorker] Current Load: 6.62%
+2026-10-28 16:17:53,385 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
+2026-10-28 16:17:53,388 [INFO] [CpuWorker] Current Load: 5.00%
+2026-10-28 16:17:56,527 [INFO] [CpuWorker] Current Load: 12.65%
 ...
-2026-10-27 19:13:13,218 [INFO] [CpuWorker] Current Load: 47.71%
-2026-10-27 19:13:16,348 [INFO] [CpuWorker] Current Load: 55.10%
-2026-10-27 19:13:16,453 [CRITICAL] [CpuWorker] CPU Threshold Violated! (55.1%).
+2026-10-28 16:18:12,126 [INFO] [CpuWorker] Current Load: 43.03%
+2026-10-28 16:18:15,246 [INFO] [CpuWorker] Current Load: 51.54%
+2026-10-28 16:18:15,351 [CRITICAL] [CpuWorker] CPU Threshold Violated! (51.540000000000006%).
 
 >>> [SYSTEM] WATCHDOG: INITIATING EMERGENCY ABORT (SIGTERM) <<<
 ```
 
-약 3초마다 부하가 오르다가 약 27초 만에 종료됐고, 종료 코드는 `143 (SIGTERM)`입니다.
+약 3초마다 부하가 오르다가 약 24초 만에 종료됐고, 종료 코드는 `143 (SIGTERM)`입니다.
 
 **평가자**: 143이면 타임아웃으로 죽인 것과 구분이 안 되지 않나요? 타임아웃도 SIGTERM을 보내잖아요.
 
@@ -300,25 +301,25 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 
 **발표자**: 아니요. 처음 수집한 로그는 `CPU Threshold Violated` 줄에서 끝났습니다. 원인은 출력 버퍼링이었습니다. 출력이 파일로 리다이렉트되면 블록 단위로 버퍼에 모였다가 한꺼번에 써지는데, 버퍼를 비우기 전에 SIGTERM으로 종료되면서 배너가 사라졌습니다. `script`로 가상 터미널을 붙여 줄 단위로 출력되게 바꾸고, 종료 코드도 기록하게 해서 다시 수집했습니다. 같은 이유로 OOM의 `SELF-TERMINATED` 배너도 그때 처음 잡혔습니다. 자세한 과정은 [06-troubleshooting.md](./06-troubleshooting.md)에 있습니다.
 
-**평가자**: 같은 시간대 관제의 `PROC_CPU`는 어땠어요?
+**평가자**: 같은 시간대 `top`/`ps`/관제는 어땠어요?
 
-**발표자**: 앱은 부하가 5%에서 55%로 오른다고 하는데, 관제의 `PROC_CPU`는 시작 직후 15.7%에서 1.6%까지 오히려 내려갔습니다. `SYS_CPU`도 2~4%였습니다.
+**발표자**: 앱은 부하가 5%에서 51.54%로 오른다고 하는데, 관제의 `PROC_CPU`는 시작 직후 17.8%에서 1.9%까지 오히려 내려갔습니다. `SYS_CPU`도 2~4%였습니다. 같은 실행에서 07 스크립트가 3초마다 남긴 `top -H` 순간 CPU는 0~3.9%였고, 누적 CPU 시간(`TIME+`)은 22초 동안 0.15초만 늘었습니다.
 
 **평가자**: 왜 그렇게 나왔을까요?
 
-**발표자**: `ps -o %cpu`는 순간 사용률이 아니라 "시작부터 지금까지 쓴 CPU 시간 ÷ 경과 시간", 즉 누적 평균입니다. 시작 직후 부팅 작업으로 CPU를 좀 쓰고 그 뒤로 거의 쉬면 값이 점점 작아집니다. 그래서 같은 조건으로 앱을 따로 띄워 `top -b -n 2 -d 1 -p <PID>`로 순간값도 측정했는데, 그것도 0~4%였습니다.
+**발표자**: `ps -o %cpu`는 순간 사용률이 아니라 "시작부터 지금까지 쓴 CPU 시간 ÷ 경과 시간", 즉 누적 평균입니다. 시작 직후 부팅 작업으로 CPU를 좀 쓰고 그 뒤로 거의 쉬면 값이 점점 작아집니다. 그래서 `top -H -b -n 2 -d 1 -p <PID>`로 1초 간격 두 번 측정한 뒤 두 번째 값, 즉 직전 1초의 순간값을 같이 기록했습니다. 그것도 0~3.9%였습니다.
 
 **평가자**: 그럼 실제로는 CPU를 거의 안 썼다는 뜻 아닌가요?
 
-**발표자**: 맞습니다. 순간값으로 봐도 낮으니까, `Current Load`는 실제 CPU 사용률이 아니라 앱이 Watchdog 판단용으로 계산하는 값으로 추정합니다. 그래서 리포트에는 "앱 내부 지표"와 "OS 측정값"을 구분해서 적었고, CPU 장애 판단의 근거는 앱 로그의 Load 추이, WATCHDOG 배너, 종료 코드로 잡았습니다. README의 검증표에서도 이 항목만 ⚠️로 표시했습니다.
+**발표자**: 맞습니다. 순간값으로 봐도 낮으니까, `Current Load`는 실제 CPU 사용률이 아니라 앱이 Watchdog 판단용으로 계산하는 값으로 추정합니다. 그래서 리포트에는 "앱 내부 지표"와 "OS 측정값"을 구분해서 적었고, CPU 장애 판단의 근거는 앱 로그의 Load 추이, WATCHDOG 배너, 종료 코드로 잡았습니다. README 검증표에는 앱 로그 Load 상승 구간과 같은 구간의 `top`/`ps` 출력을 나란히 제시했습니다.
 
-**평가자**: `top` 보조 측정은 리포트를 보니 10-13에 따로 돌린 거네요. 본 실험이랑 날짜가 다른데 괜찮아요?
+**평가자**: `top` 측정은 본 실험이랑 같은 실행이에요?
 
-**발표자**: 같은 바이너리, 같은 `CPU_MAX_OCCUPY=90` 조건으로 따로 실행한 것이고, 리포트에 날짜와 "별도 실행"을 명시했습니다. 본 실험의 원본 증거는 아니라서 보조 측정으로만 썼습니다. 05 모니터에 `top` 순간값을 같이 기록하게 바꾸면 한 번의 실행으로 둘 다 남길 수 있는데, 그건 개선 과제로 남겼습니다.
+**발표자**: 네. 처음에는 같은 조건으로 앱을 따로 띄워 측정했는데, 본 실험과 날짜가 달라 증거로 약했습니다. 그래서 `07-capture-system-tools.sh`를 만들어 04가 앱과 같이 백그라운드로 실행하게 했고, 6개 케이스를 다시 돌려 `evidence/cpu/before-systools.log`에 같은 실행의 `ps -ef`, `ps -L`, `top -H` 출력을 남겼습니다. 마지막 회차는 `top`이 1초 측정하는 사이 Watchdog이 앱을 종료해서 출력이 비어 있는데, 그것도 그대로 두었습니다.
 
-**평가자**: 한도가 90%인데 55.1%에서 위반이라고 나왔어요.
+**평가자**: 한도가 90%인데 51.54%에서 위반이라고 나왔어요.
 
-**발표자**: 다른 실행에서도 51.29%, 50.36%, 52.05%, 58.93%처럼 항상 50%를 처음 넘은 직후에 종료됐습니다. 앱이 `Recommend Under 50%`라고 경고하는 걸 보면, 설정값과 상관없이 내부 기준 50%로 판단하는 것으로 봅니다. 설정값과 실제 기준이 다른 건 리포트의 근본 해결 제안에 적었습니다.
+**발표자**: 다른 실행에서도 55.10%, 51.29%, 50.36%, 52.05%, 58.93%처럼 항상 50%를 처음 넘은 직후에 종료됐습니다. 앱이 `Recommend Under 50%`라고 경고하는 걸 보면, 설정값과 상관없이 내부 기준 50%로 판단하는 것으로 봅니다. 설정값과 실제 기준이 다른 건 리포트의 근본 해결 제안에 적었습니다.
 
 **평가자**: After는요?
 
@@ -343,10 +344,10 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 **발표자**: 기동 약 9초 뒤에 이 로그를 마지막으로 멈췄습니다.
 
 ```text
-2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
-2026-10-27 19:15:32,359 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
-2026-10-27 19:15:34,360 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
-2026-10-27 19:15:34,373 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)
+2026-10-28 16:20:31,493 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
+2026-10-28 16:20:31,493 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
+2026-10-28 16:20:33,509 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)
+2026-10-28 16:20:33,509 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
 ```
 
 이후 120초 시점까지 약 110초 동안 로그가 한 줄도 없었고, run 로그에 `App still running after 120s`가 남았습니다.
@@ -357,19 +358,23 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 
 | 근거 | 증거 |
 |---|---|
-| PID 유지 | 120초 시점에도 `kill -0` 성공 (`App still running after 120s`) |
-| 로그 정지 | 마지막 로그 19:15:34 `WAITING ... BLOCKED`, 이후 약 110초 없음 |
-| CPU 정체 | BLOCKED 이후 `PROC_CPU` 2.0% → 0.1% |
-| 메모리 정체 | RSS 증가 없이 18,488KB에서 고정 |
-| 스레드 상태 | 관제 `THREADS:3`, `STATE:SNl+` 유지 |
-| 커널 대기 지점 | 별도 실행에서 `/proc/<PID>/task/*/wchan`을 읽으니 스레드 3개 모두 `futex_wait` |
+| PID 유지 | `ps -ef \| grep agent-leak-app-x86` 27회 모두 실제 앱 PID 5734 존재, 120초 시점 `App still running after 120s` |
+| 로그 정지 | 마지막 로그 16:20:33 `WAITING ... BLOCKED`, 이후 약 110초 없음 |
+| CPU 정체 | `top -H` 순간 CPU 3개 스레드 모두 0.0%, `TIME+`가 16:20:38 ~ 16:22:20 동안 0:00.23에서 고정 |
+| 메모리 정체 | RSS 증가 없이 18,500KB에서 고정 |
+| 스레드 상태 | `ps -L` 3개 스레드, `STATE:SNl+` 유지 |
+| 커널 대기 지점 | 같은 실행의 `ps -L -o ...,wchan`에서 BLOCKED 이후 25회 모두 스레드 3개가 `futex_wait` |
 | Lock 순서 | Thread-1은 A → B, Thread-2는 B → A로 서로 반대 |
 
 `futex`는 Linux에서 Lock 대기를 구현하는 커널 기능입니다. BLOCKED 전에는 Worker 스레드가 `do_select`(작업 중 sleep)였다가 BLOCKED 뒤에 `futex_wait`로 바뀌어서, 작업 대기가 아니라 Lock 대기라는 걸 구분할 수 있었습니다.
 
 **평가자**: `wchan`에서 어느 TID가 Thread-1인지는 어떻게 알았어요?
 
-**발표자**: 커널 정보만으로는 구분이 안 됩니다. 스레드 이름이 모두 `agent-leak-app-`으로 같아서, 생성 순서로 대응시켰습니다. 리포트에도 추정이라고 적었습니다.
+**발표자**: 커널 정보만으로는 구분이 안 됩니다. 메인 스레드는 PID와 같은 TID(5734)이고, 나머지 5899·5900은 스레드 이름이 모두 `agent-leak-app-`으로 같아서 생성 순서로 대응시켰습니다. 리포트에도 추정이라고 적었습니다.
+
+**평가자**: `ps -L`의 `%CPU`는 1.5%에서 0.1%로 줄어드는데, 그건 뭔가요?
+
+**발표자**: `ps`의 `%CPU`는 누적 평균이라 CPU를 안 써도 시간이 지나면 값이 줄어듭니다. 그래서 정체 근거는 `top -H`의 순간값 0.0%와, 누적 CPU 시간 `TIME+`가 100초 동안 그대로라는 점으로 잡았습니다.
 
 **평가자**: Deadlock 4조건으로 설명해 보세요.
 
@@ -388,7 +393,7 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 
 **평가자**: After는요?
 
-**발표자**: `MULTI_THREAD_ENABLE=false`로 바꾸니 Lock 경합 로그가 없어지고 `Healthy System Monitoring` 시나리오로 120초 내내 로그가 계속 진행됐습니다. 다만 이건 동시 처리를 꺼서 경합을 피한 우회책이고, Lock 순서 문제는 코드에 그대로 남아 있습니다.
+**발표자**: `MULTI_THREAD_ENABLE=false`로 바꾸니 Lock 경합 로그가 없어지고 `Healthy System Monitoring` 시나리오로 120초 내내 로그가 계속 진행됐습니다. 스레드는 똑같이 3개지만 Worker 2개는 `do_select`(작업 사이 sleep)였고 `TIME+`가 계속 늘었습니다. `futex_wait`는 Worker를 기다리는 메인 스레드뿐이었습니다. 다만 이건 동시 처리를 꺼서 경합을 피한 우회책이고, Lock 순서 문제는 코드에 그대로 남아 있습니다.
 
 > **평가 포인트**: PID 유지, 로그 정지, 자원 정체, 스레드 대기, Lock 순서를 함께 제시해 "단순히 멈췄다"와 Deadlock을 구분했는가?
 
@@ -414,7 +419,7 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 
 **평가자**: 실무에 적용한다면 뭘 가져가겠어요?
 
-**발표자**: 장애가 나면 재시작 전에 `ps`, `ps -L`, `/proc/<PID>/task/*/wchan`, 마지막 로그, 환경변수, 종료 코드를 먼저 남기는 습관입니다. `04-run-experiment-case.sh`처럼 그 수집을 스크립트 하나로 만들어 두면 장애 상황에서도 빠뜨리지 않습니다.
+**발표자**: 장애가 나면 재시작 전에 `ps -ef`, `ps -L`(`wchan` 포함), `top -H`, 마지막 로그, 환경변수, 종료 코드를 먼저 남기는 습관입니다. `04-run-experiment-case.sh`와 `07-capture-system-tools.sh`처럼 그 수집을 스크립트로 만들어 두면 장애 상황에서도 빠뜨리지 않습니다.
 
 <br>
 
@@ -431,11 +436,11 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 | OOM 증거: 종료 로그 | ✅ | `Memory limit exceeded`, `SELF-TERMINATED`, 종료 코드 137 |
 | OOM 증거: `MEMORY_LIMIT` 전후 2회 이상 | ✅ | 100 → 256 |
 | CPU 리포트 (4섹션) | ✅ | [02-cpu-report.md](../reports/02-cpu-report.md) |
-| CPU 증거: 상승 구간 (`top`/`ps`/관제) | ⚠️ | 앱 로그 Load는 5% → 55.10%, OS 지표는 낮음. 차이를 리포트에 분석 |
+| CPU 증거: 상승 구간 (`top`/`ps`/관제) | ✅ | 앱 로그 Load 5% → 51.54% 구간과 같은 실행의 `top -H`(0~3.9%)·`ps`·관제 출력을 함께 제시, 차이를 리포트에 분석 |
 | CPU 증거: `WATCHDOG … SIGTERM` | ✅ | 배너와 종료 코드 143, `Exit mode`로 타임아웃과 구분 |
 | CPU 증거: `CPU_MAX_OCCUPY` 전후 비교 | ✅ | 90 → 50 |
 | Deadlock 리포트 (4섹션) | ✅ | [03-deadlock-report.md](../reports/03-deadlock-report.md) |
-| Deadlock 증거: PID, CPU·MEM 정체, 마지막 로그, Lock 대기 추론 | ✅ | 120초 PID 유지, `futex_wait`, `WAITING ... BLOCKED`, 반대 순서 Lock |
+| Deadlock 증거: PID, CPU·MEM 정체, 마지막 로그, Lock 대기 추론 | ✅ | `ps -ef` 120초 PID 유지, `top -H` 0.0%·`TIME+` 고정, `ps -L` `futex_wait`, `WAITING ... BLOCKED`, 반대 순서 Lock |
 | Deadlock 증거: `MULTI_THREAD_ENABLE` 전후 비교 | ✅ | true → false |
 | 재현성 | ✅ | `bash scripts/00-run-all-experiments.sh` 한 번으로 6개 케이스 재수집 |
 | 보너스: 스케줄링 추론 | ➖ | 미수행 |
@@ -447,17 +452,17 @@ RSS가 약 3초마다 25,604KB씩 계단식으로 올라가고 한 번도 내려
 - 컨테이너 생성부터 6개 케이스 실험, 증거 정리까지 스크립트 하나로 재현할 수 있다.
 - 증거가 안 남는 문제(출력 버퍼링, 방화벽 상태 오기록)를 숨기지 않고 원인과 해결 과정을 트러블슈팅 문서로 남겼다.
 - 종료 코드로 SIGKILL/SIGTERM을 확인하고, `Exit mode`로 Watchdog 종료와 타임아웃 종료를 구분했다.
-- Deadlock을 로그 정지만이 아니라 `futex_wait`와 Lock 순서까지 근거로 판단했다.
+- Deadlock을 로그 정지만이 아니라 같은 실행의 `ps -L` `futex_wait`, `top -H` `TIME+` 고정, Lock 순서까지 근거로 판단했다.
+- 별도 실행으로 남겼던 `top`, `wchan` 측정을 스크립트로 옮겨 본 실험 증거로 다시 수집했다.
 - 리포트마다 관측 사실, 추론, OS 원리를 나눠서 썼다.
 
 **보완할 점**
 
-1. 05 모니터에 순간 CPU(`top -b -n 2 -d 1 -p` 또는 `/proc/<PID>/stat` 차분)를 같이 기록하면, CPU 보조 측정을 별도 실행 없이 본 실험 증거로 남길 수 있다.
-2. Deadlock의 `wchan` 측정도 별도 실행이다. 04 스크립트가 타임아웃 직전에 `/proc/<PID>/task/*/wchan`을 저장하면 본 실험 증거가 된다.
-3. 관제 실제 주기가 약 2초라 짧은 사건을 놓친다. `sleep` 시간을 수집 시간만큼 줄이거나, 앱 로그 줄 수를 관제 로그에 함께 기록하는 방법을 고려할 수 있다.
-4. 보너스 과제(스케줄링 추론)는 시간이 되면 추가한다.
+1. 관제 실제 주기가 약 2초라 짧은 사건을 놓친다. `sleep` 시간을 수집 시간만큼 줄이거나, 앱 로그 줄 수를 관제 로그에 함께 기록하는 방법을 고려할 수 있다.
+2. `07-capture-system-tools.sh`의 `top` 순간 CPU는 3초마다 1초 구간만 측정한다. 관제(05)의 시계열에 같은 순간값을 넣으면 하나의 CSV로 비교할 수 있다.
+3. 보너스 과제(스케줄링 추론)는 시간이 되면 추가한다.
 
-**발표자**: 감사합니다. 1, 2번은 스크립트만 고치면 되는 부분이라 바로 반영할 수 있을 것 같습니다.
+**발표자**: 감사합니다. 1, 2번은 05 모니터의 수집 방식을 바꾸는 작업이라 다음에 반영하겠습니다.
 
 <br>
 

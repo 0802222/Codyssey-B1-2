@@ -4,7 +4,7 @@
 
 ### 1. Description
 
-- **발생 시각**: 2026-10-27 19:12:49 ~ 19:13:16 KST (Before 기준)
+- **발생 시각**: 2026-10-28 16:17:51 ~ 16:18:15 KST (Before 기준)
 - **실행 환경**: Linux x86_64 (Ubuntu 24.04 컨테이너 `codyssey-b1-2-lab`, `--platform linux/amd64`), 서비스 계정 `agentuser` (uid=1001)
 - **적용한 환경변수**:
   - `APP_NAME=agent-leak-app-x86`
@@ -14,7 +14,7 @@
 - **발생 조건**: `CPU_MAX_OCCUPY`를 권장값(50% 이하)보다 높은 90%로 설정한 상태에서 애플리케이션 구동
 - **관측한 현상**:
   - 부팅 시 `[ CPU ] Limit: 90% [ WARNING: Recommend Under 50% ]` 경고가 출력됨.
-  - `CpuWorker`가 보고하는 부하가 약 3초 간격으로 `5.00%`에서 `55.10%`까지 상승한 직후, `[CRITICAL] [CpuWorker] CPU Threshold Violated! (55.1%)` 로그와 `>>> [SYSTEM] WATCHDOG: INITIATING EMERGENCY ABORT (SIGTERM) <<<` 배너가 출력되고 프로세스가 종료됨.
+  - `CpuWorker`가 보고하는 부하가 약 3초 간격으로 `5.00%`에서 `51.54%`까지 상승한 직후, `[CRITICAL] [CpuWorker] CPU Threshold Violated! (51.54%)` 로그와 `>>> [SYSTEM] WATCHDOG: INITIATING EMERGENCY ABORT (SIGTERM) <<<` 배너가 출력되고 프로세스가 종료됨.
   - 종료 코드는 `143 (SIGTERM)`.
 
 ---
@@ -33,17 +33,16 @@
  >>> SYSTEM STATUS: STABLE. STARTING WORKLOAD MONITORING...
 ==================================================
 
-2026-10-27 19:12:51,312 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
-2026-10-27 19:12:51,314 [INFO] [CpuWorker] Current Load: 5.00%
-2026-10-27 19:12:54,438 [INFO] [CpuWorker] Current Load: 6.62%
-2026-10-27 19:12:57,554 [INFO] [CpuWorker] Current Load: 15.90%
-2026-10-27 19:13:00,683 [INFO] [CpuWorker] Current Load: 22.39%
-2026-10-27 19:13:03,839 [INFO] [CpuWorker] Current Load: 32.15%
-2026-10-27 19:13:06,967 [INFO] [CpuWorker] Current Load: 35.04%
-2026-10-27 19:13:10,094 [INFO] [CpuWorker] Current Load: 42.31%
-2026-10-27 19:13:13,218 [INFO] [CpuWorker] Current Load: 47.71%
-2026-10-27 19:13:16,348 [INFO] [CpuWorker] Current Load: 55.10%
-2026-10-27 19:13:16,453 [CRITICAL] [CpuWorker] CPU Threshold Violated! (55.1%).
+2026-10-28 16:17:53,385 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
+2026-10-28 16:17:53,388 [INFO] [CpuWorker] Current Load: 5.00%
+2026-10-28 16:17:56,527 [INFO] [CpuWorker] Current Load: 12.65%
+2026-10-28 16:17:59,650 [INFO] [CpuWorker] Current Load: 22.17%
+2026-10-28 16:18:02,766 [INFO] [CpuWorker] Current Load: 26.24%
+2026-10-28 16:18:05,881 [INFO] [CpuWorker] Current Load: 34.70%
+2026-10-28 16:18:08,999 [INFO] [CpuWorker] Current Load: 41.68%
+2026-10-28 16:18:12,126 [INFO] [CpuWorker] Current Load: 43.03%
+2026-10-28 16:18:15,246 [INFO] [CpuWorker] Current Load: 51.54%
+2026-10-28 16:18:15,351 [CRITICAL] [CpuWorker] CPU Threshold Violated! (51.540000000000006%).
 
 >>> [SYSTEM] WATCHDOG: INITIATING EMERGENCY ABORT (SIGTERM) <<<
 ```
@@ -52,32 +51,54 @@
 
 | 시각 | PROC_CPU (%) | SYS_CPU (%) | RSS (KB) | THREADS | STATE |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| 19:12:50 | 15.7 | 3.0 | 25,612 | 1 | `SN+` |
-| 19:12:52 | 6.5 | 4.0 | 25,716 | 1 | `SN+` |
-| 19:13:13 | 1.8 | 2.0 | 25,776 | 1 | `SN+` |
-| 19:13:15 | 1.6 | 3.4 | 25,776 | 1 | `SN+` |
+| 16:17:52 | 17.8 | 3.2 | 25,608 | 1 | `SN+` |
+| 16:17:54 | 7.7 | 3.0 | 25,712 | 1 | `SN+` |
+| 16:18:02 | 2.5 | 3.2 | 25,752 | 1 | `SN+` |
+| 16:18:13 | 1.9 | 2.1 | 25,768 | 1 | `SN+` |
 
-- 14개 샘플 중 `PROC_CPU` 최대값은 시작 직후의 `15.7%`이며, 이후 계속 감소함.
+- 12개 샘플 중 `PROC_CPU` 최대값은 시작 직후의 `17.8%`이며, 이후 계속 감소함.
 - `STATE`의 `+`는 앱이 가상 터미널(pty)의 포그라운드 프로세스 그룹에서 실행 중이라는 뜻이다. 종료 배너를 수집하기 위해 `script`로 실행한 결과이다 ([06-troubleshooting.md](../docs/06-troubleshooting.md)).
 - 메모리(RSS ~25MB)와 스레드 수(1)는 변화 없음 → OOM·Deadlock 영향 배제.
 
-#### (3) Linux 명령어 출력 (보조 측정)
+#### (3) 시스템 도구 출력 ([before-systools.log](../evidence/cpu/before-systools.log))
 
-`05-monitor-app-resources.sh`의 `PROC_CPU`는 `ps -o %cpu` 값으로, **프로세스 시작 이후 누적 평균**이라 순간 급상승을 보여주지 못한다. 그래서 같은 조건(`CPU_MAX_OCCUPY=90`)으로 앱을 따로 띄워 `top -b -n 2 -d 1 -p <PID>`로 **순간 CPU 사용률**을 측정했다 (2026-10-13 20:49~20:50, 별도 실행).
+`05-monitor-app-resources.sh`의 `PROC_CPU`는 `ps -o %cpu` 값으로, **프로세스 시작 이후 누적 평균**이라 순간 급상승을 보여주지 못한다. 그래서 실험 스크립트가 같은 실행 중에 3초마다 `ps -L`과 `top -H -b -n 2 -d 1`(1초 간격 2회 측정 중 2회차 = **직전 1초의 순간 CPU**)을 함께 기록하도록 했다.
 
 ```text
-시각       top(순간 CPU)  ps(누적 평균)  앱 로그 Load
-20:49:58   1.0%          3.4%          5.00%
-20:50:06   3.9%          1.8%          26.13%
-20:50:15   3.9%          1.5%          39.31%
-20:50:20   0.0%          1.4%          47.86%
-20:50:21   (종료)                        CPU Threshold Violated! (50.8%)
+===== [2026-10-28 16:18:05] sample 4 (app PID: 2320) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2299    2285  0 16:17 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2303    2299  1 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2320    2303  2 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2320 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2320    2320 SN+   2.2  0.3 25768       00:14 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2320   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2320 agentus+  30  10  443208  25768  10168 S   3.9   0.3   0:00.36 agent-l+
 ```
+
+6회 수집한 값을 앱 로그 Load와 나란히 놓으면 다음과 같다.
+
+| 수집 시각 | `top` 순간 CPU | `ps` 누적 평균 | `TIME+` | 직전 앱 로그 Load |
+| :---: | :---: | :---: | :---: | :---: |
+| 16:17:52 | 2.0% | 19.3% | 0:00.25 | (CpuWorker 시작 전) |
+| 16:17:56 | 0.0% | 4.8% | 0:00.27 | 5.00% |
+| 16:18:01 | 0.0% | 2.8% | 0:00.29 | 22.17% |
+| 16:18:05 | 3.9% | 2.2% | 0:00.36 | 26.24% |
+| 16:18:09 | 0.0% | 2.1% | 0:00.40 | 41.68% |
+| 16:18:14 | (측정 중 종료) | 1.8% | - | 43.03% |
+
+- 앱이 보고한 Load는 5% ➔ 43%로 오르는데, `top` 순간 CPU는 0~3.9%, 누적 CPU 시간(`TIME+`)은 22초 동안 0.15초만 늘었다.
+- `ps` 누적 평균은 시작 직후 19.3%에서 계속 떨어진다. 시작 직후 값이 높은 것은 부팅 작업 때문이다.
+- 마지막 회차는 `top`이 1초 측정하는 사이 Watchdog이 앱을 종료해 출력이 없다 (16:18:15.351 종료).
 
 #### (4) 실행 스크립트 출력 ([before-run.log](../evidence/cpu/before-run.log))
 
 ```sh
-[INFO] App started (PID: 1417)
+[INFO] App started (PID: 2299)
 [INFO] Run timeout: 120s
 [INFO] Exit mode: 앱 자체 종료
 [INFO] Exit code: 143 (SIGTERM)
@@ -88,6 +109,7 @@
 #### (5) 관련 증적 파일 목록
 - [before-app.log](../evidence/cpu/before-app.log) / [after-app.log](../evidence/cpu/after-app.log)
 - [before-monitor.log](../evidence/cpu/before-monitor.log) / [after-monitor.log](../evidence/cpu/after-monitor.log)
+- [before-systools.log](../evidence/cpu/before-systools.log) / [after-systools.log](../evidence/cpu/after-systools.log)
 - [before-timeseries.csv](../evidence/cpu/before-timeseries.csv) / [after-timeseries.csv](../evidence/cpu/after-timeseries.csv)
 - [before-report-snippet.md](../evidence/cpu/before-report-snippet.md) / [after-report-snippet.md](../evidence/cpu/after-report-snippet.md)
 - [before-env-snapshot.txt](../evidence/cpu/before-env-snapshot.txt) / [after-env-snapshot.txt](../evidence/cpu/after-env-snapshot.txt)
@@ -100,10 +122,10 @@
 ### 3. Root Cause Analysis
 
 #### (1) 증거로 직접 확인한 사실
-1. **부하 선형 상승**: 앱 로그에서 `CpuWorker`의 `Current Load`가 약 3초마다 2~10%p씩 올라 25초 만에 `5.00%` ➔ `55.10%`에 도달함.
-2. **50% 초과 직후 종료**: `47.71%`까지는 유지되다가 `55.10%`가 기록된 지 약 0.1초 뒤 `CPU Threshold Violated!`가 출력되고 프로세스가 종료됨. 설정값은 90%였지만 실제 종료는 50%를 넘은 첫 시점에 일어남 (다른 실행에서도 `51.29%`, `50.36%`, `52.05%`, `58.93%`로 모두 50%를 처음 넘은 직후 종료).
+1. **부하 선형 상승**: 앱 로그에서 `CpuWorker`의 `Current Load`가 약 3초마다 1~10%p씩 올라 약 22초 만에 `5.00%` ➔ `51.54%`에 도달함.
+2. **50% 초과 직후 종료**: `43.03%`까지는 유지되다가 `51.54%`가 기록된 지 약 0.1초 뒤 `CPU Threshold Violated!`가 출력되고 프로세스가 종료됨. 설정값은 90%였지만 실제 종료는 50%를 넘은 첫 시점에 일어남 (다른 실행에서도 `55.10%`, `51.29%`, `50.36%`, `52.05%`, `58.93%`로 모두 50%를 처음 넘은 직후 종료).
 3. **Watchdog의 SIGTERM 종료**: 종료 직후 `>>> [SYSTEM] WATCHDOG: INITIATING EMERGENCY ABORT (SIGTERM) <<<` 배너가 기록되었고, 실행 스크립트가 받은 종료 코드도 `143 (SIGTERM)`으로 일치함.
-4. **OS 관측값과 불일치**: 같은 구간에서 `top` 기준 순간 CPU는 0~4%, `ps` 누적 평균은 15.7% ➔ 1.6%로 감소. 앱이 보고한 50% 수준의 사용률은 OS 지표에서 관측되지 않음.
+4. **OS 관측값과 불일치**: 같은 실행에서 `top` 기준 순간 CPU는 0~3.9%, `ps` 누적 평균은 19.3% ➔ 1.8%로 감소, 누적 CPU 시간은 22초 동안 0.15초 증가. 앱이 보고한 50% 수준의 사용률은 OS 지표에서 관측되지 않음.
 
 #### (2) 증거를 바탕으로 추론한 원인
 - **CPU 상한 설정이 권장 범위를 벗어남**: 앱은 `CPU_MAX_OCCUPY > 50`을 `WARNING`으로 판정하고, 부하를 상한까지 계속 올리는 시나리오로 동작한다. 부하가 내부 안전 기준(약 50%)을 넘는 순간 보호 로직이 프로세스를 종료한 것으로 판단한다.
@@ -126,8 +148,8 @@
 - (앱 부팅 경고 `[ WARNING: Recommend Under 50% ]`을 반영)
 
 #### (2) 변경 전 결과 (`cpu-before`)
-- **생존 시간**: **약 27초** (앱 로그 기준 19:12:49 기동 ~ 19:13:16 종료)
-- **앱 보고 최대 부하**: **55.10%**
+- **생존 시간**: **약 24초** (앱 로그 기준 16:17:51 기동 ~ 16:18:15 종료)
+- **앱 보고 최대 부하**: **51.54%**
 - **종료 방식**: Watchdog 자체 종료 (`CPU Threshold Violated!` ➔ `WATCHDOG ... (SIGTERM)`), 종료 코드 `143`
 
 #### (3) 변경 후 결과 (`cpu-after`)
@@ -136,24 +158,25 @@
 - **생존 시간**: **120초 관찰 동안 종료되지 않음**
 - **종료 방식**: RUN_TIMEOUT(120s) 강제 종료 ([after-run.log](../evidence/cpu/after-run.log)). 이때의 143은 스크립트가 보낸 SIGTERM이며 Watchdog 종료가 아니다.
   ```sh
-  [INFO] App started (PID: 2064)
+  [INFO] App started (PID: 2939)
   [INFO] Run timeout: 120s
-  [WARN] App still running after 120s. Killing (PID: 2064)
+  [WARN] App still running after 120s. Killing (PID: 2939)
   [INFO] Exit mode: RUN_TIMEOUT(120s) 강제 종료
   [INFO] Exit code: 143 (SIGTERM)
   ```
 - **관찰 로그 ([after-app.log](../evidence/cpu/after-app.log))**:
   ```text
-  2026-10-27 19:13:43,585 [INFO] [CpuWorker] Current Load: 45.63%
-  2026-10-27 19:13:45,688 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
-  2026-10-27 19:13:46,696 [INFO] [CpuWorker] Current Load: 50.00%
-  2026-10-27 19:13:49,815 [INFO] [CpuWorker] Current Load: 41.79%
+  2026-10-28 16:18:58,241 [INFO] [CpuWorker] Current Load: 49.71%
+  2026-10-28 16:19:00,362 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
+  2026-10-28 16:19:01,369 [INFO] [CpuWorker] Current Load: 50.00%
+  2026-10-28 16:19:04,474 [INFO] [CpuWorker] Current Load: 42.13%
   ...
-  2026-10-27 19:14:16,929 [INFO] [CpuWorker] Cooldown complete (5.00%). Resuming load increase...
+  2026-10-28 16:19:28,480 [INFO] [CpuWorker] Cooldown complete (5.00%). Resuming load increase...
   ...
-  2026-10-27 19:14:57,588 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
+  2026-10-28 16:19:59,756 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
   ```
 - **부팅 배너**: `>>> [SYSTEM] ALL CONFIGURATIONS OPTIMAL. RUNNING STABILITY TEST... <<<` (모든 설정이 권장 범위)
+- **시스템 도구 출력** ([after-systools.log](../evidence/cpu/after-systools.log)): 27회 수집 동안 `top` 순간 CPU는 스레드별 0~4.9%로, Before와 마찬가지로 앱 Load 값과 무관하게 낮았다.
 - **참고**: After에서는 `MemoryWorker`도 함께 동작해 Heap이 525MB까지 올랐다가 `>>> [SYSTEM] MEMORY RECOVERED (Cache Cleared) <<<`와 함께 50MB로 회수되었다. 모든 값이 권장 범위인 `Healthy System Monitoring` 시나리오의 정상 동작이며, CPU 장애와는 별개이다.
 
 #### (4) Before & After 비교 요약
@@ -161,10 +184,11 @@
 | 비교 지표 | Before (`CPU_MAX_OCCUPY=90`) | After (`CPU_MAX_OCCUPY=50`) | 변화 분석 |
 | :--- | :---: | :---: | :--- |
 | **부팅 판정** | `WARNING: Recommend Under 50%` | `OK` | 권장 범위 진입 |
-| **CPU 상승 구간** | 5% ➔ 55.10% (약 25초) | 5% ➔ 50% (약 21초) 후 cooldown | 상승 속도는 비슷 |
-| **앱 보고 최대 부하** | 55.10% | 50.00% | 상한에서 멈춤 |
-| **OS 관측 PROC_CPU 최대** | 15.7% (시작 직후) | 15.9% (시작 직후) | 둘 다 시작 직후만 높고 이후 낮음 |
-| **생존 시간** | 약 27초 | 120초 이상 | 종료되지 않음 |
+| **CPU 상승 구간** | 5% ➔ 51.54% (약 22초) | 5% ➔ 50% (약 37초) 후 cooldown | 상승 폭은 실행마다 달라짐, 둘 다 50% 근처까지 상승 |
+| **앱 보고 최대 부하** | 51.54% | 50.00% | 상한에서 멈춤 |
+| **OS 관측 PROC_CPU 최대** | 17.8% (시작 직후) | 17.8% (시작 직후) | 둘 다 시작 직후만 높고 이후 낮음 |
+| **`top` 순간 CPU** | 0~3.9% | 0~4.9% | 앱 Load와 무관하게 둘 다 낮음 |
+| **생존 시간** | 약 24초 | 120초 이상 | 종료되지 않음 |
 | **종료 여부** | `WATCHDOG ... (SIGTERM)`, 종료 코드 143 | 종료 없음 (타임아웃으로 중단) | 장애 회피 |
 
 #### (5) 임시 조치의 한계
@@ -176,4 +200,4 @@
 1. **부하 생성 로직 개선**: `CpuWorker`가 부하를 무조건 상한까지 올리지 않도록 작업량을 제한하거나, 배치 작업을 쪼개 주기적으로 CPU를 양보하도록 수정.
 2. **설정과 실제 기준 일치**: 설정값(90%)과 실제 종료 기준(약 50%)이 다른 문제를 수정하여, 운영자가 설정한 상한이 그대로 적용되도록 함.
 3. **리소스 격리**: 컨테이너에 `--cpus`, cgroup `cpu.max` 등으로 CPU 사용 상한을 걸어 한 프로세스가 노드 전체에 영향을 주지 않게 함.
-4. **관측 개선**: `05-monitor-app-resources.sh`에 `top` 기반 순간 CPU 사용률과 앱 로그의 Load 값을 함께 기록하여 OS 지표와 앱 지표를 교차 검증.
+4. **관측 개선**: 이번 실험에서는 `07-capture-system-tools.sh`로 `top` 순간 CPU를 함께 기록했다. 운영 관제에서도 순간 CPU와 앱 로그의 Load 값을 같은 시계열로 수집해 OS 지표와 앱 지표를 교차 검증해야 한다.

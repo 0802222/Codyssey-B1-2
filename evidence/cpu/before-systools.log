@@ -1,0 +1,86 @@
+# System tools snapshot
+# APP_NAME: agent-leak-app-x86, interval: 3s
+# Started at: 2026-10-28 16:17:51 KST
+
+===== [2026-10-28 16:17:52] sample 1 (app PID: 2320) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2299    2285  1 16:17 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2303    2299 12 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2320    2303 20 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2320 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2320    2320 SN+  19.3  0.3 25608       00:01 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2320   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2320 agentus+  30  10  443200  25712  10168 S   2.0   0.3   0:00.25 agent-l+
+
+===== [2026-10-28 16:17:56] sample 2 (app PID: 2320) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2299    2285  0 16:17 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2303    2299  2 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2320    2303  4 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2320 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2320    2320 SN+   4.8  0.3 25752       00:05 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2320   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2320 agentus+  30  10  443208  25752  10168 S   0.0   0.3   0:00.27 agent-l+
+
+===== [2026-10-28 16:18:01] sample 3 (app PID: 2320) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2299    2285  0 16:17 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2303    2299  1 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2320    2303  2 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2320 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2320    2320 SN+   2.8  0.3 25752       00:10 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2320   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2320 agentus+  30  10  443208  25752  10168 S   0.0   0.3   0:00.29 agent-l+
+
+===== [2026-10-28 16:18:05] sample 4 (app PID: 2320) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2299    2285  0 16:17 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2303    2299  1 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2320    2303  2 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2320 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2320    2320 SN+   2.2  0.3 25768       00:14 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2320   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2320 agentus+  30  10  443208  25768  10168 S   3.9   0.3   0:00.36 agent-l+
+
+===== [2026-10-28 16:18:09] sample 5 (app PID: 2320) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2299    2285  0 16:17 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2303    2299  0 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2320    2303  2 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2320 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2320    2320 SN+   2.1  0.3 25768       00:18 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2320   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2320 agentus+  30  10  443208  25768  10168 S   0.0   0.3   0:00.40 agent-l+
+
+===== [2026-10-28 16:18:14] sample 6 (app PID: 2320) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2299    2285  0 16:17 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2303    2299  0 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2320    2303  1 16:17 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2320 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2320    2320 SN+   1.8  0.3 25768       00:23 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2320   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND

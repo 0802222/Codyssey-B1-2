@@ -23,7 +23,8 @@ Codyssey-B1-2/
 │   ├── 03-configure-firewall.sh     # UFW 포트 정책 적용 (root)
 │   ├── 04-run-experiment-case.sh    # 케이스 1개 실행 + 원본 로그 저장 (agentuser)
 │   ├── 05-monitor-app-resources.sh  # 앱 프로세스·시스템 자원 주기 기록
-│   └── 06-summarize-evidence.sh     # 원본 로그 → CSV·리포트 스니펫
+│   ├── 06-summarize-evidence.sh     # 원본 로그 → CSV·리포트 스니펫
+│   └── 07-capture-system-tools.sh   # ps -ef, ps -L, top -H 출력 주기 저장
 ├── reports/
 │   ├── 01-oom-report.md
 │   ├── 02-cpu-report.md
@@ -53,6 +54,7 @@ flowchart TD
         R04["04-run-experiment-case.sh<br/>(agentuser)"]
         R05["05-monitor-app-resources.sh<br/>(백그라운드)"]
         R06["06-summarize-evidence.sh"]
+        R07["07-capture-system-tools.sh<br/>(백그라운드)"]
         EV[("evidence/type/")]
     end
     R00 --> R01
@@ -60,9 +62,11 @@ flowchart TD
     R00 -- "케이스마다" --> R04
     CONF -. "환경변수" .-> R04
     R04 --> R05
+    R04 --> R07
     R04 --> R06
     R04 --> EV
     R06 --> EV
+    R07 --> EV
 ```
 
 <br>
@@ -75,10 +79,12 @@ sequenceDiagram
     participant Pty as script (pty)
     participant App as agent-leak-app-x86
     participant Mon as 05-monitor
+    participant Sys as 07-capture
     Run->>Run: env 스냅샷 저장
     Run->>Pty: script -qefc 로 앱 실행
     Pty->>App: 가상 터미널에서 실행
     Run->>Mon: 1초 간격 관제 시작
+    Run->>Sys: 3초 간격 ps -ef / ps -L / top -H 저장 시작
     alt 앱이 스스로 종료 (OOM, CPU)
         App-->>Pty: 종료 코드 137 / 143
     else RUN_TIMEOUT 도달 (Deadlock, After)
@@ -88,6 +94,7 @@ sequenceDiagram
     Pty-->>Run: 종료 코드 전달 (-e 옵션)
     Run->>Run: run.log에 Exit mode, Exit code 기록
     Run->>Mon: 관제 종료
+    Run->>Sys: 스냅샷 수집 종료 (앱이 사라지면 스스로도 종료)
     Run->>Run: 06-summarize-evidence.sh 로 CSV·스니펫 생성
 ```
 
@@ -103,6 +110,7 @@ sequenceDiagram
 | 04-run-experiment-case.sh | agentuser | 케이스마다 | 앱을 pty(`script`)로 실행, monitor 실행, `RUN_TIMEOUT` 처리, 종료 코드 기록, 원본 로그(app·monitor·run·env) 저장 |
 | 05-monitor-app-resources.sh | agentuser | 앱 실행 중 | 프로세스·CPU·메모리·RSS·스레드·포트 상태 기록 |
 | 06-summarize-evidence.sh | agentuser | run-experiment 마지막, 또는 단독 | 원본 로그로 시계열 CSV·리포트 스니펫 생성 (실험 없이 재생성 가능) |
+| 07-capture-system-tools.sh | agentuser | 앱 실행 중 (04가 백그라운드로 실행) | 3초마다 `ps -ef \| grep`, `ps -L -o ...,wchan`, `top -H -b -n 2 -d 1`(순간 CPU) 출력을 `<phase>-systools.log`에 저장 |
 
 <br>
 

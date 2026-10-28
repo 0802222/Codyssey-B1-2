@@ -4,7 +4,7 @@
 
 <br>
 
-- **발생 시각**: 2026-10-27 19:15:25 ~ 19:17:23 KST (Before 기준, 19:15:34 이후 무응답)
+- **발생 시각**: 2026-10-28 16:20:24 ~ 16:22:23 KST (Before 기준, 16:20:33 이후 무응답)
 - **실행 환경**: Linux x86_64 (Ubuntu 24.04 컨테이너 `codyssey-b1-2-lab`, `--platform linux/amd64`), 서비스 계정 `agentuser` (uid=1001)
 - **적용한 환경변수**:
   - `APP_NAME=agent-leak-app-x86`
@@ -33,60 +33,102 @@
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-10-27 19:15:27,326 [WARNING] [AgentWorker] Initializing concurrent transaction processors...
-2026-10-27 19:15:27,327 [WARNING] [System] CAUTION: Strict resource locking is enabled.
-2026-10-27 19:15:32,357 [INFO] [Worker-Thread-1] Process Started. Attempting to lock [Shared_Memory_A]...
-2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
-2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-1] Processing critical data in Memory A...
-2026-10-27 19:15:32,358 [INFO] [AgentWorker][Worker-Thread-2] Process Started. Attempting to lock [Socket_Pool_B]...
-2026-10-27 19:15:32,358 [INFO] [AgentWorker] Waiting for worker threads to complete transactions...
-2026-10-27 19:15:32,359 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
-2026-10-27 19:15:32,359 [INFO] [AgentWorker][Worker-Thread-2] Establishing network connections in Pool B...
-2026-10-27 19:15:34,360 [INFO] [AgentWorker][Worker-Thread-2] Need resource [Shared_Memory_A] to write logs.
-2026-10-27 19:15:34,360 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
-2026-10-27 19:15:34,373 [INFO] [AgentWorker][Worker-Thread-1] Need resource [Socket_Pool_B] to finish job.
-2026-10-27 19:15:34,373 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)
+2026-10-28 16:20:26,474 [WARNING] [AgentWorker] Initializing concurrent transaction processors...
+2026-10-28 16:20:26,475 [WARNING] [System] CAUTION: Strict resource locking is enabled.
+2026-10-28 16:20:31,492 [INFO] [Worker-Thread-1] Process Started. Attempting to lock [Shared_Memory_A]...
+2026-10-28 16:20:31,493 [INFO] [AgentWorker][Worker-Thread-2] Process Started. Attempting to lock [Socket_Pool_B]...
+2026-10-28 16:20:31,493 [INFO] [AgentWorker][Worker-Thread-1] LOCK ACQUIRED: [Shared_Memory_A]. (Holding...)
+2026-10-28 16:20:31,493 [INFO] [AgentWorker][Worker-Thread-1] Processing critical data in Memory A...
+2026-10-28 16:20:31,493 [INFO] [AgentWorker][Worker-Thread-2] LOCK ACQUIRED: [Socket_Pool_B]. (Holding...)
+2026-10-28 16:20:31,493 [INFO] [AgentWorker] Waiting for worker threads to complete transactions...
+2026-10-28 16:20:31,493 [INFO] [AgentWorker][Worker-Thread-2] Establishing network connections in Pool B...
+2026-10-28 16:20:33,509 [INFO] [AgentWorker][Worker-Thread-1] Need resource [Socket_Pool_B] to finish job.
+2026-10-28 16:20:33,509 [INFO] [AgentWorker][Worker-Thread-2] Need resource [Shared_Memory_A] to write logs.
+2026-10-28 16:20:33,509 [INFO] [AgentWorker][Worker-Thread-1] WAITING for [Socket_Pool_B]... (Status: BLOCKED)
+2026-10-28 16:20:33,509 [INFO] [AgentWorker][Worker-Thread-2] WAITING for [Shared_Memory_A]... (Status: BLOCKED)
 ```
 
-→ 위 마지막 줄(`19:15:34,373`)이 파일의 **마지막 로그**이며, 이후 강제 종료(약 19:17:25)까지 약 110초 동안 새 로그가 없다.
+→ 위 마지막 줄(`16:20:33,509`)이 파일의 **마지막 로그**이며, 이후 강제 종료(약 16:22:23)까지 약 110초 동안 새 로그가 없다.
 
 #### (2) 05-monitor-app-resources.sh 관제 데이터 ([before-timeseries.csv](../evidence/deadlock/before-timeseries.csv))
 
 | 시각 | PROC_CPU (%) | RSS (KB) | THREADS | STATE | 비고 |
 | :---: | :---: | :---: | :---: | :---: | :--- |
-| 19:15:26 | 16.7 | 25,600 | 1 | `SN+` | 기동 직후 |
-| 19:15:32 | 3.0 | 25,600 | 1 | `SN+` | |
-| 19:15:33 | 2.5 | 25,576 | **3** | `SNl+` | Worker 스레드 2개 생성, Lock 획득 |
-| 19:15:35 | 2.0 | 25,576 | 3 | `SNl+` | 두 스레드 BLOCKED |
-| 19:17:23 | 0.1 | 18,488 | 3 | `SNl+` | 모니터 마지막 샘플 |
+| 16:20:25 | 17.3 | 25,604 | 1 | `SN+` | 기동 직후 |
+| 16:20:31 | 3.0 | 25,604 | 1 | `SN+` | |
+| 16:20:33 | 2.5 | 25,580 | **3** | `SNl+` | Worker 스레드 2개 생성, Lock 획득 후 BLOCKED |
+| 16:20:35 | 2.1 | 25,580 | 3 | `SNl+` | 두 스레드 BLOCKED 이후 |
+| 16:22:22 | 0.2 | 18,500 | 3 | `SNl+` | 모니터 마지막 샘플 |
 
 - 61개 샘플 중 57개가 `THREADS:3`, `STATE:SNl+` (`S` 대기, `N` 저우선순위, `l` 멀티스레드, `+` 가상 터미널의 포그라운드 프로세스).
-- BLOCKED 이후 `PROC_CPU` 최대 2.0%로 계속 감소 → 아무 연산도 하지 않음.
-- RSS는 한 번도 증가하지 않고 25,600KB ➔ 22,416KB ➔ 18,488KB로 줄어든 뒤 고정 → 새 메모리 할당 없음. 감소분은 쓰지 않는 페이지를 커널이 회수한 것으로 추정한다.
+- BLOCKED 이후 `PROC_CPU` 최대 2.1%로 계속 감소 → 아무 연산도 하지 않음.
+- RSS는 한 번도 증가하지 않고 25,604KB ➔ 25,580KB ➔ 22,420KB ➔ 18,500KB로 줄어든 뒤 고정 → 새 메모리 할당 없음. 감소분은 쓰지 않는 페이지를 커널이 회수한 것으로 추정한다.
 
-#### (2-1) 스레드별 대기 지점 (보조 측정)
+#### (2-1) 시스템 도구 출력: PID 존재와 스레드별 대기 지점 ([before-systools.log](../evidence/deadlock/before-systools.log))
 
-같은 조건(`MULTI_THREAD_ENABLE=true`)으로 앱을 따로 띄우고, 두 스레드가 BLOCKED를 출력한 뒤 `/proc/<PID>/task/<TID>/`의 `status`와 `wchan`(커널에서 잠들어 있는 함수)을 읽었다 (2026-10-27 19:22, 별도 실행).
+실험 스크립트가 같은 실행 중 3초마다 `ps -ef`, `ps -L`, `top -H`를 실행해 저장했다 (총 27회).
+
+**BLOCKED 직전 (16:20:29, 기동 5초)** — 스레드 1개, 작업 중 sleep(`do_select`)
 
 ```text
-== 9697 (부모: PyInstaller 부트로더)
-  tid=9697 state=S wchan=do_wait        ← 자식 프로세스 종료 대기
-== 9698 (자식: 실제 앱)
-  tid=9698 state=S wchan=futex_wait     ← 메인(AgentWorker): Worker 종료 대기
-  tid=9699 state=S wchan=futex_wait     ← Worker-Thread-1: Lock 대기
-  tid=9700 state=S wchan=futex_wait     ← Worker-Thread-2: Lock 대기
+$ ps -L -p 5734 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   5734    5734 SN+   3.9  0.3 25604       00:05 do_select            agent-leak-app-
 ```
 
-- 3개 스레드가 모두 `S`(sleep) 상태로 `futex_wait`에서 멈춰 있다. `futex`는 Linux에서 Lock 대기를 구현하는 커널 기능이다.
-- BLOCKED 직전(기동 9초 시점)에는 Worker 스레드 2개가 `do_select`(작업 중 `sleep`)였다가, BLOCKED 이후 `futex_wait`로 바뀌었다. 즉, 작업 대기가 아니라 Lock 대기로 멈춘 것이다.
-- 어떤 TID가 어느 Worker인지는 커널 정보만으로 구분되지 않는다 (스레드 이름이 모두 `agent-leak-app-`). 생성 순서로 대응시켰다.
+**BLOCKED 5초 후 (16:20:38)**
+
+```text
+$ ps -ef | grep agent-leak-app-x86
+agentus+    5713    5699  0 16:20 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    5717    5713  0 16:20 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    5734    5717  1 16:20 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 5734 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   5734    5734 SNl+  1.5  0.3 25580       00:14 futex_wait           agent-leak-app-
+   5734    5899 SNl+  0.0  0.3 25580       00:07 futex_wait           agent-leak-app-
+   5734    5900 SNl+  0.0  0.3 25580       00:07 futex_wait           agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 5734   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   5734 agentus+  30  10  589536  25580  10168 S   0.0   0.3   0:00.23 agent-l+
+   5899 agentus+  30  10  589536  25580  10168 S   0.0   0.3   0:00.00 agent-l+
+   5900 agentus+  30  10  589536  25580  10168 S   0.0   0.3   0:00.00 agent-l+
+```
+
+**강제 종료 직전 (16:22:20, BLOCKED 107초 후)**
+
+```text
+$ ps -ef | grep agent-leak-app-x86
+agentus+    5713    5699  0 16:20 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    5717    5713  0 16:20 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    5734    5717  0 16:20 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 5734 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   5734    5734 SNl+  0.1  0.2 18500       01:56 futex_wait           agent-leak-app-
+   5734    5899 SNl+  0.0  0.2 18500       01:49 futex_wait           agent-leak-app-
+   5734    5900 SNl+  0.0  0.2 18500       01:49 futex_wait           agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 5734   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   5734 agentus+  30  10  589536  18500   3088 S   0.0   0.2   0:00.23 agent-l+
+   5899 agentus+  30  10  589536  18500   3088 S   0.0   0.2   0:00.00 agent-l+
+   5900 agentus+  30  10  589536  18500   3088 S   0.0   0.2   0:00.00 agent-l+
+```
+
+- **PID 존재**: `ps -ef`에서 `script`(5713) ➔ 부트로더(5717) ➔ 실제 앱(5734)이 120초 내내 같은 PID로 남아 있다.
+- **스레드별 대기 지점**: BLOCKED 이후 25회 수집 모두 3개 스레드가 `S`(sleep) 상태로 `futex_wait`에서 멈춰 있다. `futex`는 Linux에서 Lock 대기를 구현하는 커널 기능이다. BLOCKED 직전에는 `do_select`(작업 중 `sleep`)였으므로, 작업 대기가 아니라 Lock 대기로 바뀐 것이다.
+- **CPU 정체**: `top -H` 순간 CPU는 BLOCKED 이후 모든 스레드에서 0.0%이고, 누적 CPU 시간(`TIME+`)이 16:20:38부터 16:22:20까지 `0:00.23` / `0:00.00` / `0:00.00`으로 **한 번도 늘지 않았다**. `ps -L`의 `%CPU`(1.5 ➔ 0.1)가 줄어드는 것은 누적 평균이 경과 시간에 희석된 것일 뿐이다.
+- 어떤 TID가 어느 Worker인지는 커널 정보만으로 구분되지 않는다 (스레드 이름이 모두 `agent-leak-app-`). 메인 스레드는 PID와 같은 TID(5734)이고, 나머지 5899·5900은 생성 순서로 Worker-Thread-1·2에 대응시켰다.
 
 #### (3) 실행 스크립트 출력 ([before-run.log](../evidence/deadlock/before-run.log))
 
 ```sh
-[INFO] App started (PID: 4596)
+[INFO] App started (PID: 5713)
 [INFO] Run timeout: 120s
-[WARN] App still running after 120s. Killing (PID: 4596)
+[WARN] App still running after 120s. Killing (PID: 5713)
 [INFO] Exit mode: RUN_TIMEOUT(120s) 강제 종료
 [INFO] Exit code: 143 (SIGTERM)
 ```
@@ -96,6 +138,7 @@
 #### (4) 관련 증적 파일 목록
 - [before-app.log](../evidence/deadlock/before-app.log) / [after-app.log](../evidence/deadlock/after-app.log)
 - [before-monitor.log](../evidence/deadlock/before-monitor.log) / [after-monitor.log](../evidence/deadlock/after-monitor.log)
+- [before-systools.log](../evidence/deadlock/before-systools.log) / [after-systools.log](../evidence/deadlock/after-systools.log)
 - [before-timeseries.csv](../evidence/deadlock/before-timeseries.csv) / [after-timeseries.csv](../evidence/deadlock/after-timeseries.csv)
 - [before-report-snippet.md](../evidence/deadlock/before-report-snippet.md) / [after-report-snippet.md](../evidence/deadlock/after-report-snippet.md)
 - [before-env-snapshot.txt](../evidence/deadlock/before-env-snapshot.txt) / [after-env-snapshot.txt](../evidence/deadlock/after-env-snapshot.txt)
@@ -108,10 +151,11 @@
 ### 3. Root Cause Analysis
 
 #### (1) 증거로 직접 확인한 사실
-1. **PID 유지**: 120초 시점에 `App still running after 120s` — 프로세스는 종료되지 않았다.
-2. **로그 정지**: 마지막 로그는 `19:15:34` 두 스레드의 `WAITING ... (Status: BLOCKED)`이며, 이후 약 110초간 로그가 한 줄도 추가되지 않았다.
-3. **자원 정체**: BLOCKED 이후 `PROC_CPU`는 2.0% ➔ 0.1%로 감소, RSS는 증가 없이 감소 후 고정, 상태는 `SNl+`(대기)로 유지되었다.
-4. **Lock 획득 순서가 서로 반대**: Thread-1은 `Shared_Memory_A`를 잡은 채 `Socket_Pool_B`를, Thread-2는 `Socket_Pool_B`를 잡은 채 `Shared_Memory_A`를 기다린다.
+1. **PID 유지**: `ps -ef` 27회 수집 모두 실제 앱 PID 5734가 존재했고, 120초 시점에 `App still running after 120s` — 프로세스는 종료되지 않았다.
+2. **로그 정지**: 마지막 로그는 `16:20:33` 두 스레드의 `WAITING ... (Status: BLOCKED)`이며, 이후 약 110초간 로그가 한 줄도 추가되지 않았다.
+3. **자원 정체**: BLOCKED 이후 `top -H` 순간 CPU는 모든 스레드 0.0%, 누적 CPU 시간(`TIME+`)은 약 100초 동안 변화 없음. RSS는 증가 없이 감소 후 고정, 상태는 `SNl+`(대기)로 유지되었다.
+4. **스레드 3개 모두 Lock 대기**: `ps -L`의 `wchan`이 BLOCKED 직전 `do_select`에서 BLOCKED 이후 `futex_wait`로 바뀌었다.
+5. **Lock 획득 순서가 서로 반대**: Thread-1은 `Shared_Memory_A`를 잡은 채 `Socket_Pool_B`를, Thread-2는 `Socket_Pool_B`를 잡은 채 `Shared_Memory_A`를 기다린다.
 
 #### (2) 증거를 바탕으로 추론한 원인
 - **순환 대기에 의한 Deadlock**: 두 스레드가 서로 상대가 가진 Lock을 기다리며, 어느 쪽도 Lock을 놓지 않아 대기가 끝나지 않는다. 메인 스레드(`AgentWorker`)도 `Waiting for worker threads to complete transactions...` 상태로 두 Worker의 종료를 기다리므로 프로세스 전체가 무응답이 된다.
@@ -136,25 +180,26 @@
 - `MULTI_THREAD_ENABLE`: `true` ➔ `false`
 
 #### (2) 변경 전 결과 (`deadlock-before`)
-- **Lock 경합 발생**: 기동 약 9초 후(19:15:34) 두 스레드 BLOCKED
-- **로그 진행**: 19:15:34 이후 정지
+- **Lock 경합 발생**: 기동 약 9초 후(16:20:33) 두 스레드 BLOCKED
+- **로그 진행**: 16:20:33 이후 정지
 - **PID 유지 / 무응답**: 120초 관찰 동안 유지 / 무응답
 - **종료 방식**: RUN_TIMEOUT(120s) 강제 종료, 종료 코드 `143 (SIGTERM)`
 
 #### (3) 변경 후 결과 (`deadlock-after`)
 - **앱 시나리오**: `Scenario Selected: [Healthy System Monitoring]` (Lock 경합 로그 없음)
-- **로그 진행**: 종료 직전(19:19:27)까지 계속 기록
+- **로그 진행**: 종료 직전(16:24:26)까지 계속 기록
   ```text
-  2026-10-27 19:17:58,775 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
-  2026-10-27 19:18:32,253 [WARNING] [MemoryWorker] Memory Usage Reached Limit (525MB). Starting cleanup...
-  2026-10-27 19:18:32,278 [INFO] [System] Memory Cache Flushed. Process Stabilized.
+  2026-10-28 16:22:57,756 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
+  2026-10-28 16:23:25,923 [INFO] [CpuWorker] Cooldown complete (5.00%). Resuming load increase...
+  2026-10-28 16:23:31,295 [WARNING] [MemoryWorker] Memory Usage Reached Limit (525MB). Starting cleanup...
+  2026-10-28 16:23:31,315 [INFO] [System] Memory Cache Flushed. Process Stabilized.
   >>> [SYSTEM] MEMORY RECOVERED (Cache Cleared) <<<
-  2026-10-27 19:18:33,147 [INFO] [CpuWorker] Cooldown complete (5.00%). Resuming load increase...
-  2026-10-27 19:19:04,389 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
-  2026-10-27 19:19:25,785 [INFO] [MemoryWorker] Current Heap: 425MB
-  2026-10-27 19:19:27,244 [INFO] [CpuWorker] Current Load: 14.24%
+  2026-10-28 16:24:00,276 [INFO] [CpuWorker] Peak reached (50.00%). Starting cooldown...
+  2026-10-28 16:24:24,705 [INFO] [MemoryWorker] Current Heap: 425MB
+  2026-10-28 16:24:26,283 [INFO] [CpuWorker] Current Load: 14.28%
   ```
 - **자원 변화**: RSS가 증가 ➔ cleanup ➔ 재증가를 반복 (최대 538,004KB), 정상적으로 작업 중임을 보여줌
+- **스레드 상태** ([after-systools.log](../evidence/deadlock/after-systools.log)): 스레드는 3개지만 Worker 2개는 `do_select`(작업 사이 sleep)이고 `futex_wait`는 Worker 종료를 기다리는 메인 스레드뿐이다. Worker의 `TIME+`는 `0:00.55` ➔ `0:01.07`처럼 계속 늘어난다.
 - **종료 방식**: RUN_TIMEOUT(120s) 강제 종료 ([after-run.log](../evidence/deadlock/after-run.log)) — 정상 동작 중이라 스스로 끝나지 않음
 
 #### (4) Before & After 비교 요약
@@ -163,10 +208,10 @@
 | :--- | :---: | :---: | :--- |
 | **부팅 판정** | `WARNING` + `POTENTIAL DEADLOCK` | `OK` | 경고 해소 |
 | **PID 유지** | 120초 유지 | 120초 유지 | 둘 다 살아 있음 |
-| **로그 마지막 위치** | 19:15:34 `WAITING ... BLOCKED` | 19:19:27 (종료 직전까지 진행) | **Before만 정지** |
-| **CPU 변화** | BLOCKED 이후 2.0% ➔ 0.1% | 앱 Load 5~50% 주기 변동 | Before는 정체 |
-| **메모리 변화** | 증가 없이 18,488KB에서 고정 | 증가·cleanup 반복 (최대 538,004KB) | Before는 정체 |
-| **스레드 상태** | 3개, `SNl+`, 2개 BLOCKED | 3개, `SNl+`, 정상 작업 | |
+| **로그 마지막 위치** | 16:20:33 `WAITING ... BLOCKED` | 16:24:26 (종료 직전까지 진행) | **Before만 정지** |
+| **CPU 변화** | BLOCKED 이후 `top -H` 0.0%, `TIME+` 고정 | 앱 Load 5~50% 주기 변동, Worker `TIME+` 증가 | Before는 정체 |
+| **메모리 변화** | 증가 없이 18,500KB에서 고정 | 증가·cleanup 반복 (최대 538,004KB) | Before는 정체 |
+| **스레드 상태 (`wchan`)** | 3개 모두 `futex_wait` (Lock 대기) | Worker 2개 `do_select`, 메인만 `futex_wait` | Before만 Lock 대기 |
 | **종료 코드** | 143 (타임아웃 SIGTERM) | 143 (타임아웃 SIGTERM) | 둘 다 스스로 끝나지 않음 |
 | **무응답 발생** | **발생** | 발생하지 않음 | 장애 회피 |
 

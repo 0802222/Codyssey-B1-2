@@ -1,15 +1,17 @@
 ===== Experiment: oom-after =====
-Started at   : 2026-10-27 19:12:13 KST
+Started at   : 2026-10-28 16:17:13 KST
 Evidence dir : /workspace/evidence/oom
 
 [INFO] Env snapshot saved: /workspace/evidence/oom/after-env-snapshot.txt
 [INFO] Starting app: /workspace/bin/agent-leak-app-x86
 
-[INFO] App started (PID: 682)
-[INFO] Monitor started (PID: 683, target app PID: 682)
+[INFO] App started (PID: 1455)
+[INFO] Monitor started (PID: 1456, target app PID: 1455)
+[INFO] System tools capture started (PID: 1457, interval: 3s)
 [INFO] Exit mode: 앱 자체 종료
 [INFO] Exit code: 137 (SIGKILL)
 [INFO] Monitor log copied: /workspace/evidence/oom/after-monitor.log
+[INFO] System tools snapshot: /workspace/evidence/oom/after-systools.log (8 samples)
 [INFO] Timeseries CSV: /workspace/evidence/oom/after-timeseries.csv (16 rows)
 [INFO] Report snippet: /workspace/evidence/oom/after-report-snippet.md
 

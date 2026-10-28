@@ -1,0 +1,487 @@
+# System tools snapshot
+# APP_NAME: agent-leak-app-x86, interval: 3s
+# Started at: 2026-10-28 16:18:20 KST
+
+===== [2026-10-28 16:18:21] sample 1 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  1 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939 12 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943 20 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SN+  19.4  0.3 25612       00:01 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  442184  25692  10168 S   1.0   0.3   0:00.24 agent-l+
+
+===== [2026-10-28 16:18:26] sample 2 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  5 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  4.8  0.6 51520       00:05 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.0  0.6 51520       00:02 do_select            agent-leak-app-
+   2960    3018 SNl+  0.0  0.6 51520       00:02 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3016 agentus+  30  10  641800  77124  10168 S   1.0   0.9   0:00.01 agent-l+
+   3018 agentus+  30  10  641800  77124  10168 S   1.0   0.9   0:00.01 agent-l+
+   2960 agentus+  30  10  641800  77124  10168 S   0.0   0.9   0:00.27 agent-l+
+
+===== [2026-10-28 16:18:30] sample 3 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  1 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  3 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  2.6  1.2 102728      00:10 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.5  1.2 102728      00:06 do_select            agent-leak-app-
+   2960    3018 SNl+  0.4  1.2 102728      00:06 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  667404 102728  10168 S   0.0   1.3   0:00.27 agent-l+
+   3016 agentus+  30  10  667404 102728  10168 S   0.0   1.3   0:00.04 agent-l+
+   3018 agentus+  30  10  667404 102728  10168 S   0.0   1.3   0:00.03 agent-l+
+
+===== [2026-10-28 16:18:35] sample 4 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  1 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  1.8  1.5 128332      00:14 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  1.5 128332      00:11 do_select            agent-leak-app-
+   2960    3018 SNl+  0.4  1.5 128332      00:11 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3018 agentus+  30  10  718612 153936  10168 S   2.9   1.9   0:00.08 agent-l+
+   2960 agentus+  30  10  718612 153936  10168 S   0.0   1.9   0:00.27 agent-l+
+   3016 agentus+  30  10  718612 153936  10168 S   0.0   1.9   0:00.05 agent-l+
+
+===== [2026-10-28 16:18:39] sample 5 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  1.4  2.1 179540      00:18 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  2.1 179540      00:15 do_select            agent-leak-app-
+   2960    3018 SNl+  0.6  2.1 179540      00:15 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  744216 179540  10168 S   0.0   2.2   0:00.27 agent-l+
+   3016 agentus+  30  10  744216 179540  10168 S   0.0   2.2   0:00.07 agent-l+
+   3018 agentus+  30  10  744216 179540  10168 S   0.0   2.2   0:00.11 agent-l+
+
+===== [2026-10-28 16:18:44] sample 6 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  1.1  2.5 205144      00:23 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.3  2.5 205144      00:20 do_select            agent-leak-app-
+   2960    3018 SNl+  0.6  2.5 205144      00:20 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3016 agentus+  30  10  795424 230748  10168 S   1.0   2.8   0:00.09 agent-l+
+   2960 agentus+  30  10  795424 230748  10168 S   0.0   2.8   0:00.27 agent-l+
+   3018 agentus+  30  10  795424 230748  10168 S   0.0   2.8   0:00.14 agent-l+
+
+===== [2026-10-28 16:18:48] sample 7 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.9  3.1 256352      00:27 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  3.1 256352      00:24 do_select            agent-leak-app-
+   2960    3018 SNl+  0.7  3.1 256352      00:24 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3018 agentus+  30  10  821028 256352  10168 S   3.0   3.1   0:00.21 agent-l+
+   2960 agentus+  30  10  821028 256352  10168 S   0.0   3.1   0:00.27 agent-l+
+   3016 agentus+  30  10  821028 256352  10168 S   0.0   3.1   0:00.10 agent-l+
+
+===== [2026-10-28 16:18:52] sample 8 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.8  3.4 281956      00:32 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  3.4 281956      00:29 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  3.4 281956      00:29 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  872236 307560  10168 S   0.0   3.8   0:00.27 agent-l+
+   3016 agentus+  30  10  872236 307560  10168 S   0.0   3.8   0:00.13 agent-l+
+   3018 agentus+  30  10  872236 307560  10168 S   0.0   3.8   0:00.26 agent-l+
+
+===== [2026-10-28 16:18:57] sample 9 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.7  4.0 333164      00:36 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  4.0 333164      00:33 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  4.0 333164      00:33 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3018 agentus+  30  10  897840 333164  10168 S   4.9   4.1   0:00.35 agent-l+
+   2960 agentus+  30  10  897840 333164  10168 S   0.0   4.1   0:00.27 agent-l+
+   3016 agentus+  30  10  897840 333164  10168 S   0.0   4.1   0:00.15 agent-l+
+
+===== [2026-10-28 16:19:01] sample 10 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.6  4.3 358772      00:41 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  4.3 358772      00:37 do_select            agent-leak-app-
+   2960    3018 SNl+  1.0  4.3 358772      00:37 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  923448 358772  10168 S   0.0   4.4   0:00.27 agent-l+
+   3016 agentus+  30  10  923448 358772  10168 S   0.0   4.4   0:00.16 agent-l+
+   3018 agentus+  30  10  923448 358772  10168 S   0.0   4.4   0:00.40 agent-l+
+
+===== [2026-10-28 16:19:06] sample 11 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  2 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.5  4.6 384376      00:45 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  4.6 384376      00:42 do_select            agent-leak-app-
+   2960    3018 SNl+  1.0  4.6 384376      00:42 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  974656 409980  10168 S   0.0   5.0   0:00.27 agent-l+
+   3016 agentus+  30  10  974656 409980  10168 S   0.0   5.0   0:00.19 agent-l+
+   3018 agentus+  30  10  974656 409980  10168 S   0.0   5.0   0:00.45 agent-l+
+
+===== [2026-10-28 16:19:10] sample 12 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.5  5.3 435584      00:49 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  5.3 435584      00:46 do_select            agent-leak-app-
+   2960    3018 SNl+  1.0  5.3 435584      00:46 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10 1000260 435584  10168 S   0.0   5.3   0:00.27 agent-l+
+   3016 agentus+  30  10 1000260 435584  10168 S   0.0   5.3   0:00.19 agent-l+
+   3018 agentus+  30  10 1000260 435584  10168 S   0.0   5.3   0:00.51 agent-l+
+
+===== [2026-10-28 16:19:14] sample 13 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.4  5.6 461188      00:54 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.3  5.6 461188      00:51 do_select            agent-leak-app-
+   2960    3018 SNl+  1.0  5.6 461188      00:51 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3016 agentus+  30  10 1051468 486792  10168 S   1.0   5.9   0:00.21 agent-l+
+   2960 agentus+  30  10 1051468 486792  10168 S   0.0   5.9   0:00.27 agent-l+
+   3018 agentus+  30  10 1051468 486792  10168 S   0.0   5.9   0:00.53 agent-l+
+
+===== [2026-10-28 16:19:19] sample 14 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.4  6.2 512396      00:58 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  6.2 512396      00:55 do_select            agent-leak-app-
+   2960    3018 SNl+  0.9  6.2 512396      00:55 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3018 agentus+  30  10 1077072 512396  10168 S   1.0   6.3   0:00.56 agent-l+
+   2960 agentus+  30  10 1077072 512396  10168 S   0.0   6.3   0:00.27 agent-l+
+   3016 agentus+  30  10 1077072 512396  10168 S   0.0   6.3   0:00.24 agent-l+
+
+===== [2026-10-28 16:19:23] sample 15 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.4  6.5 538000      01:03 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  6.5 538000      01:00 do_select            agent-leak-app-
+   2960    3018 SNl+  0.9  6.5 538000      01:00 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3016 agentus+  30  10  590596  25920  10168 S   4.9   0.3   0:00.30 agent-l+
+   2960 agentus+  30  10  590596  25920  10168 S   0.0   0.3   0:00.27 agent-l+
+   3018 agentus+  30  10  590596  25920  10168 S   0.0   0.3   0:00.57 agent-l+
+
+===== [2026-10-28 16:19:28] sample 16 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.3  0.3 25920       01:07 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  0.3 25920       01:04 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  0.3 25920       01:04 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3016 agentus+  30  10  590596  51512  10168 S   2.0   0.6   0:00.32 agent-l+
+   2960 agentus+  30  10  590596  51512  10168 S   0.0   0.6   0:00.27 agent-l+
+   3018 agentus+  30  10  590596  51512  10168 S   0.0   0.6   0:00.58 agent-l+
+
+===== [2026-10-28 16:19:32] sample 17 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.3  0.9 77112       01:11 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  0.9 77112       01:08 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  0.9 77112       01:08 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  590596  77112  10168 S   0.0   0.9   0:00.27 agent-l+
+   3016 agentus+  30  10  590596  77112  10168 S   0.0   0.9   0:00.32 agent-l+
+   3018 agentus+  30  10  590596  77112  10168 S   0.0   0.9   0:00.59 agent-l+
+
+===== [2026-10-28 16:19:37] sample 18 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.3  1.2 102728      01:16 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  1.2 102728      01:13 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  1.2 102728      01:13 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  656132 102728  10168 S   0.0   1.3   0:00.27 agent-l+
+   3016 agentus+  30  10  656132 102728  10168 S   0.0   1.3   0:00.34 agent-l+
+   3018 agentus+  30  10  656132 102728  10168 S   0.0   1.3   0:00.61 agent-l+
+
+===== [2026-10-28 16:19:41] sample 19 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.3  1.8 153932      01:20 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  1.8 153932      01:17 do_select            agent-leak-app-
+   2960    3018 SNl+  0.7  1.8 153932      01:17 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3018 agentus+  30  10  721668 153932  10168 S   1.9   1.9   0:00.64 agent-l+
+   2960 agentus+  30  10  721668 153932  10168 S   0.0   1.9   0:00.27 agent-l+
+   3016 agentus+  30  10  721668 153932  10168 S   0.0   1.9   0:00.35 agent-l+
+
+===== [2026-10-28 16:19:45] sample 20 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.3  2.1 176360      01:25 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  2.1 176360      01:22 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  2.1 176360      01:22 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  721668 176360   7008 S   0.0   2.2   0:00.27 agent-l+
+   3016 agentus+  30  10  721668 176360   7008 S   0.0   2.2   0:00.36 agent-l+
+   3018 agentus+  30  10  721668 176360   7008 S   0.0   2.2   0:00.67 agent-l+
+
+===== [2026-10-28 16:19:50] sample 21 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.3  2.4 202288      01:29 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  2.4 202288      01:26 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  2.4 202288      01:26 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3018 agentus+  30  10  787204 227876   7320 S   3.0   2.8   0:00.73 agent-l+
+   2960 agentus+  30  10  787204 227876   7320 S   0.0   2.8   0:00.27 agent-l+
+   3016 agentus+  30  10  787204 227876   7320 S   0.0   2.8   0:00.38 agent-l+
+
+===== [2026-10-28 16:19:54] sample 22 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.2  3.0 253492      01:34 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  3.0 253492      01:31 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  3.0 253492      01:31 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  852740 253492   7320 S   0.0   3.1   0:00.27 agent-l+
+   3016 agentus+  30  10  852740 253492   7320 S   0.0   3.1   0:00.39 agent-l+
+   3018 agentus+  30  10  852740 253492   7320 S   0.0   3.1   0:00.77 agent-l+
+
+===== [2026-10-28 16:19:59] sample 23 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.2  3.4 279080      01:38 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  3.4 279080      01:35 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  3.4 279080      01:35 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  918276 304696   7320 S   0.0   3.7   0:00.27 agent-l+
+   3016 agentus+  30  10  918276 304696   7320 S   0.0   3.7   0:00.41 agent-l+
+   3018 agentus+  30  10  918276 304696   7320 S   0.0   3.7   0:00.82 agent-l+
+
+===== [2026-10-28 16:20:03] sample 24 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.2  4.0 330284      01:42 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  4.0 330284      01:39 do_select            agent-leak-app-
+   2960    3018 SNl+  0.8  4.0 330284      01:39 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2960 agentus+  30  10  918276 330284   7320 S   0.0   4.0   0:00.27 agent-l+
+   3016 agentus+  30  10  918276 330284   7320 S   0.0   4.0   0:00.42 agent-l+
+   3018 agentus+  30  10  918276 330284   7320 S   0.0   4.0   0:00.92 agent-l+
+
+===== [2026-10-28 16:20:08] sample 25 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.2  4.3 355900      01:47 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  4.3 355900      01:44 do_select            agent-leak-app-
+   2960    3018 SNl+  0.9  4.3 355900      01:44 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3016 agentus+  30  10  983812 381488   7320 S   2.0   4.7   0:00.45 agent-l+
+   2960 agentus+  30  10  983812 381488   7320 S   0.0   4.7   0:00.27 agent-l+
+   3018 agentus+  30  10  983812 381488   7320 S   0.0   4.7   0:00.96 agent-l+
+
+===== [2026-10-28 16:20:12] sample 26 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.2  4.9 407104      01:51 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  4.9 407104      01:48 do_select            agent-leak-app-
+   2960    3018 SNl+  0.9  4.9 407104      01:48 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3018 agentus+  30  10 1049348 407104   7320 S   3.0   5.0   0:01.03 agent-l+
+   2960 agentus+  30  10 1049348 407104   7320 S   0.0   5.0   0:00.27 agent-l+
+   3016 agentus+  30  10 1049348 407104   7320 S   0.0   5.0   0:00.45 agent-l+
+
+===== [2026-10-28 16:20:16] sample 27 (app PID: 2960) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    2939    2925  0 16:18 ?        00:00:00 /usr/bin/script script -qefc exec /workspace/bin/agent-leak-app-x86 /dev/null
+agentus+    2943    2939  0 16:18 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    2960    2943  1 16:18 pts/0    00:00:01 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 2960 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   2960    2960 SNl+  0.2  5.2 432692      01:56 futex_wait           agent-leak-app-
+   2960    3016 SNl+  0.4  5.2 432692      01:53 do_select            agent-leak-app-
+   2960    3018 SNl+  0.9  5.2 432692      01:53 do_select            agent-leak-app-
+
+$ top -H -b -n 2 -d 1 -p 2960   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   3016 agentus+  30  10 1114884 458308   7320 S   1.0   5.6   0:00.48 agent-l+
+   2960 agentus+  30  10 1114884 458308   7320 S   0.0   5.6   0:00.27 agent-l+
+   3018 agentus+  30  10 1114884 458308   7320 S   0.0   5.6   0:01.06 agent-l+
+
+# [2026-10-28 16:20:21] app PID 2960 exited. 27 samples captured.

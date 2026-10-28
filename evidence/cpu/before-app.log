@@ -14,8 +14,8 @@
 ------------------------------------------------------------
 All Boot Checks Passed!
 Agent READY
-2026-10-27 19:12:49,295 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-10-27 19:12:49,297 [INFO] Agent listening at port 15034
+2026-10-28 16:17:51,370 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-10-28 16:17:51,372 [INFO] Agent listening at port 15034
 
 ==================================================
  [ Agent Initiate ] Resource Check 
@@ -27,17 +27,16 @@ Agent READY
  >>> SYSTEM STATUS: STABLE. STARTING WORKLOAD MONITORING...
 ==================================================
 
-2026-10-27 19:12:51,312 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
-2026-10-27 19:12:51,314 [INFO] [CpuWorker] Current Load: 5.00%
-2026-10-27 19:12:54,438 [INFO] [CpuWorker] Current Load: 6.62%
-2026-10-27 19:12:57,554 [INFO] [CpuWorker] Current Load: 15.90%
-2026-10-27 19:13:00,683 [INFO] [CpuWorker] Current Load: 22.39%
-2026-10-27 19:13:03,839 [INFO] [CpuWorker] Current Load: 32.15%
-2026-10-27 19:13:06,967 [INFO] [CpuWorker] Current Load: 35.04%
-2026-10-27 19:13:10,094 [INFO] [CpuWorker] Current Load: 42.31%
-2026-10-27 19:13:13,218 [INFO] [CpuWorker] Current Load: 47.71%
-2026-10-27 19:13:16,348 [INFO] [CpuWorker] Current Load: 55.10%
-2026-10-27 19:13:16,453 [CRITICAL] [CpuWorker] CPU Threshold Violated! (55.1%).
+2026-10-28 16:17:53,385 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
+2026-10-28 16:17:53,388 [INFO] [CpuWorker] Current Load: 5.00%
+2026-10-28 16:17:56,527 [INFO] [CpuWorker] Current Load: 12.65%
+2026-10-28 16:17:59,650 [INFO] [CpuWorker] Current Load: 22.17%
+2026-10-28 16:18:02,766 [INFO] [CpuWorker] Current Load: 26.24%
+2026-10-28 16:18:05,881 [INFO] [CpuWorker] Current Load: 34.70%
+2026-10-28 16:18:08,999 [INFO] [CpuWorker] Current Load: 41.68%
+2026-10-28 16:18:12,126 [INFO] [CpuWorker] Current Load: 43.03%
+2026-10-28 16:18:15,246 [INFO] [CpuWorker] Current Load: 51.54%
+2026-10-28 16:18:15,351 [CRITICAL] [CpuWorker] CPU Threshold Violated! (51.540000000000006%).
 
 >>> [SYSTEM] WATCHDOG: INITIATING EMERGENCY ABORT (SIGTERM) <<<
 

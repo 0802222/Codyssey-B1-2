@@ -4,7 +4,7 @@
 
 ### 1. Description
 
-- **발생 시각**: 2026-10-27 19:11:58 ~ 19:12:09 KST (Before 기준)
+- **발생 시각**: 2026-10-28 16:16:59 ~ 16:17:10 KST (Before 기준)
 - **실행 환경**: Linux x86_64 (Ubuntu 24.04 LTS 컨테이너 환경, hostname: `codyssey-b1-2-lab`), 서비스 계정 `agentuser` (uid=1001)
 - **적용한 환경변수**:
   - `APP_NAME=agent-leak-app-x86`
@@ -27,12 +27,12 @@
 #### (1) 05-monitor-app-resources.sh 관제 데이터 ([before-monitor.log](../evidence/oom/before-monitor.log))
 
 ```text
-[2026-10-27 19:11:59] PID:370 PPID:360 STATE:SN+ ELAPSED:00:01 THREADS:1 PROC_CPU:16.7% PROC_MEM:0.3% RSS:25600KB SYS_CPU:3.1% SYS_MEM:13.9% DISK_USED:4% PORT:15034 FIREWALL:active
-[2026-10-27 19:12:01] PID:370 PPID:360 STATE:SN+ ELAPSED:00:03 THREADS:1 PROC_CPU:7.3% PROC_MEM:0.6% RSS:51204KB SYS_CPU:2.1% SYS_MEM:13.7% DISK_USED:4% PORT:15034 FIREWALL:active
-[2026-10-27 19:12:03] PID:370 PPID:360 STATE:SN+ ELAPSED:00:05 THREADS:1 PROC_CPU:4.6% PROC_MEM:0.6% RSS:51204KB SYS_CPU:3.1% SYS_MEM:14.2% DISK_USED:4% PORT:15034 FIREWALL:active
-[2026-10-27 19:12:05] PID:370 PPID:360 STATE:SN+ ELAPSED:00:07 THREADS:1 PROC_CPU:3.3% PROC_MEM:0.9% RSS:76808KB SYS_CPU:3.0% SYS_MEM:14.3% DISK_USED:4% PORT:15034 FIREWALL:active
-[2026-10-27 19:12:07] PID:370 PPID:360 STATE:SN+ ELAPSED:00:09 THREADS:1 PROC_CPU:2.8% PROC_MEM:1.2% RSS:102412KB SYS_CPU:2.1% SYS_MEM:14.7% DISK_USED:4% PORT:15034 FIREWALL:active
-[2026-10-27 19:12:09] PID:370 PPID:360 STATE:SN+ ELAPSED:00:11 THREADS:1 PROC_CPU:2.3% PROC_MEM:1.2% RSS:102412KB SYS_CPU:3.0% SYS_MEM:13.5% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-28 16:17:00] PID:1110 PPID:1095 STATE:SN+ ELAPSED:00:01 THREADS:1 PROC_CPU:17.3% PROC_MEM:0.3% RSS:25592KB SYS_CPU:4.1% SYS_MEM:13.4% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-28 16:17:02] PID:1110 PPID:1095 STATE:SN+ ELAPSED:00:03 THREADS:1 PROC_CPU:7.4% PROC_MEM:0.6% RSS:51196KB SYS_CPU:2.1% SYS_MEM:13.8% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-28 16:17:04] PID:1110 PPID:1095 STATE:SN+ ELAPSED:00:05 THREADS:1 PROC_CPU:4.6% PROC_MEM:0.6% RSS:51196KB SYS_CPU:3.1% SYS_MEM:14.3% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-28 16:17:06] PID:1110 PPID:1095 STATE:SN+ ELAPSED:00:07 THREADS:1 PROC_CPU:3.5% PROC_MEM:0.9% RSS:76800KB SYS_CPU:2.1% SYS_MEM:14.2% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-28 16:17:08] PID:1110 PPID:1095 STATE:SN+ ELAPSED:00:09 THREADS:1 PROC_CPU:2.8% PROC_MEM:1.2% RSS:102404KB SYS_CPU:2.1% SYS_MEM:14.6% DISK_USED:4% PORT:15034 FIREWALL:active
+[2026-10-28 16:17:10] PID:1110 PPID:1095 STATE:SN+ ELAPSED:00:10 THREADS:1 PROC_CPU:2.3% PROC_MEM:1.2% RSS:102404KB SYS_CPU:3.1% SYS_MEM:13.1% DISK_USED:4% PORT:15034 FIREWALL:active
 ```
 
 #### (2) 프로그램 실행 로그 ([before-app.log](../evidence/oom/before-app.log))
@@ -54,8 +54,8 @@
 ------------------------------------------------------------
 All Boot Checks Passed!
 Agent READY
-2026-10-27 19:11:58,867 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-10-27 19:11:58,869 [INFO] Agent listening at port 15034
+2026-10-28 16:16:59,516 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-10-28 16:16:59,520 [INFO] Agent listening at port 15034
 
 ==================================================
  [ Agent Initiate ] Resource Check 
@@ -67,12 +67,12 @@ Agent READY
  >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
 ==================================================
 
-2026-10-27 19:12:00,883 [INFO] [MemoryWorker] Current Heap: 25MB
-2026-10-27 19:12:03,907 [INFO] [MemoryWorker] Current Heap: 50MB
-2026-10-27 19:12:06,940 [INFO] [MemoryWorker] Current Heap: 75MB
-2026-10-27 19:12:09,971 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
-2026-10-27 19:12:09,972 [CRITICAL] [MemoryGuard] Self-terminating process 370 to prevent system instability.
+2026-10-28 16:17:01,551 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-10-28 16:17:04,575 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-10-28 16:17:07,596 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-10-28 16:17:10,625 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-10-28 16:17:10,626 [CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB) / (Recommend Over 256MB)
+2026-10-28 16:17:10,626 [CRITICAL] [MemoryGuard] Self-terminating process 1110 to prevent system instability.
 
 >>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<
 ```
@@ -80,36 +80,68 @@ Agent READY
 #### (2-1) 실행 스크립트 출력 ([before-run.log](../evidence/oom/before-run.log))
 
 ```sh
-[INFO] App started (PID: 357)
+[INFO] App started (PID: 1091)
 [INFO] Exit mode: 앱 자체 종료
 [INFO] Exit code: 137 (SIGKILL)
 ```
 
 - 종료 코드 137은 `128 + 9`이며, 9번 신호는 `SIGKILL`이다. `MemoryGuard`가 자신에게 SIGKILL을 보내 즉시 종료했음을 뜻한다.
-- `App started`의 PID(357)는 앱을 감싼 `script` 프로세스이고, 실제 앱은 그 아래 자식 프로세스(370)이다. 구조는 [01-concepts.md](../docs/01-concepts.md#부모와-자식-프로세스)에 정리했다.
+- `App started`의 PID(1091)는 앱을 감싼 `script` 프로세스이고, 그 아래 PyInstaller 부트로더(1095), 실제 앱(1110) 순서로 자식 프로세스가 이어진다. 아래 (3-1)의 `ps -ef` 출력으로 확인했다. 구조는 [01-concepts.md](../docs/01-concepts.md#부모와-자식-프로세스)에 정리했다.
 
 #### (3) 시계열 데이터 요약 ([before-timeseries.csv](../evidence/oom/before-timeseries.csv))
 
 | 시각 (Timestamp) | 프로세스 CPU (%) | 시스템 CPU (%) | RSS (KB) | 직전 앱 로그 Heap | 프로세스 상태 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| 19:11:59 | 16.7 | 3.1 | 25,600 | (할당 전) | `SN+` |
-| 19:12:01 | 7.3 | 2.1 | 51,204 | 25MB (12:00.883) | `SN+` |
-| 19:12:03 | 4.6 | 3.1 | 51,204 | 25MB | `SN+` |
-| 19:12:05 | 3.3 | 3.0 | 76,808 | 50MB (12:03.907) | `SN+` |
-| 19:12:07 | 2.8 | 2.1 | 102,412 | 75MB (12:06.940) | `SN+` |
-| 19:12:09 | 2.3 | 3.0 | 102,412 | 75MB | `SN+` |
+| 16:17:00 | 17.3 | 4.1 | 25,592 | (할당 전) | `SN+` |
+| 16:17:02 | 7.4 | 2.1 | 51,196 | 25MB (17:01.551) | `SN+` |
+| 16:17:04 | 4.6 | 3.1 | 51,196 | 25MB | `SN+` |
+| 16:17:06 | 3.5 | 2.1 | 76,800 | 50MB (17:04.575) | `SN+` |
+| 16:17:08 | 2.8 | 2.1 | 102,404 | 75MB (17:07.596) | `SN+` |
+| 16:17:10 | 2.3 | 3.1 | 102,404 | 75MB | `SN+` |
 
-- RSS는 앱 기본 메모리 약 25MB(할당 전 `25,600KB`)에 Heap이 더해진 값이다. 예를 들어 마지막 샘플 `102,412KB`는 기본 25MB + Heap 75MB이다.
-- Heap 100MB 할당(`19:12:09,971`)과 종료(`19:12:09,972`)는 마지막 샘플 이후 1ms 안에 일어나 관제에 기록되지 않았다. 관제의 실제 주기는 약 2초(수집 시간 + `sleep 1`)이다.
+- RSS는 앱 기본 메모리 약 25MB(할당 전 `25,592KB`)에 Heap이 더해진 값이다. 예를 들어 마지막 샘플 `102,404KB`는 기본 25MB + Heap 75MB이다.
+- Heap 100MB 할당(`16:17:10,625`)과 종료(`16:17:10,626`)는 마지막 샘플 이후 1ms 안에 일어나 관제에 기록되지 않았다. 관제의 실제 주기는 약 2초(수집 시간 + `sleep 1`)이다.
 - `STATE`의 `+`는 앱이 가상 터미널(pty)의 포그라운드 프로세스로 실행 중이라는 뜻이다. 종료 배너를 수집하려고 `script`로 실행했기 때문이다 ([06-troubleshooting.md](../docs/06-troubleshooting.md)).
 
+#### (3-1) 시스템 도구 출력 ([before-systools.log](../evidence/oom/before-systools.log))
+
+실험 스크립트가 앱 실행 중 3초마다 `ps -ef`, `ps -L`, `top -H`를 실행해 저장한 결과이다. 관제 로그와 별개로 같은 시점의 RSS 증가를 시스템 도구로 다시 확인했다.
+
+```text
+===== [2026-10-28 16:17:00] sample 1 (app PID: 1110) =====
+$ ps -ef | grep agent-leak-app-x86
+agentus+    1095    1091 10 16:16 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+agentus+    1110    1095 19 16:16 pts/0    00:00:00 /workspace/bin/agent-leak-app-x86 /workspace/bin/agent-leak-app-x86
+
+$ ps -L -p 1110 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+    PID     TID STAT %CPU %MEM   RSS     ELAPSED WCHAN                COMMAND
+   1110    1110 SN+  18.6  0.3 25592       00:01 do_select            agent-leak-app-
+
+===== [2026-10-28 16:17:04] sample 2 (app PID: 1110) =====
+$ ps -L -p 1110 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+   1110    1110 SN+   4.4  0.9 76800       00:05 do_select            agent-leak-app-
+
+===== [2026-10-28 16:17:09] sample 3 (app PID: 1110) =====
+$ ps -L -p 1110 -o pid,tid,stat,%cpu,%mem,rss,etime,wchan:20,comm
+   1110    1110 SN+   2.5  1.2 102404      00:10 do_select            agent-leak-app-
+$ top -H -b -n 2 -d 1 -p 1110   (2nd iteration)
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   1110 agentus+  30  10  518972 102404  10164 S   0.0   1.2   0:00.26 agent-l+
+```
+
+- `ps -ef`로 부트로더(1095)와 실제 앱(1110)의 부모-자식 관계를 확인했다. 메모리가 늘어나는 쪽은 실제 앱(1110)이다.
+- `ps -L`의 RSS가 25,592 ➔ 76,800 ➔ 102,404KB로 관제 로그와 같은 값으로 증가했다. 스레드는 1개로 Deadlock과는 관계없다.
+- `top`의 순간 CPU는 0.0%이고 `TIME+`도 거의 늘지 않는다. CPU 부하 없이 메모리만 증가하는 패턴이다.
+- After(`MEMORY_LIMIT=256`)에서도 같은 방식으로 RSS가 25,596 ➔ 102,408 ➔ 204,824 ➔ 281,636KB로 증가했다 ([after-systools.log](../evidence/oom/after-systools.log)).
+
 #### (4) 관련 증적 파일 목록
-- [before-app.log](../evidence/oom/before-app.log)
-- [before-monitor.log](../evidence/oom/before-monitor.log)
-- [before-timeseries.csv](../evidence/oom/before-timeseries.csv)
-- [before-report-snippet.md](../evidence/oom/before-report-snippet.md)
-- [before-env-snapshot.txt](../evidence/oom/before-env-snapshot.txt)
-- [before-run.log](../evidence/oom/before-run.log)
+- [before-app.log](../evidence/oom/before-app.log) / [after-app.log](../evidence/oom/after-app.log)
+- [before-monitor.log](../evidence/oom/before-monitor.log) / [after-monitor.log](../evidence/oom/after-monitor.log)
+- [before-systools.log](../evidence/oom/before-systools.log) / [after-systools.log](../evidence/oom/after-systools.log)
+- [before-timeseries.csv](../evidence/oom/before-timeseries.csv) / [after-timeseries.csv](../evidence/oom/after-timeseries.csv)
+- [before-report-snippet.md](../evidence/oom/before-report-snippet.md) / [after-report-snippet.md](../evidence/oom/after-report-snippet.md)
+- [before-env-snapshot.txt](../evidence/oom/before-env-snapshot.txt) / [after-env-snapshot.txt](../evidence/oom/after-env-snapshot.txt)
+- [before-run.log](../evidence/oom/before-run.log) / [after-run.log](../evidence/oom/after-run.log)
 
 ---
 
@@ -118,9 +150,9 @@ Agent READY
 ### 3. Root Cause Analysis
 
 #### (1) 증거로 직접 확인한 사실
-1. **계단식 메모리 증가**: 관제 데이터(`monitor.log`) 상에서 프로세스의 물리 메모리 사용량(RSS)이 할당 전 `25,600KB`에서 약 3초 간격으로 `+25,604KB`씩 계단식으로 증가(`51,204KB` ➔ `76,808KB` ➔ `102,412KB`)하며, 한 번도 감소하지 않음.
+1. **계단식 메모리 증가**: 관제 데이터(`monitor.log`) 상에서 프로세스의 물리 메모리 사용량(RSS)이 할당 전 `25,592KB`에서 약 3초 간격으로 `+25,604KB`씩 계단식으로 증가(`51,196KB` ➔ `76,800KB` ➔ `102,404KB`)하며, 한 번도 감소하지 않음.
 2. **할당 주기와 일치**: 앱 로그(`before-app.log`)에서 `MemoryWorker`가 약 3초 간격으로 `Current Heap: 25MB ➔ 50MB ➔ 75MB ➔ 100MB`를 기록하며, RSS가 늘어난 시점이 각 Heap 로그 직후와 일치함. RSS는 기본 메모리 약 25MB에 Heap이 더해진 값이다.
-3. **임계치 도달 즉시 자가 종료**: 힙 메모리가 `100MB`에 도달한 `19:12:09`에 `[CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB)` 로그와 `SELF-TERMINATED` 배너가 출력되고 프로세스 `370`이 즉각 종료됨.
+3. **임계치 도달 즉시 자가 종료**: 힙 메모리가 `100MB`에 도달한 `16:17:10`에 `[CRITICAL] [MemoryGuard] Memory limit exceeded (100MB >= 100MB)` 로그와 `SELF-TERMINATED` 배너가 출력되고 프로세스 `1110`이 즉각 종료됨.
 4. **SIGKILL 종료**: 실행 스크립트가 받은 종료 코드는 `137 (SIGKILL)`이다.
 
 #### (2) 증거를 바탕으로 추론한 원인
@@ -146,22 +178,22 @@ Agent READY
 - (앱 로그의 경고문 `[ WARNING: Recommend Over 256MB ]`을 반영하여 256MB로 증설)
 
 #### (2) 변경 전 결과 (`oom-before`)
-- **생존 시간**: **약 11초** (앱 로그 기준 19:11:58 기동 ~ 19:12:09 자가 종료)
-- **최종 RSS (모니터 마지막 샘플)**: **102,412 KB** (기본 약 25MB + Heap 75MB)
+- **생존 시간**: **약 11초** (앱 로그 기준 16:16:59 기동 ~ 16:17:10 자가 종료)
+- **최종 RSS (모니터 마지막 샘플)**: **102,404 KB** (기본 약 25MB + Heap 75MB)
 - **종료 시점 힙 사용량**: **100MB** (`100MB >= 100MB`)
 - **종료 방식**: 앱 자체 종료, 종료 코드 `137 (SIGKILL)` ([before-report-snippet.md](../evidence/oom/before-report-snippet.md))
 
 #### (3) 변경 후 결과 (`oom-after`)
-- **생존 시간**: **약 32초** (앱 로그 기준 19:12:13 기동 ~ 19:12:45 자가 종료)
+- **생존 시간**: **약 32초** (앱 로그 기준 16:17:14 기동 ~ 16:17:46 자가 종료)
 - **최종 RSS (모니터 마지막 샘플)**: **281,636 KB** (기본 약 25MB + Heap 250MB, Heap 275MB 할당 직후 종료되어 관제에는 기록되지 않음)
 - **종료 시점 힙 사용량**: **275MB** (`275MB >= 256MB`)
 - **종료 방식**: 앱 자체 종료, 종료 코드 `137 (SIGKILL)` ([after-report-snippet.md](../evidence/oom/after-report-snippet.md))
 - **관찰 로그 ([after-app.log](../evidence/oom/after-app.log))**:
   ```text
-  2026-10-27 19:12:42,771 [INFO] [MemoryWorker] Current Heap: 250MB
-  2026-10-27 19:12:45,793 [INFO] [MemoryWorker] Current Heap: 275MB
-  2026-10-27 19:12:45,795 [CRITICAL] [MemoryGuard] Memory limit exceeded (275MB >= 256MB) / (Recommend Over 256MB)
-  2026-10-27 19:12:45,795 [CRITICAL] [MemoryGuard] Self-terminating process 695 to prevent system instability.
+  2026-10-28 16:17:43,569 [INFO] [MemoryWorker] Current Heap: 250MB
+  2026-10-28 16:17:46,596 [INFO] [MemoryWorker] Current Heap: 275MB
+  2026-10-28 16:17:46,597 [CRITICAL] [MemoryGuard] Memory limit exceeded (275MB >= 256MB) / (Recommend Over 256MB)
+  2026-10-28 16:17:46,597 [CRITICAL] [MemoryGuard] Self-terminating process 1474 to prevent system instability.
   >>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<
   ```
 
@@ -170,8 +202,8 @@ Agent READY
 | 비교 지표 | Before (`MEMORY_LIMIT=100`) | After (`MEMORY_LIMIT=256`) | 변화 분석 |
 | :--- | :---: | :---: | :--- |
 | **생존 시간** | 약 11 초 | 약 32 초 | **약 +21 초 (약 2.9배)** |
-| **시작 RSS** | 25,600 KB | 25,596 KB | 기동 시 기본 메모리는 동일 (~25MB) |
-| **종료 직전 RSS** | 102,412 KB | 281,636 KB | 임계치까지 지속 증가 |
+| **시작 RSS** | 25,592 KB | 25,596 KB | 기동 시 기본 메모리는 동일 (~25MB) |
+| **종료 직전 RSS** | 102,404 KB | 281,636 KB | 임계치까지 지속 증가 |
 | **최종 도달 힙** | 100 MB | 275 MB | 25MB 청크 단위 누적 |
 | **증가 속도** | 약 25MB / 3초 | 약 25MB / 3초 | **변화 없음** |
 | **종료 원인** | Memory limit exceeded (100MB) | Memory limit exceeded (256MB) | **동일 원인으로 종료** |

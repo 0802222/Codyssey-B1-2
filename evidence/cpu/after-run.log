@@ -1,17 +1,19 @@
 ===== Experiment: cpu-after =====
-Started at   : 2026-10-27 19:13:21 KST
+Started at   : 2026-10-28 16:18:20 KST
 Evidence dir : /workspace/evidence/cpu
 
 [INFO] Env snapshot saved: /workspace/evidence/cpu/after-env-snapshot.txt
 [INFO] Starting app: /workspace/bin/agent-leak-app-x86
 
-[INFO] App started (PID: 2064)
-[INFO] Monitor started (PID: 2065, target app PID: 2064)
+[INFO] App started (PID: 2939)
+[INFO] Monitor started (PID: 2940, target app PID: 2939)
+[INFO] System tools capture started (PID: 2941, interval: 3s)
 [INFO] Run timeout: 120s
-[WARN] App still running after 120s. Killing (PID: 2064)
+[WARN] App still running after 120s. Killing (PID: 2939)
 [INFO] Exit mode: RUN_TIMEOUT(120s) 강제 종료
 [INFO] Exit code: 143 (SIGTERM)
 [INFO] Monitor log copied: /workspace/evidence/cpu/after-monitor.log
+[INFO] System tools snapshot: /workspace/evidence/cpu/after-systools.log (27 samples)
 [INFO] Timeseries CSV: /workspace/evidence/cpu/after-timeseries.csv (61 rows)
 [INFO] Report snippet: /workspace/evidence/cpu/after-report-snippet.md
 

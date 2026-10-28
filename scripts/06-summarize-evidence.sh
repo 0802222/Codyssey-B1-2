@@ -5,7 +5,7 @@
 #
 # 04-run-experiment-case.sh 가 남긴 원본 로그로 아래 파일을 (다시) 만든다. 실험을 다시 돌리지 않아도 된다.
 #   - <phase>-timeseries.csv    : monitor.log 시계열
-#   - <phase>-report-snippet.md : 리포트 인용용 요약
+#   - <phase>-report-snippet.md : 리포트 인용용 요약 (07 의 ps/top 스냅샷 첫·마지막 회차 포함)
 
 set -euo pipefail    # 에러, 미정의 변수, 파이프 중간 실패 시 즉시 중단
 
@@ -31,6 +31,7 @@ APP_LOG="$CASE_DIR/$PHASE-app.log"                  # 앱 콘솔 출력
 MONITOR_LOG="$CASE_DIR/$PHASE-monitor.log"          # 관제 로그
 ENV_SNAPSHOT="$CASE_DIR/$PHASE-env-snapshot.txt"    # 실험 시점 환경변수
 RUN_LOG="$CASE_DIR/$PHASE-run.log"                  # 04 실행 기록
+SYSTOOLS_LOG="$CASE_DIR/$PHASE-systools.log"        # 07 ps/top 스냅샷
 TIMESERIES_CSV="$CASE_DIR/$PHASE-timeseries.csv"    # 만들 CSV
 REPORT_SNIPPET="$CASE_DIR/$PHASE-report-snippet.md" # 만들 요약 파일
 
@@ -78,6 +79,15 @@ RUN_LINES=$(grep -E '^\[(INFO|WARN)\] (App started|Run timeout|App still running
 APP_LAST_LINES=$(tail -n 20 "$APP_LOG" 2>/dev/null || echo "(no app log)")    # 앱 로그 마지막 20줄
 MON_FIRST=$(head -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")                # 관제 로그 처음 3줄
 MON_LAST=$(tail -n 3 "$MONITOR_LOG" 2>/dev/null || echo "")                 # 관제 로그 마지막 3줄
+
+# ps/top 스냅샷: "===== " 로 시작하는 줄이 회차 구분선이므로, 첫 회차와 마지막 회차 블록만 꺼낸다
+SYS_COUNT=$(grep -c '^===== ' "$SYSTOOLS_LOG" 2>/dev/null || true)    # 전체 회차 수
+SYS_FIRST="(no system tools snapshot)"                                   # 첫 회차 (없을 때 기본 문구)
+SYS_LAST="(no system tools snapshot)"                                    # 마지막 회차 (없을 때 기본 문구)
+if [[ "${SYS_COUNT:-0}" -gt 0 ]]; then
+  SYS_FIRST=$(awk '/^===== /{n++} n==1' "$SYSTOOLS_LOG")                           # 1번째 블록
+  SYS_LAST=$(awk -v last="$SYS_COUNT" '/^===== /{n++} n==last && !/^# /' "$SYSTOOLS_LOG")    # 마지막 블록 (끝의 # 종료 안내 줄 제외)
+fi
 
 # 생존 시간 (모니터 로그의 첫/끝 타임스탬프 차이)
 SURVIVAL=""
@@ -135,6 +145,20 @@ $MON_FIRST
 **종료 부근:**
 \`\`\`
 $MON_LAST
+\`\`\`
+
+## 시스템 도구 출력 (ps -ef / ps -L / top -H)
+
+원본: [\`$PHASE-systools.log\`](./$PHASE-systools.log) (${SYS_COUNT:-0}회 수집)
+
+**첫 회차:**
+\`\`\`
+$SYS_FIRST
+\`\`\`
+
+**마지막 회차:**
+\`\`\`
+$SYS_LAST
 \`\`\`
 
 ## 시계열 데이터
